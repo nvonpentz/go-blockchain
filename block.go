@@ -31,7 +31,7 @@ func (blockchain *Blockchain) addBlock(block Block) {
 
 func (blockchain *Blockchain) isValidBlock(block Block) bool{
 	lastBlockInChain := blockchain.getLastBlock()
-	return isValidBlocks(lastBlockInChain, block)
+	return areValidBlocks(lastBlockInChain, block)
 }
 
 func (blockchain *Blockchain) isValidChain() bool {
@@ -39,7 +39,7 @@ func (blockchain *Blockchain) isValidChain() bool {
 	for i:= blockchainLength-1; i<=1; i-- {
 		b2 := blockchain.Blocks[i]
 		b1 := blockchain.Blocks[i-1]
-		if isValidBlocks(b1, b2) == false {
+		if areValidBlocks(b1, b2) == false {
 			return false
 		}
 	}
@@ -81,12 +81,47 @@ func calcHashForBlock(block Block) []byte {
 	return blockHash.Sum(nil)
 }
 
-func isValidBlocks(b1 Block, b2 Block) (bool){
-	isValidIndex := b2.Index == b1.Index + 1
+func areValidBlocks(oldBlock Block, newBlock Block) (bool){
+	isValidIndex := newBlock.Index == oldBlock.Index + 1
 	/*
-	incoming blocks previous hash has to equal the hash of the 
+	new blocks previous hash has to equal the hash of the old block
 	*/
-	return isValidIndex
+	isValidHash := testEqByteSlice(newBlock.PrevHash, oldBlock.Hash)
+	isValidBlock := isValidIndex && isValidHash
+
+	return isValidBlock
 }
+
+
+
+
+func testEqByteSlice (a, b []byte) bool {
+    if a == nil && b == nil { 
+        return true; 
+    }
+    if a == nil || b == nil { 
+        return false; 
+    }
+    if len(a) != len(b) {
+        return false
+    }
+    for i := range a {
+        if a[i] != b[i] {
+            return false
+        }
+    }
+    return true
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
