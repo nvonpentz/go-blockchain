@@ -78,11 +78,8 @@ func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
 }
 
 func isValidBlocks(b1 Block, b2 Block) (bool){
-	if b2.Index != b1.Index + 1 {
-		return false
-	} else {
-		return true
-	}
+	isValidIndex := b2.Index == b1.Index + 1
+	return isValidIndex
 }
 
 
