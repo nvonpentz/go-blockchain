@@ -120,9 +120,10 @@ func main() {
 
             case trans := <- transmissionChannel:  // new transmission sent to node
                 // add my nodes listening port to map of visited addresses
+                fmt.Println("in trans channel")
                 if !trans.hasAddress(myNode.address) && myNode.blockchain.isValidBlock(trans.Block){
                     trans.updateVisitedAddresses(myNode.address)
-                    forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
+                    // forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
                 } else if trans.hasAddress(myNode.address) {
                     fmt.Println("You have already seen this block")
                 } else if !myNode.blockchain.isValidBlock(trans.Block){
@@ -162,9 +163,10 @@ func main() {
                     fmt.Println("Blockchain rejected, invalid")
                 }
             case block   := <- blockChannel:
+                fmt.Println("in block channel")
                 myNode.blockchain.addBlock(block)
                 // trans := Transmission{block, map[string]bool{}}
-                go myNode.blockchain.mineBlock(blockChannel)
+                go myNode.blockchain.mineBlock(blockChannel, transmissionChannel)
                 // transmissionChannel <- trans
 
             case input   := <- inputChannel: // user entered some input
@@ -172,7 +174,7 @@ func main() {
                 arg0 := strings.ToLower(outgoingArgs[0])
                 switch arg0 {
                 case "mine":
-                        go myNode.blockchain.mineBlock(blockChannel)                        
+                        go myNode.blockchain.mineBlock(blockChannel, transmissionChannel)                        
                 case "getchain":
                     fmt.Println("getting chain from neighbor")
                     if myNode.seed == "" {
