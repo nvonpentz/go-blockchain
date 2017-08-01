@@ -147,7 +147,6 @@ func main() {
                 fmt.Println(approvedAddresses)
 
             case conn    := <- blockchainRequestChannel:
-                fmt.Println("bout to send blockchain")
                 sendBlockchainToNode(conn, myNode.blockchain)
 
             case blockchain := <- blockchainChannel:

@@ -21,7 +21,7 @@ type Node struct {
 }
 
 /*
-A Transmission is simply a message that will be sent throughout the netowrk.  
+A Transmission is simply a message that will be sent throughout the network.  
 It includes the actual message as well as the addresses of nodes who have
 already received the Transmission
 */
@@ -148,7 +148,7 @@ func acceptConn (listener net.Listener, connChannel chan net.Conn) {
         if err != nil {
             fmt.Printf("There was an error accepting a new connection: \n %v", err)
         }
-        fmt.Println("Listener accepted connection through port " + conn.LocalAddr().String() + " from " + conn.RemoteAddr().String())
+        fmt.Println("* Listener accepted connection through port " + conn.LocalAddr().String() + " from " + conn.RemoteAddr().String())
         connChannel <- conn //send to conection channel
     }
 }
@@ -239,7 +239,7 @@ func sendBlockchainToNode (conn net.Conn, blockchain Blockchain){
     communication := Communication{3, Transmission{}, []string{}, blockchain}
     encoder   := gob.NewEncoder(conn)
     encoder.Encode(communication)
-    fmt.Println("sent blockchain")
+    fmt.Printf("Sent my copy of blockchain to %v", conn.RemoteAddr().String())
 }
 
 func requestBlockchain (conn net.Conn){

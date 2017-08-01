@@ -36,12 +36,17 @@ func (blockchain *Blockchain) verifyBlock(block Block) bool{
 	}
 }
 
-// func (blockchain *Blockchain) verifyChain() bool {
-// 	blockchainLength := len(blockchain.blocks)
-// 	for i:= blockchainLength-1; i<=0; i-- s{
-// 		blockchain.blocks[i]
-// 	}
-// }
+func (blockchain *Blockchain) verifyChain() bool {
+	blockchainLength := len(blockchain.Blocks)
+	for i:= blockchainLength-1; i<=1; i-- {
+		b2 := blockchain.Blocks[i]
+		b1 := blockchain.Blocks[i-1]
+		if verifyBlocks(b1, b2) == false {
+			return false
+		}
+	}
+	return true
+}
 
 func (blockchain Blockchain) getLastBlock() Block{
 	lastBlock := blockchain.Blocks[len(blockchain.Blocks) - 1]
@@ -58,5 +63,12 @@ func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
 	blockChannel <- newBlock
 }
 
+func verifyBlocks(b1 Block, b2 Block) (bool){
+	if b2.Index != b1.Index + 1 {
+		return false
+	} else {
+		return true
+	}
+}
 
 
