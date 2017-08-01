@@ -119,15 +119,16 @@ func main() {
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
             case trans := <- transmissionChannel:  // new transmission sent to node
-                fmt.Println("in trans channel")
                 if !trans.hasAddress(myNode.address){
                     trans.updateVisitedAddresses(myNode.address)
-                    fmt.Println("updated trans address")
                 }
                 if myNode.blockchain.isValidBlock(trans.Block) {
                     myNode.blockchain.addBlock(trans.Block)
-                    fmt.Println("added block to blockchain from blockchannel")
+                    fmt.Printf("added block #%v sent from network \n", trans.Block.Index)
+                } else{
+                    fmt.Printf("Did not add block #%v sent from network \n", trans.Block.Index)                    
                 }
+
                 forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
             case conn := <-  requestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
@@ -162,9 +163,13 @@ func main() {
                 }
 
             case block   := <- blockChannel:
-                fmt.Println("in block channel")
-                myNode.blockchain.addBlock(block)
-                go sendTransFromMinedBlock(block, transmissionChannel)
+                if myNode.blockchain.isValidBlock(block){
+                    myNode.blockchain.addBlock(block)
+                    fmt.Printf("Added mined block #%v\n", block.Index)
+                    go sendTransFromMinedBlock(block, transmissionChannel)
+                } else {
+                    fmt.Printf("Did not add mined block #%v\n", block.Index)
+                }
                 go myNode.blockchain.mineBlock(blockChannel, transmissionChannel)
 
             case input   := <- inputChannel: // user entered some input

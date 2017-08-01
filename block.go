@@ -19,7 +19,7 @@ var genesisBlock = Block{0, "genesis transaction"}
 func (blockchain *Blockchain) addBlock(block Block) {
 	if blockchain.isValidBlock(block) == true {
 		blockchain.Blocks = append(blockchain.Blocks, block)
-		fmt.Printf("Added block %d to blockchain \n", block.Index)
+		// fmt.Printf("Added block %d to blockchain \n", block.Index)
 	} else {
 		fmt.Println("Did not add block to blockchain")
 	}
@@ -52,14 +52,11 @@ func (blockchain Blockchain) getLastBlock() Block{
 }
 
 func (blockchain Blockchain) mineBlock(blockChannel chan Block, transmissionChannel chan *Transmission){
-	fmt.Println("..begin mining..")
+	fmt.Println("-> begin mine")
 	// sleepTime := time.Duration((rand.Int() % 10) + 5) //use randomness for now
     time.Sleep(time.Second * 2)
 	newBlockIndex := blockchain.getLastBlock().Index + 1
 	newBlock := Block{newBlockIndex,"new block!"}
-	fmt.Printf("Mined block # %d ", newBlock.Index)
-    // trans := Transmission{newBlock, map[string]bool{}}
-    // transmissionChannel <- &trans
 	blockChannel <- newBlock
 }
 
