@@ -36,6 +36,13 @@ func (blockchain *Blockchain) verifyBlock(block Block) bool{
 	}
 }
 
+// func (blockchain *Blockchain) verifyChain() bool {
+// 	blockchainLength := len(blockchain.blocks)
+// 	for i:= blockchainLength-1; i<=0; i-- s{
+// 		blockchain.blocks[i]
+// 	}
+// }
+
 func (blockchain Blockchain) getLastBlock() Block{
 	lastBlock := blockchain.Blocks[len(blockchain.Blocks) - 1]
 	return lastBlock

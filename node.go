@@ -191,7 +191,6 @@ func listenToConn (conn                          net.Conn,
             fmt.Println(err)
             break
         }
-        fmt.Println("DECODING")
         switch communication.ID {
         case 0:
             transmissionChannel <- &communication.Trans

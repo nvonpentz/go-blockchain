@@ -151,8 +151,15 @@ func main() {
                 sendBlockchainToNode(conn, myNode.blockchain)
 
             case blockchain := <- blockchainChannel:
-                fmt.Println("Seed node sent this blockchain when I requested")
+                fmt.Println("Seed node sent this blockchain when I requested:")
                 fmt.Println(blockchain)
+
+                
+                /*
+
+                CODE TO ADD BLOCKS TO BLOCKCHAIN GO HERE.
+
+                */
 
             case block   := <- blockChannel:
                 myNode.blockchain.addBlock(block)
@@ -171,8 +178,6 @@ func main() {
                     if myNode.seed == "" {
                         fmt.Println("You must have a seed node to request a blockchain")
                     } else{
-                        fmt.Println("YOU HAVE A SEED NODE")
-                        fmt.Println(myNode.seed)
                         seedConn := myNode.getConnForAddress(myNode.seed)
                         requestBlockchain(seedConn)                        
                     }
