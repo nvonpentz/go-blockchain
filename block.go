@@ -3,6 +3,8 @@ package main
 import ("fmt"
 		"time"
 		// "math/rand"
+		"crypto/sha256"
+		"encoding/binary"
 		)
 
 type Blockchain struct {
@@ -10,11 +12,13 @@ type Blockchain struct {
 }
 
 type Block struct {
-	Index int
+	Index uint32
+	PrevHash []byte
 	Information string
+	Hash []byte
 }
 
-var genesisBlock = Block{0, "genesis transaction"}
+var genesisBlock = Block{0, []byte{0}, "genesis transaction", []byte{0}}
 
 func (blockchain *Blockchain) addBlock(block Block) {
 	if blockchain.isValidBlock(block) == true {
@@ -51,12 +55,29 @@ func (blockchain Blockchain) getLastBlock() Block{
 	return lastBlock
 }
 
-func (blockchain *Blockchain) mineBlock(blockChannel chan Block, transmissionChannel chan *Transmission){
+func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
 	fmt.Println("-> begin mine")
 	// sleepTime := time.Duration((rand.Int() % 10) + 5) //use randomness for now
     time.Sleep(time.Second * 2)
-	newBlockIndex := blockchain.getLastBlock().Index + 1
-	newBlock := Block{newBlockIndex,"new block!"}
+
+    prevBlock     := blockchain.getLastBlock()
+	newBlockIndex := prevBlock.Index + 1
+	prevBlockHash := prevBlock.Hash
+	newBlockInfo  := "new block!"
+	newBlockHash  := sha256.New()
+
+	nbIndexBytes := make([]byte, 4)
+	binary.LittleEndian.PutUint32(nbIndexBytes, newBlockIndex)
+
+	pbHashBytes  := []byte(prevBlockHash)
+	nbInfoBytes  := []byte(newBlockInfo)
+
+	toHash := append(nbIndexBytes, pbHashBytes...)
+	toHash  = append(toHash, nbInfoBytes...)
+
+	newBlockHash.Write(toHash)
+	newBlock := Block{newBlockIndex, prevBlockHash, newBlockInfo, newBlockHash.Sum(nil)}
+
 	blockChannel <- newBlock
 }
 

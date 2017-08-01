@@ -70,7 +70,7 @@ func (n *Node) updateSeed(seedPort string) {
 func (n Node) printBlockchain(){
     for i := range n.blockchain.Blocks {
         block := n.blockchain.Blocks[i]
-        fmt.Printf(" Block %d is: \n  %v \n", i, block.Information)
+        fmt.Printf(" Block %d is: \n  PrevHash: %v \n  Info:     %v \n  Hash:     %v \n", i, block.PrevHash, block.Information, block.Hash)
     }
 }
 
@@ -218,7 +218,7 @@ func forwardTransToNetwork (trans Transmission, connections map[net.Conn]int) {
             communication := Communication{0, trans, []string{}, Blockchain{}}
             encoder       := gob.NewEncoder(conn)
             encoder.Encode(communication)        
-            fmt.Printf("Sent transsmission:\n %v to %v \n", trans, destinationAddr)
+            fmt.Printf("Sent transsmission to network:\n %v to %v \n", trans, destinationAddr)
         }
     }
 }

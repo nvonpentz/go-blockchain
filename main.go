@@ -125,10 +125,7 @@ func main() {
                 if myNode.blockchain.isValidBlock(trans.Block) {
                     myNode.blockchain.addBlock(trans.Block)
                     fmt.Printf("added block #%v sent from network \n", trans.Block.Index)
-                } else{
-                    fmt.Printf("Did not add block #%v sent from network \n", trans.Block.Index)                    
                 }
-
                 forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
             case conn := <-  requestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
@@ -170,14 +167,14 @@ func main() {
                 } else {
                     fmt.Printf("Did not add mined block #%v\n", block.Index)
                 }
-                go myNode.blockchain.mineBlock(blockChannel, transmissionChannel)
+                go myNode.blockchain.mineBlock(blockChannel)
 
             case input   := <- inputChannel: // user entered some input
                 outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
                 arg0 := strings.ToLower(outgoingArgs[0])
                 switch arg0 {
                 case "mine":
-                    go myNode.blockchain.mineBlock(blockChannel, transmissionChannel)                        
+                    go myNode.blockchain.mineBlock(blockChannel)                        
                 case "getchain":
                     fmt.Println("getting chain from neighbor")
                     if myNode.seed == "" {
