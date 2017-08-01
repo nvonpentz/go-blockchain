@@ -14,7 +14,7 @@ type Blockchain struct {
 type Block struct {
 	Index uint32
 	PrevHash []byte
-	Information string
+	Info string
 	Hash []byte
 }
 
@@ -58,27 +58,34 @@ func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
 
     prevBlock     := blockchain.getLastBlock()
 	newBlockIndex := prevBlock.Index + 1
-	prevBlockHash := prevBlock.Hash
 	newBlockInfo  := "new block!"
-	newBlockHash  := sha256.New()
+	newBlock := Block{newBlockIndex, prevBlock.Hash, newBlockInfo, []byte{}}
 
-	nbIndexBytes := make([]byte, 4)
-	binary.LittleEndian.PutUint32(nbIndexBytes, newBlockIndex)
-
-	pbHashBytes  := []byte(prevBlockHash)
-	nbInfoBytes  := []byte(newBlockInfo)
-
-	toHash := append(nbIndexBytes, pbHashBytes...)
-	toHash  = append(toHash, nbInfoBytes...)
-
-	newBlockHash.Write(toHash)
-	newBlock := Block{newBlockIndex, prevBlockHash, newBlockInfo, newBlockHash.Sum(nil)}
+	newBlockHash := calcHashForBlock(newBlock)
+	newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockInfo, newBlockHash}
 
 	blockChannel <- newBlock
 }
 
+func calcHashForBlock(block Block) []byte {
+	blockHash := sha256.New()
+
+	nbIndexBytes := make([]byte, 4)
+	binary.LittleEndian.PutUint32(nbIndexBytes, block.Index)
+	pbHashBytes  := []byte(block.PrevHash)
+	nbInfoBytes  := []byte(block.Info)
+	toHash := append(nbIndexBytes, pbHashBytes...)
+	toHash  = append(toHash, nbInfoBytes...)
+	blockHash.Write(toHash)
+
+	return blockHash.Sum(nil)
+}
+
 func isValidBlocks(b1 Block, b2 Block) (bool){
 	isValidIndex := b2.Index == b1.Index + 1
+	/*
+	incoming blocks previous hash has to equal the hash of the 
+	*/
 	return isValidIndex
 }
 

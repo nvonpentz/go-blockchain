@@ -70,7 +70,7 @@ func (n *Node) updateSeed(seedPort string) {
 func (n Node) printBlockchain(){
     for i := range n.blockchain.Blocks {
         block := n.blockchain.Blocks[i]
-        fmt.Printf(" Block %d is: \n  PrevHash: %v \n  Info:     %v \n  Hash:     %v \n", i, block.PrevHash, block.Information, block.Hash)
+        fmt.Printf(" Block %d is: \n  PrevHash: %v \n  Info:     %v \n  Hash:     %v \n", i, block.PrevHash, block.Info, block.Hash)
     }
 }
 
