@@ -90,7 +90,7 @@ func main() {
     disconnChannel          := make(chan net.Conn)
     requestChannel          := make(chan net.Conn)
     addressesChannel        := make(chan []string)
-    // blockChannel            := make(chan Block)
+    blockChannel            := make(chan Block)
     blockchainRequestChannel:= make(chan net.Conn)
     blockchainChannel       := make(chan Blockchain)
 
@@ -122,14 +122,8 @@ func main() {
                 myNode.isMining = false
                 // add my nodes listening port to map of visited addresses
                 if !trans.hasAddress(myNode.address) && myNode.blockchain.isValidBlock(trans.Block){
-                    fmt.Println("Blockchain is valid with new block")
                     trans.updateVisitedAddresses(myNode.address)
-                    myNode.blockchain.addBlock(trans.Block)
                     forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
-                    if myNode.miningOn == true && myNode.isMining == false {
-                        myNode.isMining = true
-                        go myNode.blockchain.mineBlock(transmissionChannel)                        
-                    }
                 } else if trans.hasAddress(myNode.address) {
                     fmt.Println("You have already seen this block")
                 } else if !myNode.blockchain.isValidBlock(trans.Block){
@@ -168,12 +162,11 @@ func main() {
                 } else {
                     fmt.Println("Blockchain rejected, invalid")
                 }
-            // case block   := <- blockChannel:
-            //     myNode.blockchain.addBlock(block)
-            //     fmt.Println("added block to your chain")
-            //     trans := Transmission{block, []string{}}
-            //     transmissionChannel <- trans
-            //     go myNode.blockchain.mineBlock(blockChannel)
+            case block   := <- blockChannel:
+                myNode.blockchain.addBlock(block)
+                // trans := Transmission{block, map[string]bool{}}
+                go myNode.blockchain.mineBlock(blockChannel)
+                // transmissionChannel <- trans
 
             case input   := <- inputChannel: // user entered some input
                 outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
@@ -183,7 +176,7 @@ func main() {
                     myNode.miningOn = true
                     if !myNode.isMining {
                         myNode.isMining = true
-                        go myNode.blockchain.mineBlock(transmissionChannel)                        
+                        go myNode.blockchain.mineBlock(blockChannel)                        
                     }
                 case "getchain":
                     fmt.Println("getting chain from neighbor")
