@@ -18,6 +18,8 @@ type Node struct {
     blockchain Blockchain
     address string
     seed string
+    isMining bool
+    miningOn bool
 }
 
 /*

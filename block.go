@@ -2,7 +2,7 @@ package main
 
 import ("fmt"
 		"time"
-		"math/rand"
+		// "math/rand"
 		)
 
 type Blockchain struct {
@@ -17,31 +17,29 @@ type Block struct {
 var genesisBlock = Block{0, "genesis transaction"}
 
 func (blockchain *Blockchain) addBlock(block Block) {
-	if blockchain.verifyBlock(block) == true {
+	if blockchain.isValidBlock(block) == true {
 		blockchain.Blocks = append(blockchain.Blocks, block)
-		fmt.Println("Added block to blockchain")
+		fmt.Printf("Added block %d to blockchain \n", block.Index)
 	} else {
 		fmt.Println("Did not add block to blockchain")
 	}
 }
 
-func (blockchain *Blockchain) verifyBlock(block Block) bool{
+func (blockchain *Blockchain) isValidBlock(block Block) bool{
 	lastBlockInChain := blockchain.getLastBlock()
 	if  lastBlockInChain.Index + 1 != block.Index{
-		fmt.Println("Blockchain does not verify")
 		return false
 	} else {
-		fmt.Println("Blockcahin verifies")
 		return true
 	}
 }
 
-func (blockchain *Blockchain) verifyChain() bool {
+func (blockchain *Blockchain) isValidChain() bool {
 	blockchainLength := len(blockchain.Blocks)
 	for i:= blockchainLength-1; i<=1; i-- {
 		b2 := blockchain.Blocks[i]
 		b1 := blockchain.Blocks[i-1]
-		if verifyBlocks(b1, b2) == false {
+		if isValidBlocks(b1, b2) == false {
 			return false
 		}
 	}
@@ -53,17 +51,24 @@ func (blockchain Blockchain) getLastBlock() Block{
 	return lastBlock
 }
 
-func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
-	sleepTime := time.Duration((rand.Int() % 10) + 5)
-    time.Sleep(time.Second * sleepTime)
+func (blockchain *Blockchain) mineBlock(transmissionChannel chan *Transmission){
+	fmt.Println("..begin mining..")
+	// sleepTime := time.Duration((rand.Int() % 10) + 5) //use randomness for now
+    time.Sleep(time.Second * 4)
 	newBlockIndex := blockchain.getLastBlock().Index + 1
 	newBlock := Block{newBlockIndex,"new block!"}
 	// blockchain.Blocks = append(blockchain.Blocks, newBlock)
-	fmt.Println("Mined a new block!")
-	blockChannel <- newBlock
+	fmt.Printf("Mined block # %d ", newBlock.Index)
+    // myNode.blockchain.addBlock(block)
+    // fmt.Println("added block to your chain")
+    trans := Transmission{newBlock, map[string]bool{}}
+    transmissionChannel <- &trans
+	// blockChannel <- newBlock
 }
 
-func verifyBlocks(b1 Block, b2 Block) (bool){
+
+
+func isValidBlocks(b1 Block, b2 Block) (bool){
 	if b2.Index != b1.Index + 1 {
 		return false
 	} else {
