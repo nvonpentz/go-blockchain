@@ -95,7 +95,7 @@ func main() {
     blockchainChannel       := make(chan Blockchain)
 
     // create node    
-    myNode := Node{make(map[net.Conn]int), 0, Blockchain{[]Block{genesisBlock}}, "", "", false, false}
+    myNode := Node{make(map[net.Conn]int), 0, Blockchain{[]Block{genesisBlock}}, "", ""}
     myNode.updateAddress(listenPort)
     myNode.updateSeed(seedPort)
 
@@ -119,7 +119,6 @@ func main() {
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
             case trans := <- transmissionChannel:  // new transmission sent to node
-                myNode.isMining = false
                 // add my nodes listening port to map of visited addresses
                 if !trans.hasAddress(myNode.address) && myNode.blockchain.isValidBlock(trans.Block){
                     trans.updateVisitedAddresses(myNode.address)
@@ -173,11 +172,7 @@ func main() {
                 arg0 := strings.ToLower(outgoingArgs[0])
                 switch arg0 {
                 case "mine":
-                    myNode.miningOn = true
-                    if !myNode.isMining {
-                        myNode.isMining = true
                         go myNode.blockchain.mineBlock(blockChannel)                        
-                    }
                 case "getchain":
                     fmt.Println("getting chain from neighbor")
                     if myNode.seed == "" {
