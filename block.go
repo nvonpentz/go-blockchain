@@ -51,7 +51,7 @@ func (blockchain Blockchain) getLastBlock() Block{
 	return lastBlock
 }
 
-func (blockchain Blockchain) mineBlock(blockChannel chan Block, transmissionChannel chan *Transmission){
+func (blockchain *Blockchain) mineBlock(blockChannel chan Block, transmissionChannel chan *Transmission){
 	fmt.Println("-> begin mine")
 	// sleepTime := time.Duration((rand.Int() % 10) + 5) //use randomness for now
     time.Sleep(time.Second * 2)
