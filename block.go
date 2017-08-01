@@ -51,19 +51,17 @@ func (blockchain Blockchain) getLastBlock() Block{
 	return lastBlock
 }
 
-func (blockchain *Blockchain) mineBlock(blockChannel chan Block, transmissionChannel chan *Transmission){
+func (blockchain Blockchain) mineBlock(blockChannel chan Block, transmissionChannel chan *Transmission){
 	fmt.Println("..begin mining..")
 	// sleepTime := time.Duration((rand.Int() % 10) + 5) //use randomness for now
     time.Sleep(time.Second * 2)
 	newBlockIndex := blockchain.getLastBlock().Index + 1
 	newBlock := Block{newBlockIndex,"new block!"}
 	fmt.Printf("Mined block # %d ", newBlock.Index)
-    trans := Transmission{newBlock, map[string]bool{}}
-    transmissionChannel <- &trans
+    // trans := Transmission{newBlock, map[string]bool{}}
+    // transmissionChannel <- &trans
 	blockChannel <- newBlock
 }
-
-
 
 func isValidBlocks(b1 Block, b2 Block) (bool){
 	if b2.Index != b1.Index + 1 {

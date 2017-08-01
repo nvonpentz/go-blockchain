@@ -119,18 +119,16 @@ func main() {
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
             case trans := <- transmissionChannel:  // new transmission sent to node
-                // add my nodes listening port to map of visited addresses
                 fmt.Println("in trans channel")
-                if !trans.hasAddress(myNode.address) && myNode.blockchain.isValidBlock(trans.Block){
+                if !trans.hasAddress(myNode.address){
                     trans.updateVisitedAddresses(myNode.address)
-                    // forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
-                } else if trans.hasAddress(myNode.address) {
-                    fmt.Println("You have already seen this block")
-                } else if !myNode.blockchain.isValidBlock(trans.Block){
-                    fmt.Printf("Blockchain does not validate with new block %d\n", trans.Block.Index)
-                } else {
-                    fmt.Println("SOMETHING")
+                    fmt.Println("updated trans address")
                 }
+                if myNode.blockchain.isValidBlock(trans.Block) {
+                    myNode.blockchain.addBlock(trans.Block)
+                    fmt.Println("added block to blockchain from blockchannel")
+                }
+                forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
             case conn := <-  requestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
                 sendConnectionsToNode(conn, addressesToSendTo)
@@ -162,19 +160,19 @@ func main() {
                 } else {
                     fmt.Println("Blockchain rejected, invalid")
                 }
+
             case block   := <- blockChannel:
                 fmt.Println("in block channel")
                 myNode.blockchain.addBlock(block)
-                // trans := Transmission{block, map[string]bool{}}
+                go sendTransFromMinedBlock(block, transmissionChannel)
                 go myNode.blockchain.mineBlock(blockChannel, transmissionChannel)
-                // transmissionChannel <- trans
 
             case input   := <- inputChannel: // user entered some input
                 outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
                 arg0 := strings.ToLower(outgoingArgs[0])
                 switch arg0 {
                 case "mine":
-                        go myNode.blockchain.mineBlock(blockChannel, transmissionChannel)                        
+                    go myNode.blockchain.mineBlock(blockChannel, transmissionChannel)                        
                 case "getchain":
                     fmt.Println("getting chain from neighbor")
                     if myNode.seed == "" {

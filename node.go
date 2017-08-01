@@ -249,6 +249,11 @@ func requestBlockchain (conn net.Conn){
     fmt.Println("requested blockchain")
 }
 
+func sendTransFromMinedBlock(block Block, transmissionChannel chan *Transmission){
+    trans := Transmission{block, map[string]bool{}}
+    transmissionChannel <- &trans
+}
+
 func getPrivateIP() string {
     name, err := os.Hostname()
     if err != nil {
