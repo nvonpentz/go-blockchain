@@ -31,11 +31,7 @@ func (blockchain *Blockchain) addBlock(block Block) {
 
 func (blockchain *Blockchain) isValidBlock(block Block) bool{
 	lastBlockInChain := blockchain.getLastBlock()
-	if  lastBlockInChain.Index + 1 != block.Index{
-		return false
-	} else {
-		return true
-	}
+	return isValidBlocks(lastBlockInChain, block)
 }
 
 func (blockchain *Blockchain) isValidChain() bool {
