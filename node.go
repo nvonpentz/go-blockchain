@@ -250,7 +250,7 @@ func forwardTransToNetwork (trans Transmission, connections map[net.Conn]int) {
             communication := Communication{0, trans, []string{}, Blockchain{}}
             encoder       := gob.NewEncoder(conn)
             encoder.Encode(communication)        
-            fmt.Printf("Sent transsmission to network:\n %v to %v \n", trans, destinationAddr)
+            fmt.Printf("Sent block #%v to %v \n", trans.Block.Index, destinationAddr)
         }
     }
 }
