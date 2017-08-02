@@ -12,36 +12,6 @@ import(
  * COMMAND LINE INTERFACE *
  *------------------------*/
 
-func showHelp() {
-    fmt.Println(`NAME:
-   go-p2p - peer to peer network
-
-USAGE:
-   go-p2p [global options]
-
-COMMANDS:
-   go-p2p      launches a node
-
-GLOBAL OPTIONS:
-    -l, --listen     assigns the listening port for the server        (default = 1999).
-    -s, --seed       assigns the port of the seed                     (default = 2000).
-    -j, --join       attempt to join the network                      (default = false).
-    -h, --help       prints this help info
-
-NODE COMMANDS:
-    send      sends the subsequent text to the network
-    request   requests the list of nodes from your seed node and attempts to connect to each
-    node      prints the information associated with your node
-    help      prints the node command help info
-`)
-}
-
-func setFlag(flag *flag.FlagSet) {
-    flag.Usage = func() {
-        showHelp()
-    }
-}
-
 func main() {
     // set up flags
     var listenPort string
@@ -67,7 +37,7 @@ func main() {
     seedPort = ":" + seedPort
 
     if helpFlag {
-        showHelp()
+        showGlobalHelp()
         return
     }
 
@@ -191,11 +161,7 @@ func main() {
                         fmt.Println("You are not connected to your seed node to make a request..")
                     }
                 case "help":
-                    fmt.Println(`NODE COMMANDS:
-    send      sends the subsequent text to the network
-    request   requests the list of nodes from your seed node and attempts to connect to each
-    node      prints the information associated with your node
-    help      prints the node command help info`)
+                    showNodeHelp()
                 case "node":
                     myNode.printNode()
                 default:
@@ -203,5 +169,50 @@ func main() {
                 }
         }
 
+    }
+}
+
+/*-------------------*
+ *       HELP        *
+ *-------------------*/
+
+func showGlobalHelp() {
+fmt.Println(
+`NAME:
+   go-blockchain - blockchain network
+
+USAGE:
+   go-blockchain [global options]
+
+COMMANDS:
+   go-blockchain      launches a node
+
+GLOBAL OPTIONS:
+    -l, --listen     assigns the listening port for the server        (default = 1999).
+    -s, --seed       assigns the port of the seed                     (default = 2000).
+    -j, --join       attempt to join the network                      (default = false).
+    -h, --help       prints this help info
+
+NODE COMMANDS:
+    send      sends the subsequent text to the network
+    request   requests the list of nodes from your seed node and attempts to connect to each
+    getchain  requests seed node for their version of the blockchain
+    node      prints the information associated with your node
+    help      prints the node command help info`)
+}
+
+func showNodeHelp(){
+fmt.Println(
+`
+NODE COMMANDS:
+    send      sends the subsequent text to the network
+    request   requests the list of nodes from your seed node and attempts to connect to each
+    node      prints the information associated with your node
+    help      prints the node command help info`)
+}
+
+func setFlag(flag *flag.FlagSet) {
+    flag.Usage = func() {
+        showGlobalHelp()
     }
 }
