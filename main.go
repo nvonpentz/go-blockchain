@@ -111,7 +111,7 @@ func main() {
                 } else if minedButNotSent { //mined but not sent out yet,
                     trans.updateBeenSent()
                     trans.updateSender(myNode.address) 
-                    fmt.Printf("[minedButNotSent] Sending mined block #%v to network\n", trans.Block.Index)
+                    fmt.Printf("[minedButNotSent] Mined block #%v, sending to network\n", trans.Block.Index)
                     forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
                 } else if alreadySent{
                     fmt.Printf("[alreadySent] Already seen block #%v, did not forward", trans.Block.Index)
