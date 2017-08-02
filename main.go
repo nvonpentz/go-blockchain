@@ -89,11 +89,20 @@ func main() {
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
             case trans := <- transmissionChannel:  // new transmission sent to node
-                if myNode.seenBlocks[string(trans.Block.Hash)]!= true && !trans.hasAddress(myNode.address){
+                if myNode.seenBlocks[string(trans.Block.Hash)]!= true && !trans.hasAddress(myNode.address) && myNode.blockchain.isValidBlock(trans.Block){ // not mined and valid
+                    fmt.Printf("Added block #%v sent from network to my blockchain\n", trans.Block.Index)
                     trans.updateVisitedAddresses(myNode.address)
                     myNode.seenBlocks[string(trans.Block.Hash)] = true
                     myNode.blockchain.addBlock(trans.Block)
-                    // fmt.Printf("added block #%v sent from network \n", trans.Block.Index)
+                    forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
+                } else if myNode.seenBlocks[string(trans.Block.Hash)]!= true && !trans.hasAddress(myNode.address) && !myNode.blockchain.isValidBlock(trans.Block) { // not mined and not valid
+                    trans.updateVisitedAddresses(myNode.address)
+                    myNode.seenBlocks[string(trans.Block.Hash)] = true
+                    // myNode.blockchain.addBlock(trans.Block)
+                    // forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
+                    fmt.Printf("Did not add block #%v sent from network to my chain, did not forward\n", trans.Block.Index)
+                } else if myNode.seenBlocks[string(trans.Block.Hash)] == true && !trans.hasAddress(myNode.address){ //mined but not sent out yet,
+                    trans.updateVisitedAddresses(myNode.address) //update address so its not sent out again
                     forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
                 }
             case conn := <-  requestChannel:  // was requested addresses to send
@@ -131,6 +140,7 @@ func main() {
             case block   := <- blockChannel:
                 if myNode.blockchain.isValidBlock(block){
                     myNode.blockchain.addBlock(block)
+                    myNode.seenBlocks[string(block.Hash)] = true // specify weve now seen this block but don't update the trans address until its processed there
                     fmt.Printf("Added mined block #%v\n", block.Index)
                     go sendTransFromMinedBlock(block, transmissionChannel)
                 } else {

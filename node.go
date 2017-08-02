@@ -40,7 +40,6 @@ through sending this communication object.  The ID represents the type:
 2 - means we were requested to send conections
 3 - means we were requested to send your blockchain 
 4 - means we will be receiving a blockchain
-5 - means we will be requesting
 */
 type Communication struct {
     ID int

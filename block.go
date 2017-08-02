@@ -25,7 +25,7 @@ func (blockchain *Blockchain) addBlock(block Block) {
 		blockchain.Blocks = append(blockchain.Blocks, block)
 		// fmt.Printf("Added block %d to blockchain \n", block.Index)
 	} else {
-		fmt.Printf("Did not add block %d to blockchain \n", block.Index)
+		// fmt.Printf("Did not add block %d to blockchain \n", block.Index)
 	}
 }
 
@@ -52,7 +52,7 @@ func (blockchain Blockchain) getLastBlock() Block{
 }
 
 func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
-	fmt.Println("-> begin mine")
+	fmt.Println("-> begin mining..")
 	// sleepTime := time.Duration((rand.Int() % 10) + 5) //use randomness for now
     time.Sleep(time.Second * 2)
 
