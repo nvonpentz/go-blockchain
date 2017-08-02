@@ -161,7 +161,6 @@ func main() {
                 if myNode.blockchain.isValidBlock(block){
                     myNode.blockchain.addBlock(block)
                     myNode.seenBlocks[string(block.Hash)] = true // specify weve now seen this block but don't update the trans address until its processed there
-                    // fmt.Printf("Added mined block #%v\n", block.Index)
                     go sendTransFromMinedBlock(block, transmissionChannel)
                 } else {
                     fmt.Printf("Did not add mined block #%v\n", block.Index)

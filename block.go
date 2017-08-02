@@ -54,18 +54,23 @@ func (blockchain Blockchain) getLastBlock() Block{
 
 func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
 	fmt.Println("-> begin mining..")
-	// sleepTime := time.Duration((rand.Int() % 10) + 5) //use randomness for now
-    time.Sleep(time.Second * 2)
 
+	// sleep between 5 - 10 seconds before mining block to simulate a blockchain
+	sleepTime := time.Duration((rand.Int() % 10) + 5)
+    time.Sleep(time.Second * sleepTime)
+
+    //create new block
     prevBlock     := blockchain.getLastBlock()
 	newBlockIndex := prevBlock.Index + 1
 	newBlockInfo  := "new block!"
 	newBlock := Block{newBlockIndex, prevBlock.Hash, newBlockInfo, []byte{}}
 
+	// must calculate the hash of this block
 	newBlockHash := calcHashForBlock(newBlock)
 	newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockInfo, newBlockHash}
-	// fmt.Printf("<- finished minining block #%v\n", newBlockIndex)
-	blockChannel <- newBlock
+
+	// send to control center to 
+	blockChannel <- newBlock 
 }
 
 func calcHashForBlock(block Block) []byte {
@@ -83,10 +88,10 @@ func calcHashForBlock(block Block) []byte {
 }
 
 func areValidBlocks(oldBlock Block, newBlock Block) (bool){
+	// new block's index must be one greater
 	isValidIndex := newBlock.Index == oldBlock.Index + 1
-	/*
-	new blocks previous hash has to equal the hash of the old block
-	*/
+
+	// new block's previous hash has to equal the hash of the old block
 	isValidHash := testEqByteSlice(newBlock.PrevHash, oldBlock.Hash)
 	isValidBlock := isValidIndex && isValidHash
 
