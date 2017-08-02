@@ -82,6 +82,25 @@ func (n *Node) replaceChainIfLonger(theirChain Blockchain){
     }
 }
 
+
+func (n Node) printNode(){
+    fmt.Println("//----------------- \nNODE:\nConnections:")
+    n.listConnections()
+    fmt.Println("Blockchain:")
+    n.printBlockchain()
+    fmt.Printf("Your Address:\n %v \n", n.address)
+    fmt.Printf("Seed Adddress:\n %v \n", n.seed)
+    fmt.Println("Seen Transmissions:")
+    n.printSeenTrans()
+    fmt.Println("-----------------//")
+}
+
+func (n Node) printSeenTrans()(){
+    for transID, _  := range n.seenTransmissions{
+        fmt.Println("  " + transID)
+    }
+}
+
 func (n Node) printBlockchain(){
     for i := range n.blockchain.Blocks {
         block := n.blockchain.Blocks[i]

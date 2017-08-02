@@ -23,7 +23,7 @@ var genesisBlock = Block{0, []byte{0}, "genesis", []byte{0}}
 func (blockchain *Blockchain) addBlock(block Block) {
 	if blockchain.isValidBlock(block) == true {
 		blockchain.Blocks = append(blockchain.Blocks, block)
-		fmt.Printf("Added block %d to blockchain \n", block.Index)
+		// fmt.Printf("Added block %d to blockchain \n", block.Index)
 	} else {
 		fmt.Printf("Did not add block %d to blockchain \n", block.Index)
 	}

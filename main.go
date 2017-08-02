@@ -197,13 +197,7 @@ func main() {
     node      prints the information associated with your node
     help      prints the node command help info`)
                 case "node":
-                    fmt.Println("//----------------- \nNODE:\nConnections:")
-                    myNode.listConnections()
-                    fmt.Println("Blockchain:")
-                    myNode.printBlockchain()
-                    fmt.Printf("Your Address:\n %v \n", myNode.address)
-                    fmt.Printf("Seed Adddress:\n %v \n", myNode.seed)
-                    fmt.Println("-----------------//")
+                    myNode.printNode()
                 default:
                     fmt.Println("Enter 'help' for options.")
                 }
