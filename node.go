@@ -6,7 +6,6 @@ import(
     "bufio"
     "os"
     "encoding/gob"
-    "github.com/nvonpentz/random-string"
 )
 
 /*-------------------*
@@ -19,7 +18,7 @@ type Node struct {
     blockchain Blockchain
     address string
     seed string
-    seenTransmissions map[string]bool
+    seenBlocks map[string]bool
 }
 
 /*
@@ -28,7 +27,6 @@ It includes the actual message as well as the addresses of nodes who have
 already received the Transmission
 */
 type Transmission struct {
-    ID string
     Block Block
     VisitedAddresses map[string]bool // map for efficiency
 }
@@ -90,14 +88,15 @@ func (n Node) printNode(){
     n.printBlockchain()
     fmt.Printf("Your Address:\n %v \n", n.address)
     fmt.Printf("Seed Adddress:\n %v \n", n.seed)
-    fmt.Println("Seen Transmissions:")
+    fmt.Println("Seen Blocks:")
     n.printSeenTrans()
     fmt.Println("-----------------//")
 }
 
-func (n Node) printSeenTrans()(){
-    for transID, _  := range n.seenTransmissions{
-        fmt.Println("  " + transID)
+func (n Node) printSeenTrans(){
+    for blockHashString, _  := range n.seenBlocks{
+        blockHashBytes := []byte(blockHashString)
+        fmt.Printf("  %v\n", blockHashBytes)
     }
 }
 
@@ -284,9 +283,7 @@ func requestBlockchain (conn net.Conn){
 }
 
 func sendTransFromMinedBlock(block Block, transmissionChannel chan *Transmission){
-    inputToRandomString := "abcdefghijklmnopqrstuvwxyzABCDEGHIJKLMNOPQRSTUVWXYZ0123456789"
-    transID := randomstring.RandomString(10, inputToRandomString)
-    trans := Transmission{transID, block, map[string]bool{}}
+    trans := Transmission{block, map[string]bool{}}
     transmissionChannel <- &trans
 }
 

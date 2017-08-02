@@ -119,9 +119,9 @@ func main() {
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
             case trans := <- transmissionChannel:  // new transmission sent to node
-                if myNode.seenTransmissions[trans.ID]!= true && !trans.hasAddress(myNode.address){
+                if myNode.seenBlocks[string(trans.Block.Hash)]!= true && !trans.hasAddress(myNode.address){
                     trans.updateVisitedAddresses(myNode.address)
-                    myNode.seenTransmissions[trans.ID] = true
+                    myNode.seenBlocks[string(trans.Block.Hash)] = true
                     myNode.blockchain.addBlock(trans.Block)
                     // fmt.Printf("added block #%v sent from network \n", trans.Block.Index)
                     forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
