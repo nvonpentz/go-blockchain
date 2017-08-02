@@ -63,7 +63,7 @@ func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
 
 	newBlockHash := calcHashForBlock(newBlock)
 	newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockInfo, newBlockHash}
-
+	// fmt.Printf("<- finished minining block #%v\n", newBlockIndex)
 	blockChannel <- newBlock
 }
 

@@ -28,7 +28,8 @@ already received the Transmission
 */
 type Transmission struct {
     Block Block
-    VisitedAddresses map[string]bool // map for efficiency
+    // VisitedAddresses map[string]bool // map for efficiency
+    BeenSent bool 
 }
 
 /*
@@ -148,15 +149,19 @@ func (n Node) getConnForAddress(address string) (net.Conn){
     return emptyConn
 }
 
-func (t *Transmission) updateVisitedAddresses(address string) {
-    t.VisitedAddresses[address] = true
-}
+// func (t *Transmission) updateVisitedAddresses(address string) {
+//     t.VisitedAddresses[address] = true
+// }
 
-func (t *Transmission) hasAddress(address string) bool {
-    if val := !t.VisitedAddresses[address]; val {
-        return false
-    }
-    return true
+// func (t *Transmission) hasAddress(address string) bool {
+//     if val := !t.VisitedAddresses[address]; val {
+//         return false
+//     }
+//     return true
+// }
+
+func (t *Transmission) updateBeenSent() {
+    t.BeenSent = true
 }
 
 /*----------------------*
@@ -244,14 +249,13 @@ func listenToConn (conn                          net.Conn,
 }
 
 func forwardTransToNetwork (trans Transmission, connections map[net.Conn]int) {
+    // fmt.Println("IN SEND TRANS TO NET, trans.BeenSent is:")
     for conn, _ := range connections { // loop through all this nodes connections
-        destinationAddr := conn.RemoteAddr().String() // get the destination of the connection
-        if !trans.hasAddress(destinationAddr){ // look to see if this transmission has already been to this node so we don't send to any we KNOW have seen it.
-            communication := Communication{0, trans, []string{}, Blockchain{}}
-            encoder       := gob.NewEncoder(conn)
-            encoder.Encode(communication)        
-            fmt.Printf("Sent block #%v to %v \n", trans.Block.Index, destinationAddr)
-        }
+        // destinationAddr := conn.RemoteAddr().String() // get the destination of the connection
+        communication := Communication{0, trans, []string{}, Blockchain{}}
+        encoder       := gob.NewEncoder(conn)
+        encoder.Encode(communication)        
+        // fmt.Printf("Sent block #%v to %v \n", trans.Block.Index, destinationAddr)
     }
 }
 
@@ -282,7 +286,7 @@ func requestBlockchain (conn net.Conn){
 }
 
 func sendTransFromMinedBlock(block Block, transmissionChannel chan *Transmission){
-    trans := Transmission{block, map[string]bool{}}
+    trans := Transmission{block, false}
     transmissionChannel <- &trans
 }
 
