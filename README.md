@@ -1,6 +1,6 @@
 # go-blockchain
 
-A simple implementation of a private peer-to-peer blockchain.  There is no cryptocoin associated with this blockchain, it just the data structure.
+A simple implementation of a private peer-to-peer blockchain.  There is no cryptocoin associated with this blockchain, it just the data structure and network.
 
 ## Usage
 ```
@@ -55,7 +55,7 @@ Node2 connected to Node3
 From Node3, enter `getconns`.  It will ask Node2 for its connections, and connect to those that it isn't connected with already (ie Node1).  Enter `node` to see the connections, and you will see that it is connected to both Node2 and Node1.
 
 ### Start Mining
-To start mining, after you have booted up the node, simpy enter `mine`, and your node will begin mining blocks, and send them to the network when they are mined.  Nodes will automatically validate blocks/blockchains which are sent to them.
+To start mining, after you have booted up the node, simpy enter `mine`, and your node will begin mining blocks and send them to the network when they are mined.  Nodes will automatically validate blocks/blockchains which are sent to them.
 
 
 ## Summary / Walkthrough 
@@ -136,5 +136,5 @@ Depending on the value of the `Communication.ID`, the communication instance is 
 When a communication is sent over the network, it is parsed by the `listenToConnection()` go routine, and redirects the information to the appropriate channel.
 
 ## Why Private?
-This is a private blockchain, which means it cannot easily be run beyond a private network because of the challenges of getting past routers and NAT.  Theoretically this blockchain would work as public blockchain if users setup portforwarding on their router, or if universal plug and play (UPNP) was implemented.
+This is a private blockchain, which means it cannot easily be run beyond a private network because of the challenges of getting past routers and NAT.  Theoretically this blockchain would work as public blockchain if users setup port forwarding on their router, or if universal plug and play (UPNP) was implemented.
 
