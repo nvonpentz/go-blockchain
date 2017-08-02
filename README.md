@@ -1,6 +1,6 @@
 # go-blockchain
 
-A simple implementation of a privatepeer-to-peer blockchain.  There is no cryptocoin associated with this blockchain, it just the data structure.
+A simple implementation of a private peer-to-peer blockchain.  There is no cryptocoin associated with this blockchain, it just the data structure.
 
 ## Usage
 ```
@@ -57,11 +57,13 @@ From Node3, enter `getconns`.  It will ask Node2 for its connections, and connec
 ### Start Mining
 To start mining, after you have booted up the node, simpy enter `mine`, and your node will begin mining blocks, and send them to the network when they are mined.  Nodes will automatically validate blocks/blockchains which are sent to them.
 
-## Summary
+
+## Summary / Walkthrough 
 A node on the network will:
 * Mine new blocks, add them to their blockchain, and send to connected nodes
 * Receive blocks mined by other nodes, validate them, and send them all their connections
 
+### Mining
 Currently, block are mined every 5 to 10 seconds, and send to the `blockChannel` to be processed.
 ```{Go}
 func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
@@ -113,6 +115,25 @@ Through the configuration of a transmission, a Node can determine whether it has
 * If a Node receives a transmission containing a block that has a higher `Index` value compared to the last block in its chain (ie. it sees that the node that sent it is claiming to have a **longer chain**), it sends a request to the `Sender` of the transmission for the entire blockchain that is supposedly longer.  Once the Node receives this supposedly longer blockchain, it validates the entire chain, and if it turns out that the chain is valid, the node replaces its own shorter chain with this new valid chain.
 
 This behavior happens within the `transmissionChannel` in `main.go`
+
+### Network
+Nodes communicate via TCP.  Every communication passed between nodes in the network is actually just a instance of `Communication` struct:
+```
+type Communication struct {
+    ID int
+    Trans Transmission // wrapper for sent block
+    SentAddresses []string
+    Blockchain Blockchain
+}
+```
+Depending on the value of the `Communication.ID`, the communication instance is either:
+* A block (ID = 0)
+* A response of connection addresses (ID = 1)
+* A request for connection addresses (ID = 2)
+* A response of a blockchain (ID = 3)
+* A request to send a blockchain (ID = 4)
+
+When a communication is sent over the network, it is parsed by the `listenToConnection()` go routine, and redirects the information to the appropriate channel.
 
 ## Why Private?
 This is a private blockchain, which means it cannot easily be run beyond a private network because of the challenges of getting past routers and NAT.  Theoretically this blockchain would work as public blockchain if users setup portforwarding on their router, or if universal plug and play (UPNP) was implemented.
