@@ -95,7 +95,7 @@ func main() {
     blockchainChannel       := make(chan Blockchain)
 
     // create node    
-    myNode := Node{make(map[net.Conn]int), 0, Blockchain{[]Block{genesisBlock}}, "", ""}
+    myNode := Node{make(map[net.Conn]int), 0, Blockchain{[]Block{genesisBlock}}, "", "", map[string]bool{}}
     myNode.updateAddress(listenPort)
     myNode.updateSeed(seedPort)
 
@@ -119,14 +119,13 @@ func main() {
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
             case trans := <- transmissionChannel:  // new transmission sent to node
-                if !trans.hasAddress(myNode.address){
+                if myNode.seenTransmissions[trans.ID]!= true && !trans.hasAddress(myNode.address){
                     trans.updateVisitedAddresses(myNode.address)
-                }
-                if myNode.blockchain.isValidBlock(trans.Block) {
+                    myNode.seenTransmissions[trans.ID] = true
                     myNode.blockchain.addBlock(trans.Block)
-                    fmt.Printf("added block #%v sent from network \n", trans.Block.Index)
+                    // fmt.Printf("added block #%v sent from network \n", trans.Block.Index)
+                    forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
                 }
-                forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
             case conn := <-  requestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
                 sendConnectionsToNode(conn, addressesToSendTo)
