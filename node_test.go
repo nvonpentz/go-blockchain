@@ -44,7 +44,6 @@ func TestStartListening(t *testing.T){
 
 	startListening(listenPort, connChannel, inputChannel)
 	conn, err := net.Dial("tcp", "127.0.0.1" + listenPort)
-	conn.Close()
 	if err != nil {
 		t.Error("Unable to make a connection using startListening()")
 		fmt.Println(conn)
@@ -52,23 +51,23 @@ func TestStartListening(t *testing.T){
 	conn.Close()
 }
 
-// func TestAcceptConn(t *testing.T){
-// 	listener, err := net.Listen("tcp", ":1999")
-//     if err != nil {
-//         fmt.Println("There was an error setting up the listener:")
-//         fmt.Println(err)
-//     }
-// 	// listener := *createTestListener(":1999")
-//     connChannel := make(chan net.Conn)
-//     go acceptConn(listener, connChannel)
+func TestAcceptConn(t *testing.T){
+	listener, err := net.Listen("tcp", ":2000")
+    if err != nil {
+        fmt.Println("There was an error setting up the listener:")
+        fmt.Println(err)
+    }
+	// listener := *createTestListener(":1999")
+    connChannel := make(chan net.Conn)
+    go acceptConn(listener, connChannel)
 
-//     conn := testDial(":1999")
-//     receivedConn := <- connChannel
-//     if conn.LocalAddr().String() != receivedConn.RemoteAddr().String() {
-//     	t.Error("Could not establish connection using acceptConn().  sending and receiving conns should be the same:")
-// 		conn.Close()
-//     }
-// }
+    conn := testDial(":2000")
+    receivedConn := <- connChannel
+    if conn.LocalAddr().String() != receivedConn.RemoteAddr().String() {
+    	t.Error("Could not establish connection using acceptConn().  sending and receiving conns should be the same:")
+    }
+	conn.Close()
+}
 
 
 
