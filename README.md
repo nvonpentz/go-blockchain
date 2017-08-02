@@ -1,6 +1,6 @@
-# go-p2p
+# go-blockchain
 
-A simple implementation of a peer-to-peer network over TCP, written to be the basis of a simple blockchain network.
+A simple implementation of a peer-to-peer blockchain
 
 Once connected to peer nodes, a node can send information (a string text) to each node on the network.  Each node will save that information for itself and pass the message along to it's peers who haven't seen the information yet.
 

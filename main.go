@@ -175,14 +175,13 @@ func main() {
                 case "mine":
                     go myNode.blockchain.mineBlock(blockChannel)                        
                 case "getchain":
-                    fmt.Println("getting chain from neighbor")
                     if myNode.seed == "" {
                         fmt.Println("You must have a seed node to request a blockchain")
                     } else{
                         seedConn := myNode.getConnForAddress(myNode.seed)
                         requestBlockchain(seedConn)                        
                     }
-                case "request":
+                case "getconns":
                     if myNode.hasConnectionOfAddress(myNode.seed){
                         seedConn := myNode.getConnForAddress(myNode.seed)
                         fmt.Println("Requesting more connections from seed " + myNode.seed + " ...")
@@ -190,10 +189,10 @@ func main() {
                     } else {
                         fmt.Println("You are not connected to your seed node to make a request..")
                     }
-                case "help":
-                    showNodeHelp()
                 case "node":
                     myNode.printNode()
+                case "help":
+                    showNodeHelp()
                 default:
                     fmt.Println("Enter 'help' for options.")
                 }
@@ -225,7 +224,7 @@ GLOBAL OPTIONS:
 
 NODE COMMANDS:
     send      sends the subsequent text to the network
-    request   requests the list of nodes from your seed node and attempts to connect to each
+    getconns   requests the list of nodes from your seed node and attempts to connect to each
     getchain  requests seed node for their version of the blockchain
     node      prints the information associated with your node
     help      prints the node command help info`)
@@ -236,7 +235,7 @@ fmt.Println(
 `
 NODE COMMANDS:
     send      sends the subsequent text to the network
-    request   requests the list of nodes from your seed node and attempts to connect to each
+    getconns  requests the list of nodes from your seed node and attempts to connect to each
     node      prints the information associated with your node
     help      prints the node command help info`)
 }

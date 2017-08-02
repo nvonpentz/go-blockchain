@@ -275,7 +275,6 @@ func requestBlockchain (conn net.Conn){
     communication := Communication{4, Transmission{}, []string{}, Blockchain{}}
     encoder   := gob.NewEncoder(conn)
     encoder.Encode(communication)
-    fmt.Println("requested blockchain")
 }
 
 func sendTransFromMinedBlock(block Block, transmissionChannel chan *Transmission){

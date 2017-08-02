@@ -36,6 +36,7 @@ func (blockchain *Blockchain) isValidBlock(block Block) bool{
 
 func (blockchain *Blockchain) isValidChain() bool {
 	blockchainLength := len(blockchain.Blocks)
+	if blockchain == nil || blockchainLength == 0 || blockchainLength == 1 { return false }
 	for i:= blockchainLength-1; i<=1; i-- {
 		b2 := blockchain.Blocks[i]
 		b1 := blockchain.Blocks[i-1]
