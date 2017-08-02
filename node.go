@@ -69,18 +69,6 @@ func (n *Node) updateSeed(seedPort string) {
     }
 }
 
-func (n *Node) replaceChainIfLonger(theirChain Blockchain){
-    myLastBlock    := n.blockchain.getLastBlock()
-    theirLastBlock := theirChain.getLastBlock()
-    if myLastBlock.Index < theirLastBlock.Index && theirChain.isValidChain() {
-        n.blockchain = theirChain
-        fmt.Printf("Replaced my blockchain with")
-    } else {
-        fmt.Printf("Did not replace blockchain")
-    }
-}
-
-
 func (n Node) printNode(){
     fmt.Println("//----------------- \nNODE:\nConnections:")
     n.listConnections()
