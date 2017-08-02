@@ -18,7 +18,7 @@ type Block struct {
 	Hash []byte
 }
 
-var genesisBlock = Block{0, []byte{0}, "genesis transaction", []byte{0}}
+var genesisBlock = Block{0, []byte{0}, "genesis", []byte{0}}
 
 func (blockchain *Blockchain) addBlock(block Block) {
 	if blockchain.isValidBlock(block) == true {
@@ -91,8 +91,6 @@ func areValidBlocks(oldBlock Block, newBlock Block) (bool){
 
 	return isValidBlock
 }
-
-
 
 
 func testEqByteSlice (a, b []byte) bool {
