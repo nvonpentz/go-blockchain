@@ -28,8 +28,8 @@ already received the Transmission
 */
 type Transmission struct {
     Block Block
-    // VisitedAddresses map[string]bool // map for efficiency
-    BeenSent bool 
+    BeenSent bool
+    Sender string
 }
 
 /*
@@ -39,8 +39,8 @@ through sending this communication object.  The ID represents the type:
 0 - means we will be receiving a transmission
 1 - means we will be receiving a slice of sent addresses
 2 - means we were requested to send conections
-3 - means we were requested to send your blockchain 
-4 - means we will be receiving a blockchain
+3 - means we will be receiving a blockchain
+4 - means we were requested to send your blockchain 
 */
 type Communication struct {
     ID int
@@ -149,19 +149,12 @@ func (n Node) getConnForAddress(address string) (net.Conn){
     return emptyConn
 }
 
-// func (t *Transmission) updateVisitedAddresses(address string) {
-//     t.VisitedAddresses[address] = true
-// }
-
-// func (t *Transmission) hasAddress(address string) bool {
-//     if val := !t.VisitedAddresses[address]; val {
-//         return false
-//     }
-//     return true
-// }
-
 func (t *Transmission) updateBeenSent() {
     t.BeenSent = true
+}
+
+func (t *Transmission) updateSender(address string){
+    t.Sender = address
 }
 
 /*----------------------*
@@ -234,7 +227,7 @@ func listenToConn (conn                          net.Conn,
         case 1:
             addressesChannel <- communication.SentAddresses
         case 2:
-            fmt.Println("You have been requested to send your conenction address to a peer at " + conn.RemoteAddr().String() + " ...")
+            fmt.Println("You have been requested to send your connection addresses to a peer at " + conn.RemoteAddr().String() + " ...")
             requestChannel <- conn
         case 3:
             blockchainChannel <- communication.Blockchain
@@ -286,7 +279,7 @@ func requestBlockchain (conn net.Conn){
 }
 
 func sendTransFromMinedBlock(block Block, transmissionChannel chan *Transmission){
-    trans := Transmission{block, false}
+    trans := Transmission{block, false, ""}
     transmissionChannel <- &trans
 }
 

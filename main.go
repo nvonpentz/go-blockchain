@@ -97,12 +97,20 @@ func main() {
                     myNode.seenBlocks[string(trans.Block.Hash)] = true
                     myNode.blockchain.addBlock(trans.Block)
                     fmt.Printf("[notMinedAndValid] Added block #%v sent from network to my blockchain, and sending it to network\n", trans.Block.Index)
+                    trans.updateSender(myNode.address)
                     forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
                 } else if notMinedAndInvalid { // not mined and not valid
                     myNode.seenBlocks[string(trans.Block.Hash)] = true
+                    myBlockchainLength := myNode.blockchain.getLastBlock().Index
+                    if trans.Block.Index > myBlockchainLength {
+                        connThatSentHigherBlockIndex := myNode.getConnForAddress(trans.Sender)
+                        fmt.Println("I was sent a block with a higher index, now requesting full chain to validate")
+                        requestBlockchain(connThatSentHigherBlockIndex)
+                    }
                     fmt.Printf("[notMinedAndInvalid] Did not add block #%v sent from network to my chain, did not forward\n", trans.Block.Index)
                 } else if minedButNotSent { //mined but not sent out yet,
-                    trans.updateBeenSent()           
+                    trans.updateBeenSent()
+                    trans.updateSender(myNode.address) 
                     fmt.Printf("[minedButNotSent] Sending mined block #%v to network\n", trans.Block.Index)
                     forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
                 } else if alreadySent{
@@ -140,7 +148,7 @@ func main() {
                 sendBlockchainToNode(conn, myNode.blockchain)
 
             case blockchain := <- blockchainChannel:
-                fmt.Println("Seed node sent this blockchain when I requested:")
+                fmt.Println("You were sent a blockchain")
                 if blockchain.isValidChain() {
                     myNode.blockchain = blockchain
                     fmt.Println("Blockchain accepted: ")
