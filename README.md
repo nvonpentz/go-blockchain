@@ -5,7 +5,7 @@ A simple implementation of a private peer-to-peer blockchain.  There is no crypt
 ## Usage
 ```
 NAME:
-   go-blockchain - peer to peer network
+   go-blockchain
 
 USAGE:
    go-blockchain [global options]
@@ -27,7 +27,7 @@ NODE COMMANDS:
 ```
 ## Getting Started
 ### Setup
-To install, in Terminal, `cd` into the directory containing Go projects and enter:
+To install, in Terminal, `cd` into your directory containing Go projects and enter:
 ```
 git clone https://github.com/nvonpentz/go-blockchain.git
 go build
@@ -52,7 +52,7 @@ Node1 connected to Node2
 Node2 connected to Node3
 ```
 
-From Node3, enter `getconns`.  It will ask Node2 for its connections, and connect to those that it isn't connected with already (ie Node1).  Enter `node` to see the connections, and you will see that it is connected to both Node2 and Node1.
+From Node3, enter `getconns`.  It will ask Node2 for its connections, and Node2 will send back a list of addresses to connect to.  Node3 will then connect to those that it isn't connected with already (ie Node1).  Enter `node` to see the connections, and you will see that it is connected to both Node2 and Node1.
 
 ### Start Mining
 To start mining, after you have booted up the node, simpy enter `mine`, and your node will begin mining blocks and send them to the network when they are mined.  Nodes will automatically validate blocks/blockchains which are sent to them.

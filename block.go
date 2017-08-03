@@ -2,7 +2,7 @@ package main
 
 import ("fmt"
 		"time"
-		// "math/rand"
+		"math/rand"
 		"crypto/sha256"
 		"encoding/binary"
 		)
@@ -23,9 +23,7 @@ var genesisBlock = Block{0, []byte{0}, "genesis", []byte{0}}
 func (blockchain *Blockchain) addBlock(block Block) {
 	if blockchain.isValidBlock(block) == true {
 		blockchain.Blocks = append(blockchain.Blocks, block)
-		// fmt.Printf("Added block %d to blockchain \n", block.Index)
 	} else {
-		// fmt.Printf("Did not add block %d to blockchain \n", block.Index)
 	}
 }
 
@@ -73,6 +71,7 @@ func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
 	blockChannel <- newBlock 
 }
 
+// computes the hash of a block 
 func calcHashForBlock(block Block) []byte {
 	blockHash := sha256.New()
 
@@ -98,7 +97,7 @@ func areValidBlocks(oldBlock Block, newBlock Block) (bool){
 	return isValidBlock
 }
 
-
+// used for comparison of hash byte slices
 func testEqByteSlice (a, b []byte) bool {
     if a == nil && b == nil { 
         return true; 

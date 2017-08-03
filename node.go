@@ -71,7 +71,7 @@ func (n *Node) updateSeed(seedPort string) {
 
 func (n Node) printNode(){
     fmt.Println("//----------------- \nNODE:\nConnections:")
-    n.listConnections()
+    n.printConnections()
     fmt.Println("Blockchain:")
     n.printBlockchain()
     fmt.Printf("Your Address:\n %v \n", n.address)
@@ -95,16 +95,12 @@ func (n Node) printBlockchain(){
     }
 }
 
-func (n Node) listConnections(){
+func (n Node) printConnections(){
     for conn, id := range n.connections {
         localAddr := conn.LocalAddr().String()
         remoteAddr := conn.RemoteAddr().String()
         fmt.Printf(" ID: %v, Connection: %v to %v \n", id, localAddr, remoteAddr)
     }
-}
-
-func (n Node) numberConns() (int){
-    return len(n.connections)
 }
 
 func (n Node) getRemoteAddresses() (remoteAddresses []string) {
@@ -226,7 +222,7 @@ func listenToConn (conn                          net.Conn,
             fmt.Println("There was a problem decoding the message")
         }
     }
-    disconnChannel <- conn
+    disconnChannel <- conn // disconnect must have occurred if we exit the for loop
 }
 
 func forwardTransToNetwork (trans Transmission, connections map[net.Conn]int) {
@@ -236,7 +232,6 @@ func forwardTransToNetwork (trans Transmission, connections map[net.Conn]int) {
         communication := Communication{0, trans, []string{}, Blockchain{}}
         encoder       := gob.NewEncoder(conn)
         encoder.Encode(communication)        
-        // fmt.Printf("Sent block #%v to %v \n", trans.Block.Index, destinationAddr)
     }
 }
 

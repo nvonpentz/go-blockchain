@@ -88,7 +88,7 @@ func main() {
                 delete(myNode.connections, disconn) // remove the connection from the nodes list of connections
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
-            case trans := <- transmissionChannel:  // new transmission sent to node
+            case trans := <- transmissionChannel:  // new transmission sent to node // handles adding, validating, and sending blocks to network
                 notMinedAndValid   := myNode.seenBlocks[string(trans.Block.Hash)] == false  && trans.BeenSent == true && myNode.blockchain.isValidBlock(trans.Block)
                 notMinedAndInvalid := myNode.seenBlocks[string(trans.Block.Hash)] == false  && trans.BeenSent == true && !myNode.blockchain.isValidBlock(trans.Block)
                 minedButNotSent    := myNode.seenBlocks[string(trans.Block.Hash)] == true   && trans.BeenSent == false
@@ -99,7 +99,7 @@ func main() {
                     fmt.Printf("[notMinedAndValid] Added block #%v sent from network to my blockchain, and sending it to network\n", trans.Block.Index)
                     trans.updateSender(myNode.address)
                     forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
-                } else if notMinedAndInvalid { // not mined and not valid
+                } else if notMinedAndInvalid {
                     myNode.seenBlocks[string(trans.Block.Hash)] = true
                     myBlockchainLength := myNode.blockchain.getLastBlock().Index
                     if trans.Block.Index > myBlockchainLength {
@@ -117,12 +117,6 @@ func main() {
                     fmt.Printf("[alreadySent] Already seen block #%v, did not forward", trans.Block.Index)
                 } else {
                     fmt.Println("Some other case, this should not occur:")
-                    // fmt.Println("myNode.seenBlocks[string(trans.Block.Hash)]")
-                    // fmt.Println(myNode.seenBlocks[string(trans.Block.Hash)])
-                    // fmt.Println("trans.BeenSent")
-                    // fmt.Println((trans.BeenSent))
-                    // fmt.Println("myNode.blockchain.isValidBlock(trans.Block)")
-                    // fmt.Println(myNode.blockchain.isValidBlock(trans.Block))
                 }
 
             case conn := <-  requestChannel:  // was requested addresses to send
@@ -147,7 +141,7 @@ func main() {
             case conn    := <- blockchainRequestChannel:
                 sendBlockchainToNode(conn, myNode.blockchain)
 
-            case blockchain := <- blockchainChannel:
+            case blockchain := <- blockchainChannel: // node was sent a blockchain
                 fmt.Println("You were sent a blockchain")
                 if blockchain.isValidChain() {
                     myNode.blockchain = blockchain
@@ -157,7 +151,7 @@ func main() {
                     fmt.Println("Blockchain rejected, invalid")
                 }
 
-            case block   := <- blockChannel:
+            case block   := <- blockChannel: // new block was mined (only mined blocks sent here)
                 if myNode.blockchain.isValidBlock(block){
                     myNode.blockchain.addBlock(block)
                     myNode.seenBlocks[string(block.Hash)] = true // specify weve now seen this block but don't update the trans address until its processed there
