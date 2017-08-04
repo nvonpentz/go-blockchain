@@ -65,7 +65,7 @@ A node on the network will:
 
 ### Mining
 Currently, block are mined every 5 to 10 seconds, and send to the `blockChannel` to be processed.
-```{Go}
+```go
 func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
   fmt.Println("-> begin mining..")
 
@@ -88,7 +88,7 @@ func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
 }
 ```
 Once in the `blockChannel`, the block is validated by the `isValidBlock()` blockchain method.  A pending block is valid if it's property `PrevHash` is equal to the `Hash` of the current latest block, and if it's `Index` is 1 greater than the latest block's `Index`:
-```{Go}
+```go
 func areValidBlocks(oldBlock Block, newBlock Block) (bool){
   // new block's index must be one greater
   isValidIndex := newBlock.Index == oldBlock.Index + 1
@@ -101,7 +101,7 @@ func areValidBlocks(oldBlock Block, newBlock Block) (bool){
 }
 ```
 If the block validates with respect to the Node's blockchain, it is sent throughout the network in the form of a `Transmission`.  A transmission is simply the Block, a bool representing whether it has been sent to the network yet, as well as the most recent sender:
-```{Go}
+```go
 type Transmission struct {
     Block Block
     BeenSent bool
