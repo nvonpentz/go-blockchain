@@ -1,13 +1,10 @@
 package main 
 
-import ("testing"
-		"net"
-		"fmt"
-		)
-
-func createTestNode() Node{
-	return Node{make(map[net.Conn]int), 0, Blockchain{[]Block{genesisBlock}}, "", "", map[string]bool{}}
-}
+import (
+	"testing"
+	"net"
+	"fmt"
+)
 
 func createTestListener(port string) *net.Listener {
 	listener, err := net.Listen("tcp", port)
@@ -29,7 +26,7 @@ func testDial(address string) net.Conn {
 }
 
 func TestIncrementConnID(t *testing.T) {
-	n := createTestNode()
+	n := newNode()
 	n.incrementConnID()
 	if n.nextConnID != 1 {
 		t.Error("Expected 1, got %v", n.nextConnID)

@@ -314,17 +314,6 @@ func (n *Node) getPublicIP() string {
     return myPublicIPstring
 }
 
-func (n Node) printNode(){
-    fmt.Println("*------------------*\nYour Node:\n Connections:")
-    fmt.Printf(" Your Address:\n  %v \n Seed Address:\n  %v\n", n.address, n.seed)
-    n.printConnections()
-    fmt.Println(" Seen Blocks:")
-    n.printSeenTrans()
-    fmt.Println(" Blockchain:")
-    n.printBlockchain()
-    fmt.Println("*------------------*")
-}
-
 func (n Node) printSeenTrans(){
     for blockHashString, _  := range n.seenBlocks{
         blockHashBytes := []byte(blockHashString)
@@ -347,9 +336,21 @@ func (n Node) printConnections(){
     }
 }
 
+func (n Node) printNode(){
+    fmt.Println("*------------------*\nYour Node:\n Connections:")
+    fmt.Printf(" Your Address:\n  %v \n Seed Address:\n  %v\n", n.address, n.seed)
+    n.printConnections()
+    fmt.Println(" Seen Blocks:")
+    n.printSeenTrans()
+    fmt.Println(" Blockchain:")
+    n.printBlockchain()
+    fmt.Println("*------------------*")
+}
+
 func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     joinFlag := false
     if seedInfo != "" { joinFlag = true }
+    
     // specify ports to seed and listen to
     myNode.updatePorts(listenPort, seedInfo, publicFlag)
 
