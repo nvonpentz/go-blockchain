@@ -203,6 +203,38 @@ func (n *Node) forwardTransToNetwork(trans Transmission, connections map[net.Con
     }
 }
 
+func (n *Node) handleTrans(trans *Transmission){
+    notMinedAndValid   := n.seenBlocks[string(trans.Block.Hash)] == false  && trans.BeenSent == true && n.blockchain.isValidBlock(trans.Block)
+    notMinedAndInvalid := n.seenBlocks[string(trans.Block.Hash)] == false  && trans.BeenSent == true && !n.blockchain.isValidBlock(trans.Block)
+    minedButNotSent    := n.seenBlocks[string(trans.Block.Hash)] == true   && trans.BeenSent == false
+    alreadySent        := n.seenBlocks[string(trans.Block.Hash)] == true   && trans.BeenSent == true
+    if notMinedAndValid {
+        n.seenBlocks[string(trans.Block.Hash)] = true
+        n.blockchain.addBlock(trans.Block)
+        fmt.Printf("[notMinedAndValid] Added block #%v sent from network to my blockchain, and sending it to network\n", trans.Block.Index)
+        trans.updateSender(n.address)
+        n.forwardTransToNetwork(*trans, n.connections) // forward messages to the rest of network
+    } else if notMinedAndInvalid {
+        n.seenBlocks[string(trans.Block.Hash)] = true
+        myBlockchainLength := n.blockchain.getLastBlock().Index
+        if trans.Block.Index > myBlockchainLength {
+            connThatSentHigherBlockIndex := n.getConnForAddress(trans.Sender)
+            fmt.Println("I was sent a block with a higher index, now requesting full chain to validate")
+            n.requestBlockchain(connThatSentHigherBlockIndex)
+        }
+        fmt.Printf("[notMinedAndInvalid] Did not add block #%v sent from network to my chain, did not forward\n", trans.Block.Index)
+    } else if minedButNotSent { //mined but not sent out yet,
+        trans.updateBeenSent()
+        trans.updateSender(n.address) 
+        fmt.Printf("[minedButNotSent] Mined block #%v, sending to network\n", trans.Block.Index)
+        n.forwardTransToNetwork(*trans, n.connections) // forward messages to the rest of network
+    } else if alreadySent{
+        fmt.Printf("[alreadySent] Already seen block #%v, did not forward", trans.Block.Index)
+    } else {
+        fmt.Println("Some other case, this should not occur:")
+    }
+}
+
 func (n *Node) requestConnections(conn net.Conn){
     communication := Communication{2, Transmission{}, []string{}, Blockchain{}}
     encoder       := gob.NewEncoder(conn)
@@ -304,35 +336,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
             case trans := <- transmissionChannel:  // new transmission sent to node // handles adding, validating, and sending blocks to network
-                notMinedAndValid   := myNode.seenBlocks[string(trans.Block.Hash)] == false  && trans.BeenSent == true && myNode.blockchain.isValidBlock(trans.Block)
-                notMinedAndInvalid := myNode.seenBlocks[string(trans.Block.Hash)] == false  && trans.BeenSent == true && !myNode.blockchain.isValidBlock(trans.Block)
-                minedButNotSent    := myNode.seenBlocks[string(trans.Block.Hash)] == true   && trans.BeenSent == false
-                alreadySent        := myNode.seenBlocks[string(trans.Block.Hash)] == true   && trans.BeenSent == true
-                if notMinedAndValid {
-                    myNode.seenBlocks[string(trans.Block.Hash)] = true
-                    myNode.blockchain.addBlock(trans.Block)
-                    fmt.Printf("[notMinedAndValid] Added block #%v sent from network to my blockchain, and sending it to network\n", trans.Block.Index)
-                    trans.updateSender(myNode.address)
-                    myNode.forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
-                } else if notMinedAndInvalid {
-                    myNode.seenBlocks[string(trans.Block.Hash)] = true
-                    myBlockchainLength := myNode.blockchain.getLastBlock().Index
-                    if trans.Block.Index > myBlockchainLength {
-                        connThatSentHigherBlockIndex := myNode.getConnForAddress(trans.Sender)
-                        fmt.Println("I was sent a block with a higher index, now requesting full chain to validate")
-                        myNode.requestBlockchain(connThatSentHigherBlockIndex)
-                    }
-                    fmt.Printf("[notMinedAndInvalid] Did not add block #%v sent from network to my chain, did not forward\n", trans.Block.Index)
-                } else if minedButNotSent { //mined but not sent out yet,
-                    trans.updateBeenSent()
-                    trans.updateSender(myNode.address) 
-                    fmt.Printf("[minedButNotSent] Mined block #%v, sending to network\n", trans.Block.Index)
-                    myNode.forwardTransToNetwork(*trans, myNode.connections) // forward messages to the rest of network
-                } else if alreadySent{
-                    fmt.Printf("[alreadySent] Already seen block #%v, did not forward", trans.Block.Index)
-                } else {
-                    fmt.Println("Some other case, this should not occur:")
-                }
+                myNode.handleTrans(trans)
 
             case conn := <-  connRequestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
