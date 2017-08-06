@@ -100,55 +100,55 @@ func (n Node) getConnForAddress(address string) (net.Conn){
 }
 
 
-func (n *Node) startListening(port string, connChannel chan net.Conn, inputChannel chan string) {
+func (n *Node) startListening(port string, newConnChannel chan net.Conn, userInputChannel chan string) {
     listener, err := net.Listen("tcp", port)
     if err != nil {
         fmt.Println("There was an error setting up the listener:")
         fmt.Println(err)
     }
 
-    go n.acceptConn(listener, connChannel)
-    go n.listenForUserInput(inputChannel)
+    go n.acceptConn(listener, newConnChannel)
+    go n.listenForUserInput(userInputChannel)
 }
 
-func (n *Node) acceptConn(listener net.Listener, connChannel chan net.Conn) {
+func (n *Node) acceptConn(listener net.Listener, newConnChannel chan net.Conn) {
     for {
         conn, err := listener.Accept()
         if err != nil {
             fmt.Printf("There was an error accepting a new connection: \n %v", err)
         }
         fmt.Println("* Listener accepted connection through port " + conn.LocalAddr().String() + " from " + conn.RemoteAddr().String())
-        connChannel <- conn //send to conection channel
+        newConnChannel <- conn //send to conection channel
     }
 }
 
-func (n *Node) dialNode(address string, connChannel chan net.Conn) {
+func (n *Node) dialNode(address string, newConnChannel chan net.Conn) {
     conn, err := net.Dial("tcp", address)
     if err != nil {
         fmt.Println("**Make sure there is someone listening at " + address + "**")
         fmt.Println(err)
     }
     fmt.Println("Connection established out of port " + conn.LocalAddr().String() + " dialing to " + conn.RemoteAddr().String())
-    connChannel <- conn
+    newConnChannel <- conn
 }
 
-func (n *Node) listenForUserInput(inputChannel chan string) {
+func (n *Node) listenForUserInput(userInputChannel chan string) {
     for {
         reader := bufio.NewReader(os.Stdin) //constantly be reading in from std in
         input, err := reader.ReadString('\n')
         if (err != nil || input == "\n") {
         } else {
             fmt.Println()
-            inputChannel <- input
+            userInputChannel <- input
         }
     }
 }
 
 func (n *Node) listenToConn(conn                          net.Conn, 
                    transmissionChannel      chan *Transmission,
-                   disconnChannel           chan net.Conn,
-                   requestChannel           chan net.Conn,
-                   addressesChannel         chan []string,
+                   disconChannel           chan net.Conn,
+                   connRequestChannel       chan net.Conn,
+                   sentAddressesChannel     chan []string,
                    blockchainRequestChannel chan net.Conn,
                    blockchainChannel        chan Blockchain) {
 
@@ -164,10 +164,10 @@ func (n *Node) listenToConn(conn                          net.Conn,
         case 0:
             transmissionChannel <- &communication.Trans
         case 1:
-            addressesChannel <- communication.SentAddresses
+            sentAddressesChannel <- communication.SentAddresses
         case 2:
             fmt.Println("You have been requested to send your connection addresses to a peer at " + conn.RemoteAddr().String() + " ...")
-            requestChannel <- conn
+            connRequestChannel <- conn
         case 3:
             blockchainChannel <- communication.Blockchain
         case 4:
@@ -177,16 +177,16 @@ func (n *Node) listenToConn(conn                          net.Conn,
             fmt.Println("There was a problem decoding the message")
         }
     }
-    disconnChannel <- conn // disconnect must have occurred if we exit the for loop
+    disconChannel <- conn // disconnect must have occurred if we exit the for loop
 }
 
-func (n *Node) approveSentAddresses(addresses []string, connChannel chan net.Conn){
+func (n *Node) approveSentAddresses(addresses []string, newConnChannel chan net.Conn){
     approvedAddresses := []string{}
     for i := range addresses {
         r, _ := regexp.Compile(":.*") // match everything after the colon
         port := r.FindString(addresses[i])
         if len(port) == 5 {  // in a real network this should simply be 1999
-            go n.dialNode(addresses[i], connChannel)
+            go n.dialNode(addresses[i], newConnChannel)
             approvedAddresses = append(approvedAddresses, addresses[i])
         }
     }
@@ -267,27 +267,25 @@ func (n *Node) getPublicIP() string {
 
 func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     joinFlag := false
-    if seedInfo != "" {
-        joinFlag = true
-    }
+    if seedInfo != "" { joinFlag = true }
     // specify ports to seed and listen to
     myNode.updatePorts(listenPort, seedInfo, publicFlag)
 
     // create channels
-    inputChannel            := make(chan string)
+    userInputChannel            := make(chan string)
     transmissionChannel     := make(chan *Transmission)
-    connChannel             := make(chan net.Conn)
-    disconnChannel          := make(chan net.Conn)
-    requestChannel          := make(chan net.Conn)
-    addressesChannel        := make(chan []string)
-    blockChannel            := make(chan Block)
+    newConnChannel          := make(chan net.Conn) // new connections added
+    disconChannel           := make(chan net.Conn) // new disconnestion
+    connRequestChannel      := make(chan net.Conn) // received a request to send connections 
+    sentAddressesChannel    := make(chan []string) // received addresses to make connections
+    minedBlockChannel       := make(chan Block)    // new block was mined
     blockchainRequestChannel:= make(chan net.Conn)
     blockchainChannel       := make(chan Blockchain)
 
-    myNode.startListening(listenPort, connChannel, inputChannel)
+    myNode.startListening(listenPort, newConnChannel, userInputChannel)
     if joinFlag { // if the user requested to join a seed node // need to make sure you can't join if you don't supply a seed
         fmt.Println("Dialing seed node at port " + seedInfo + "...")
-         go myNode.dialNode(myNode.seed, connChannel)
+         go myNode.dialNode(myNode.seed, newConnChannel)
     }
 
     myNode.printNode()
@@ -295,12 +293,12 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     // handle go routines
     for {
         select {
-            case conn    := <- connChannel: // listener picked up new conn
+            case conn    := <- newConnChannel: // listener picked up new conn
                 myNode.nextConnID = myNode.nextConnID + 1
                 myNode.connections[conn] = myNode.nextConnID // assign connection an ID
-                go myNode.listenToConn(conn, transmissionChannel, disconnChannel, requestChannel, addressesChannel, blockchainRequestChannel, blockchainChannel)
+                go myNode.listenToConn(conn, transmissionChannel, disconChannel, connRequestChannel, sentAddressesChannel, blockchainRequestChannel, blockchainChannel)
 
-            case disconn := <- disconnChannel: // established connection disconnected
+            case disconn := <- disconChannel: // established connection disconnected
                 connID := myNode.connections[disconn]
                 delete(myNode.connections, disconn) // remove the connection from the nodes list of connections
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
@@ -336,24 +334,13 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                     fmt.Println("Some other case, this should not occur:")
                 }
 
-            case conn := <-  requestChannel:  // was requested addresses to send
+            case conn := <-  connRequestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
                 myNode.sendConnectionsToNode(conn, addressesToSendTo)
 
-            case addresses := <- addressesChannel:  //received addresses to add
+            case addresses := <- sentAddressesChannel:  //received addresses to add
                 fmt.Printf("Seed node sent these addresses to connect to:\n-> %v\n", addresses)
-                go myNode.approveSentAddresses(addresses, connChannel)
-                // approvedAddresses := []string{}
-                // for i := range addresses {
-                //     r, _ := regexp.Compile(":.*") // match everything after the colon
-                //     port := r.FindString(addresses[i])
-                //     if len(port) == 5 {  // in a real network this should simply be 1999
-                //         go myNode.dialNode(addresses[i], connChannel)
-                //         approvedAddresses = append(approvedAddresses, addresses[i])
-                //     }
-                // }
-                // fmt.Print("These new connections will be added:\n->")
-                // fmt.Println(approvedAddresses)
+                myNode.approveSentAddresses(addresses, newConnChannel)
 
             case conn    := <- blockchainRequestChannel:
                 myNode.sendBlockchainToNode(conn, myNode.blockchain)
@@ -368,7 +355,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                     fmt.Println("Blockchain rejected, invalid")
                 }
 
-            case block   := <- blockChannel: // new block was mined (only mined blocks sent here)
+            case block   := <- minedBlockChannel: // new block was mined (only mined blocks sent here)
                 if myNode.blockchain.isValidBlock(block){
                     myNode.blockchain.addBlock(block)
                     myNode.seenBlocks[string(block.Hash)] = true // specify weve now seen this block but don't update the trans address until its processed there
@@ -376,14 +363,14 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 } else {
                     fmt.Printf("Did not add mined block #%v\n", block.Index)
                 }
-                go myNode.blockchain.mineBlock(blockChannel)
+                go myNode.blockchain.mineBlock(minedBlockChannel)
 
-            case input   := <- inputChannel: // user entered some input
+            case input   := <- userInputChannel: // user entered some input
                 outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
                 arg0 := strings.ToLower(outgoingArgs[0])
                 switch arg0 {
                 case "mine":
-                    go myNode.blockchain.mineBlock(blockChannel)                        
+                    go myNode.blockchain.mineBlock(minedBlockChannel)                        
                 case "getchain":
                     if myNode.seed == "" {
                         fmt.Println("You must have a seed node to request a blockchain")
