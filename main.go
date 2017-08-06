@@ -10,25 +10,24 @@ import(
 func main() {
     // set up flags
     var listenPort string
-    flag.StringVar(&listenPort, "l", "1999", "")
-    flag.StringVar(&listenPort, "listen", "1999", "")
+    flag.StringVar(&listenPort, "l", "", "")
+    flag.StringVar(&listenPort, "listen", "", "")
 
-    var seedPort string
-    flag.StringVar(&seedPort, "s", "", "")
-    flag.StringVar(&seedPort, "seed", "", "")
+    var seedInfo string
+    flag.StringVar(&seedInfo, "s", "", "")
+    flag.StringVar(&seedInfo, "seed", "", "")
 
     var helpFlag bool
     flag.BoolVar(&helpFlag, "h", false, "")
     flag.BoolVar(&helpFlag, "help", false, "")
 
-    var joinFlag bool
-    flag.BoolVar(&joinFlag, "j", false, "")
-    flag.BoolVar(&joinFlag, "join", false, "")
+    var publicFlag bool
+    flag.BoolVar(&publicFlag, "p", false, "")
+    flag.BoolVar(&publicFlag, "public", false, "")
 
     flag.Parse()
 
-    listenPort = ":" + listenPort 
-    seedPort = ":" + seedPort
+    listenPort   = ":" + listenPort
 
     if helpFlag {
         showGlobalHelp()
@@ -36,5 +35,5 @@ func main() {
     }
 
     myNode := newNode()
-    myNode.run(listenPort, seedPort,joinFlag)
+    myNode.run(listenPort, seedInfo, publicFlag)
 }

@@ -8,6 +8,8 @@ import(
     "encoding/gob"
     "strings"
     "regexp"
+    "net/http"
+    "io/ioutil"
 )
 
 type Node struct {
@@ -19,19 +21,19 @@ type Node struct {
     seenBlocks map[string]bool
 }
 
-func (n *Node) updatePorts(listenPort string, seedPort string) {
-    privateIP := n.getPrivateIP()
-    n.address = privateIP + listenPort
-    if seedPort == ":"{ // ie empty seed port **should refactor**
-        n.seed = ""
-    } else {
-        n.seed = privateIP + seedPort
+func (n *Node) updatePorts(listenPort string, seedInfo string, publicFlag bool) {
+    if publicFlag{
+        n.seed = seedInfo + ":1999" // if public ip, seed is specifiec seedInfo:1999
+        n.address = n.getPublicIP() + ":1999" // must set up port forwarding
+    } else { 
+        n.seed = n.getPrivateIP() + ":" + seedInfo  // no default seed
+        n.address = n.getPrivateIP() + listenPort
     }
 }
 
 func (n Node) printNode(){
     fmt.Println("*------------------*\nYour Node:\n Connections:")
-    fmt.Printf(" Your Address:\n  %v \n Seed Address:\n  %v", n.address, n.seed)
+    fmt.Printf(" Your Address:\n  %v \n Seed Address:\n  %v\n", n.address, n.seed)
     n.printConnections()
     fmt.Println(" Seen Blocks:")
     n.printSeenTrans()
@@ -97,10 +99,13 @@ func newNode() Node {
     return myNode
 }
 
-func (myNode Node) run(listenPort string, seedPort string, joinFlag bool) {
-    
+func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
+    joinFlag := false
+    if seedInfo != "" {
+        joinFlag = true
+    }
     // specify ports to seed and listen to
-    myNode.updatePorts(listenPort, seedPort)
+    myNode.updatePorts(listenPort, seedInfo, publicFlag)
 
     // create channels
     inputChannel            := make(chan string)
@@ -115,8 +120,8 @@ func (myNode Node) run(listenPort string, seedPort string, joinFlag bool) {
 
     myNode.startListening(listenPort, connChannel, inputChannel)
     if joinFlag { // if the user requested to join a seed node // need to make sure you can't join if you don't supply a seed
-        fmt.Println("Dialing seed node at port " + seedPort + "...")
-         go myNode.dialNode(seedPort, connChannel)
+        fmt.Println("Dialing seed node at port " + seedInfo + "...")
+         go myNode.dialNode(myNode.seed, connChannel)
     }
 
     myNode.printNode()
@@ -177,7 +182,7 @@ func (myNode Node) run(listenPort string, seedPort string, joinFlag bool) {
                     r, _ := regexp.Compile(":.*") // match everything after the colon
                     port := r.FindString(addresses[i])
                     if len(port) == 5 {  // in a real network this should simply be 1999
-                        go myNode.dialNode(port, connChannel)
+                        go myNode.dialNode(addresses[i], connChannel)
                         approvedAddresses = append(approvedAddresses, addresses[i])
                     }
                 }
@@ -266,10 +271,10 @@ func (n *Node) acceptConn(listener net.Listener, connChannel chan net.Conn) {
     }
 }
 
-func (n *Node) dialNode(port string, connChannel chan net.Conn) {
-    conn, err := net.Dial("tcp", n.getPrivateIP()+port)
+func (n *Node) dialNode(address string, connChannel chan net.Conn) {
+    conn, err := net.Dial("tcp", address)
     if err != nil {
-        fmt.Println("**Make sure there is someone listening at " + port + "**")
+        fmt.Println("**Make sure there is someone listening at " + address + "**")
         fmt.Println(err)
     }
     fmt.Println("Connetion established out of port " + conn.LocalAddr().String() + " dialing to " + conn.RemoteAddr().String())
@@ -363,7 +368,7 @@ func (n *Node) sendTransFromMinedBlock(block Block, transmissionChannel chan *Tr
     transmissionChannel <- &trans
 }
 
-func (N *Node) getPrivateIP() string {
+func (n *Node) getPrivateIP() string {
     name, err := os.Hostname()
     if err != nil {
         return ""
@@ -374,6 +379,24 @@ func (N *Node) getPrivateIP() string {
     }
 
     return address[0]
+}
+
+func (n *Node) getPublicIP() string {
+    resp, err := http.Get("http://myexternalip.com/raw")
+    if err != nil {
+        os.Stderr.WriteString(err.Error())
+        os.Stderr.WriteString("\n")
+        os.Exit(1)
+    }
+    defer resp.Body.Close()
+
+    myPublicIP, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    myPublicIPstring := strings.Trim(string(myPublicIP), "\n")
+    return myPublicIPstring
 }
 
 
