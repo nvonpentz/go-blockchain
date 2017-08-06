@@ -7,7 +7,6 @@ import(
 /*------------------------*
  * COMMAND LINE INTERFACE *
  *------------------------*/
-
 func main() {
     // set up flags
     var listenPort string

@@ -10,10 +10,6 @@ import(
     "regexp"
 )
 
-/*-------------------*
- * STRUCTS & METHODS *
- *-------------------*/
-
 type Node struct {
     connections map[net.Conn]int
     nextConnID int
@@ -25,10 +21,6 @@ type Node struct {
 
 func (n *Node) incrementConnID() {
     n.nextConnID = n.nextConnID + 1
-}
-
-func (n *Node) appendBlock(block Block) {
-    n.blockchain.Blocks = append(n.blockchain.Blocks, block)
 }
 
 func (n *Node) updateAddress(listenPort string) {
@@ -340,7 +332,6 @@ func (n *Node) listenToConn(conn                          net.Conn,
 }
 
 func (n *Node) forwardTransToNetwork(trans Transmission, connections map[net.Conn]int) {
-    // fmt.Println("IN SEND TRANS TO NET, trans.BeenSent is:")
     for conn, _ := range connections { // loop through all this nodes connections
         // destinationAddr := conn.RemoteAddr().String() // get the destination of the connection
         communication := Communication{0, trans, []string{}, Blockchain{}}
