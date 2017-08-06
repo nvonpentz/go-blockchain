@@ -235,6 +235,36 @@ func (n *Node) handleTrans(trans *Transmission){
     }
 }
 
+func (n *Node) handleUserInput(input string, minedBlockChannel chan Block) {
+    outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
+    arg0 := strings.ToLower(outgoingArgs[0])
+    switch arg0 {
+    case "mine":
+        go n.blockchain.mineBlock(minedBlockChannel)                        
+    case "getchain":
+        if n.seed == "" {
+            fmt.Println("You must have a seed node to request a blockchain")
+        } else{
+            seedConn := n.getConnForAddress(n.seed)
+            n.requestBlockchain(seedConn)                        
+        }
+    case "getconns":
+        if n.hasConnectionOfAddress(n.seed){
+            seedConn := n.getConnForAddress(n.seed)
+            fmt.Println("Requesting more connections from seed " + n.seed + " ...")
+            n.requestConnections(seedConn)
+        } else {
+            fmt.Println("You are not connected to your seed node to make a request..")
+        }
+    case "node":
+        n.printNode()
+    case "help":
+        showNodeHelp()
+    default:
+        fmt.Println("Enter 'help' for options.")
+    }
+}
+
 func (n *Node) requestConnections(conn net.Conn){
     communication := Communication{2, Transmission{}, []string{}, Blockchain{}}
     encoder       := gob.NewEncoder(conn)
@@ -370,33 +400,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 go myNode.blockchain.mineBlock(minedBlockChannel)
 
             case input   := <- userInputChannel: // user entered some input
-                outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
-                arg0 := strings.ToLower(outgoingArgs[0])
-                switch arg0 {
-                case "mine":
-                    go myNode.blockchain.mineBlock(minedBlockChannel)                        
-                case "getchain":
-                    if myNode.seed == "" {
-                        fmt.Println("You must have a seed node to request a blockchain")
-                    } else{
-                        seedConn := myNode.getConnForAddress(myNode.seed)
-                        myNode.requestBlockchain(seedConn)                        
-                    }
-                case "getconns":
-                    if myNode.hasConnectionOfAddress(myNode.seed){
-                        seedConn := myNode.getConnForAddress(myNode.seed)
-                        fmt.Println("Requesting more connections from seed " + myNode.seed + " ...")
-                        myNode.requestConnections(seedConn)
-                    } else {
-                        fmt.Println("You are not connected to your seed node to make a request..")
-                    }
-                case "node":
-                    myNode.printNode()
-                case "help":
-                    showNodeHelp()
-                default:
-                    fmt.Println("Enter 'help' for options.")
-                }
+                myNode.handleUserInput(input, minedBlockChannel)
         }
 
     }
