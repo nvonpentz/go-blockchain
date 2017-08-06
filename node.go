@@ -23,15 +23,13 @@ func (n *Node) incrementConnID() {
     n.nextConnID = n.nextConnID + 1
 }
 
-func (n *Node) updateAddress(listenPort string) {
-    n.address = n.getPrivateIP() + listenPort
-}
-
-func (n *Node) updateSeed(seedPort string) {
+func (n *Node) updatePorts(listenPort string, seedPort string) {
+    privateIP := n.getPrivateIP()
+    n.address = privateIP + listenPort
     if seedPort == ":"{ // ie empty seed port **should refactor**
         n.seed = ""
     } else {
-        n.seed = n.getPrivateIP() + seedPort
+        n.seed = privateIP + seedPort
     }
 }
 
@@ -106,8 +104,7 @@ func newNode() Node {
 func (myNode Node) run(listenPort string, seedPort string, joinFlag bool) {
     
     // specify ports to seed and listen to
-    myNode.updateAddress(listenPort)
-    myNode.updateSeed(seedPort)
+    myNode.updatePorts(listenPort, seedPort)
 
     // create channels
     inputChannel            := make(chan string)

@@ -5,7 +5,6 @@ import ("testing"
 		"fmt"
 		)
 
-
 func createTestNode() Node{
 	return Node{make(map[net.Conn]int), 0, Blockchain{[]Block{genesisBlock}}, "", "", map[string]bool{}}
 }
