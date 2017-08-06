@@ -44,15 +44,14 @@ func (n *Node) updateSeed(seedPort string) {
 }
 
 func (n Node) printNode(){
-    fmt.Println("//----------------- \nNODE:\nConnections:")
+    fmt.Println("*------------------*\nYour Node:\n Connections:")
+    fmt.Printf(" Your Address:\n  %v \n Seed Address:\n  %v", n.address, n.seed)
     n.printConnections()
-    fmt.Println("Blockchain:")
-    n.printBlockchain()
-    fmt.Printf("Your Address:\n %v \n", n.address)
-    fmt.Printf("Seed Adddress:\n %v \n", n.seed)
-    fmt.Println("Seen Blocks:")
+    fmt.Println(" Seen Blocks:")
     n.printSeenTrans()
-    fmt.Println("-----------------//")
+    fmt.Println(" Blockchain:")
+    n.printBlockchain()
+    fmt.Println("*------------------*")
 }
 
 func (n Node) printSeenTrans(){
@@ -65,7 +64,7 @@ func (n Node) printSeenTrans(){
 func (n Node) printBlockchain(){
     for i := range n.blockchain.Blocks {
         block := n.blockchain.Blocks[i]
-        fmt.Printf(" Block %d is: \n  PrevHash: %v \n  Info:     %v \n  Hash:     %v \n", i, block.PrevHash, block.Info, block.Hash)
+        fmt.Printf("  Block %d is: \n   PrevHash: %v \n   Info:     %v \n   Hash:     %v \n", i, block.PrevHash, block.Info, block.Hash)
     }
 }
 
@@ -134,6 +133,8 @@ func (myNode Node) run(listenPort string, seedPort string, joinFlag bool) {
         fmt.Println("Dialing seed node at port " + seedPort + "...")
          go dialNode(seedPort, connChannel)
     }
+
+    myNode.printNode()
 
     // handle go routines
     for {

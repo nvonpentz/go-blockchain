@@ -1,7 +1,6 @@
 package main
 
 import(
-    "fmt"
     "flag"
 )
 
@@ -36,17 +35,6 @@ func main() {
         showGlobalHelp()
         return
     }
-    fmt.Println(".................................")
-    if listenPort != ":" {
-        fmt.Printf("Listen port:                %s \n", listenPort)
-    }
-    if seedPort != ":" {
-        fmt.Printf("Seed port:                  %s \n", seedPort)
-    }
-    if (joinFlag && seedPort != ""){
-        fmt.Printf("Will attempt to join network\n")
-    }
-    fmt.Println(".................................\n")
 
     myNode := newNode()
     myNode.run(listenPort, seedPort,joinFlag)
