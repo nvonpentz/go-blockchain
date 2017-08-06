@@ -19,10 +19,6 @@ type Node struct {
     seenBlocks map[string]bool
 }
 
-func (n *Node) incrementConnID() {
-    n.nextConnID = n.nextConnID + 1
-}
-
 func (n *Node) updatePorts(listenPort string, seedPort string) {
     privateIP := n.getPrivateIP()
     n.address = privateIP + listenPort
@@ -129,7 +125,7 @@ func (myNode Node) run(listenPort string, seedPort string, joinFlag bool) {
     for {
         select {
             case conn    := <- connChannel: // listener picked up new conn
-                myNode.incrementConnID()
+                myNode.nextConnID = myNode.nextConnID + 1
                 myNode.connections[conn] = myNode.nextConnID // assign connection an ID
                 go myNode.listenToConn(conn, transmissionChannel, disconnChannel, requestChannel, addressesChannel, blockchainRequestChannel, blockchainChannel)
 
