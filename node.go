@@ -36,70 +36,6 @@ func (n *Node) updatePorts(listenPort string, seedInfo string, publicFlag bool) 
     }
 }
 
-func (n Node) printNode(){
-    fmt.Println("*------------------*\nYour Node:\n Connections:")
-    fmt.Printf(" Your Address:\n  %v \n Seed Address:\n  %v\n", n.address, n.seed)
-    n.printConnections()
-    fmt.Println(" Seen Blocks:")
-    n.printSeenTrans()
-    fmt.Println(" Blockchain:")
-    n.printBlockchain()
-    fmt.Println("*------------------*")
-}
-
-func (n Node) printSeenTrans(){
-    for blockHashString, _  := range n.seenBlocks{
-        blockHashBytes := []byte(blockHashString)
-        fmt.Printf("  %v\n", blockHashBytes)
-    }
-}
-
-func (n Node) printBlockchain(){
-    for i := range n.blockchain.Blocks {
-        block := n.blockchain.Blocks[i]
-        fmt.Printf("  Block %d is: \n   PrevHash: %v \n   Info:     %v \n   Hash:     %v \n", i, block.PrevHash, block.Info, block.Hash)
-    }
-}
-
-func (n Node) printConnections(){
-    for conn, id := range n.connections {
-        localAddr := conn.LocalAddr().String()
-        remoteAddr := conn.RemoteAddr().String()
-        fmt.Printf(" ID: %v, Connection: %v to %v \n", id, localAddr, remoteAddr)
-    }
-}
-
-func (n Node) getRemoteAddresses() (remoteAddresses []string) {
-    for conn, _ := range n.connections {
-        remoteAddr := conn.RemoteAddr().String()
-        remoteAddresses = append(remoteAddresses, remoteAddr)
-    }
-    return remoteAddresses
-}
-
-// this could be made more efficient by not using getRemoteAddresses()
-func (n Node) hasConnectionOfAddress(address string) (bool) {
-    remoteAddresses := n.getRemoteAddresses()
-    for i := 0; i < len(remoteAddresses); i++ {
-        if address == remoteAddresses[i] {
-            return true
-        }
-    }
-    return false
-}
-
-func (n Node) getConnForAddress(address string) (net.Conn){
-    for conn := range n.connections {
-        remoteAddr := conn.RemoteAddr().String()
-        if address == remoteAddr {
-            return conn
-        }
-    }
-    var emptyConn net.Conn
-    return emptyConn
-}
-
-
 func (n *Node) startListening(port string, newConnChannel chan net.Conn, userInputChannel chan string) {
     listener, err := net.Listen("tcp", port)
     if err != nil {
@@ -306,7 +242,7 @@ func (n *Node) sendBlockchainToNode(conn net.Conn, blockchain Blockchain){
     fmt.Printf("Sent my copy of blockchain to %v", conn.RemoteAddr().String())
 }
 
-func (n *Node) requestBlockchain (conn net.Conn){
+func (n *Node) requestBlockchain(conn net.Conn){
     communication := Communication{4, Transmission{}, []string{}, Blockchain{}}
     encoder   := gob.NewEncoder(conn)
     encoder.Encode(communication)
@@ -315,6 +251,36 @@ func (n *Node) requestBlockchain (conn net.Conn){
 func (n *Node) sendTransFromMinedBlock(block Block, transmissionChannel chan *Transmission){
     trans := Transmission{block, false, ""}
     transmissionChannel <- &trans
+}
+
+func (n Node) getRemoteAddresses() (remoteAddresses []string) {
+    for conn, _ := range n.connections {
+        remoteAddr := conn.RemoteAddr().String()
+        remoteAddresses = append(remoteAddresses, remoteAddr)
+    }
+    return remoteAddresses
+}
+
+// this could be made more efficient by not using getRemoteAddresses()
+func (n Node) hasConnectionOfAddress(address string) (bool) {
+    remoteAddresses := n.getRemoteAddresses()
+    for i := 0; i < len(remoteAddresses); i++ {
+        if address == remoteAddresses[i] {
+            return true
+        }
+    }
+    return false
+}
+
+func (n Node) getConnForAddress(address string) (net.Conn){
+    for conn := range n.connections {
+        remoteAddr := conn.RemoteAddr().String()
+        if address == remoteAddr {
+            return conn
+        }
+    }
+    var emptyConn net.Conn
+    return emptyConn
 }
 
 func (n *Node) getPrivateIP() string {
@@ -348,6 +314,38 @@ func (n *Node) getPublicIP() string {
     return myPublicIPstring
 }
 
+func (n Node) printNode(){
+    fmt.Println("*------------------*\nYour Node:\n Connections:")
+    fmt.Printf(" Your Address:\n  %v \n Seed Address:\n  %v\n", n.address, n.seed)
+    n.printConnections()
+    fmt.Println(" Seen Blocks:")
+    n.printSeenTrans()
+    fmt.Println(" Blockchain:")
+    n.printBlockchain()
+    fmt.Println("*------------------*")
+}
+
+func (n Node) printSeenTrans(){
+    for blockHashString, _  := range n.seenBlocks{
+        blockHashBytes := []byte(blockHashString)
+        fmt.Printf("  %v\n", blockHashBytes)
+    }
+}
+
+func (n Node) printBlockchain(){
+    for i := range n.blockchain.Blocks {
+        block := n.blockchain.Blocks[i]
+        fmt.Printf("  Block %d is: \n   PrevHash: %v \n   Info:     %v \n   Hash:     %v \n", i, block.PrevHash, block.Info, block.Hash)
+    }
+}
+
+func (n Node) printConnections(){
+    for conn, id := range n.connections {
+        localAddr := conn.LocalAddr().String()
+        remoteAddr := conn.RemoteAddr().String()
+        fmt.Printf(" ID: %v, Connection: %v to %v \n", id, localAddr, remoteAddr)
+    }
+}
 
 func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     joinFlag := false

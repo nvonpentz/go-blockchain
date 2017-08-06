@@ -14,7 +14,6 @@ type Block struct {
 
 var genesisBlock = Block{0, []byte{0}, "genesis", []byte{0}}
 
-// computes the hash of a block 
 func (block *Block) calcHashForBlock() []byte {
 	blockHash := sha256.New()
 
