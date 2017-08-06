@@ -145,13 +145,12 @@ func (n *Node) listenForUserInput(userInputChannel chan string) {
 }
 
 func (n *Node) listenToConn(conn                          net.Conn, 
-                   transmissionChannel      chan *Transmission,
-                   disconChannel           chan net.Conn,
-                   connRequestChannel       chan net.Conn,
-                   sentAddressesChannel     chan []string,
-                   blockchainRequestChannel chan net.Conn,
-                   blockchainChannel        chan Blockchain) {
-
+                            transmissionChannel      chan *Transmission,
+                            disconChannel            chan net.Conn,
+                            connRequestChannel       chan net.Conn,
+                            sentAddressesChannel     chan []string,
+                            blockchainRequestChannel chan net.Conn,
+                            blockchainChannel        chan Blockchain) {
     for {
         decoder := gob.NewDecoder(conn)
         var communication Communication
@@ -180,20 +179,6 @@ func (n *Node) listenToConn(conn                          net.Conn,
     disconChannel <- conn // disconnect must have occurred if we exit the for loop
 }
 
-func (n *Node) approveSentAddresses(addresses []string, newConnChannel chan net.Conn){
-    approvedAddresses := []string{}
-    for i := range addresses {
-        r, _ := regexp.Compile(":.*") // match everything after the colon
-        port := r.FindString(addresses[i])
-        if len(port) == 5 {  // in a real network this should simply be 1999
-            go n.dialNode(addresses[i], newConnChannel)
-            approvedAddresses = append(approvedAddresses, addresses[i])
-        }
-    }
-    fmt.Print("These new connections will be added:\n->")
-    fmt.Println(approvedAddresses)
-}
-
 func (n *Node) forwardTransToNetwork(trans Transmission, connections map[net.Conn]int) {
     for conn, _ := range connections { // loop through all this nodes connections
         // destinationAddr := conn.RemoteAddr().String() // get the destination of the connection
@@ -204,10 +189,12 @@ func (n *Node) forwardTransToNetwork(trans Transmission, connections map[net.Con
 }
 
 func (n *Node) handleTrans(trans *Transmission){
+    
     notMinedAndValid   := n.seenBlocks[string(trans.Block.Hash)] == false  && trans.BeenSent == true && n.blockchain.isValidBlock(trans.Block)
     notMinedAndInvalid := n.seenBlocks[string(trans.Block.Hash)] == false  && trans.BeenSent == true && !n.blockchain.isValidBlock(trans.Block)
     minedButNotSent    := n.seenBlocks[string(trans.Block.Hash)] == true   && trans.BeenSent == false
     alreadySent        := n.seenBlocks[string(trans.Block.Hash)] == true   && trans.BeenSent == true
+    
     if notMinedAndValid {
         n.seenBlocks[string(trans.Block.Hash)] = true
         n.blockchain.addBlock(trans.Block)
@@ -262,6 +249,41 @@ func (n *Node) handleUserInput(input string, minedBlockChannel chan Block) {
         showNodeHelp()
     default:
         fmt.Println("Enter 'help' for options.")
+    }
+}
+
+func (n *Node) handleSentAddresses(addresses []string, newConnChannel chan net.Conn){
+    approvedAddresses := []string{}
+    for i := range addresses {
+        r, _ := regexp.Compile(":.*") // match everything after the colon
+        port := r.FindString(addresses[i])
+        if len(port) == 5 {  // in a real network this should simply be 1999
+            go n.dialNode(addresses[i], newConnChannel)
+            approvedAddresses = append(approvedAddresses, addresses[i])
+        }
+    }
+    fmt.Printf("These new connections will be added:\n->%v\n", approvedAddresses)
+}
+
+func (n *Node) handleMinedBlock(block Block, minedBlockChannel chan Block, transmissionChannel chan *Transmission) {
+    if n.blockchain.isValidBlock(block){
+        n.blockchain.addBlock(block)
+        n.seenBlocks[string(block.Hash)] = true // specify weve now seen this block but don't update the trans address until its processed there
+        go n.sendTransFromMinedBlock(block, transmissionChannel)
+    } else {
+        fmt.Printf("Did not add mined block #%v\n", block.Index)
+    }
+    go n.blockchain.mineBlock(minedBlockChannel)
+}
+
+func (n *Node) handleSentBlockchain(blockchain Blockchain){
+    fmt.Println("You were sent a blockchain")
+    if blockchain.isValidChain() {
+        n.blockchain = blockchain
+        fmt.Println("Blockchain accepted: ")
+        fmt.Println(blockchain)
+    } else {
+        fmt.Println("Blockchain rejected, invalid")
     }
 }
 
@@ -374,30 +396,16 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
 
             case addresses := <- sentAddressesChannel:  //received addresses to add
                 fmt.Printf("Seed node sent these addresses to connect to:\n-> %v\n", addresses)
-                myNode.approveSentAddresses(addresses, newConnChannel)
+                myNode.handleSentAddresses(addresses, newConnChannel)
 
             case conn    := <- blockchainRequestChannel:
                 myNode.sendBlockchainToNode(conn, myNode.blockchain)
 
             case blockchain := <- blockchainChannel: // node was sent a blockchain
-                fmt.Println("You were sent a blockchain")
-                if blockchain.isValidChain() {
-                    myNode.blockchain = blockchain
-                    fmt.Println("Blockchain accepted: ")
-                    fmt.Println(blockchain)
-                } else {
-                    fmt.Println("Blockchain rejected, invalid")
-                }
+                myNode.handleSentBlockchain(blockchain)
 
             case block   := <- minedBlockChannel: // new block was mined (only mined blocks sent here)
-                if myNode.blockchain.isValidBlock(block){
-                    myNode.blockchain.addBlock(block)
-                    myNode.seenBlocks[string(block.Hash)] = true // specify weve now seen this block but don't update the trans address until its processed there
-                    go myNode.sendTransFromMinedBlock(block, transmissionChannel)
-                } else {
-                    fmt.Printf("Did not add mined block #%v\n", block.Index)
-                }
-                go myNode.blockchain.mineBlock(minedBlockChannel)
+                myNode.handleMinedBlock(block, minedBlockChannel, transmissionChannel)
 
             case input   := <- userInputChannel: // user entered some input
                 myNode.handleUserInput(input, minedBlockChannel)
