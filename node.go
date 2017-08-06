@@ -150,7 +150,7 @@ func (n *Node) listenToConn(conn                          net.Conn,
                             connRequestChannel       chan net.Conn,
                             sentAddressesChannel     chan []string,
                             blockchainRequestChannel chan net.Conn,
-                            blockchainChannel        chan Blockchain) {
+                            sentBlockchainChannel    chan Blockchain) {
     for {
         decoder := gob.NewDecoder(conn)
         var communication Communication
@@ -168,7 +168,7 @@ func (n *Node) listenToConn(conn                          net.Conn,
             fmt.Println("You have been requested to send your connection addresses to a peer at " + conn.RemoteAddr().String() + " ...")
             connRequestChannel <- conn
         case 3:
-            blockchainChannel <- communication.Blockchain
+            sentBlockchainChannel <- communication.Blockchain
         case 4:
             fmt.Println("You have been requested to send your blockchain address to a peer at " + conn.RemoteAddr().String() + " ...")
             blockchainRequestChannel <- conn
@@ -216,7 +216,7 @@ func (n *Node) handleTrans(trans *Transmission){
         fmt.Printf("[minedButNotSent] Mined block #%v, sending to network\n", trans.Block.Index)
         n.forwardTransToNetwork(*trans, n.connections) // forward messages to the rest of network
     } else if alreadySent{
-        fmt.Printf("[alreadySent] Already seen block #%v, did not forward", trans.Block.Index)
+        fmt.Printf("[alreadySent] Already seen block #%v, did not forward\n", trans.Block.Index)
     } else {
         fmt.Println("Some other case, this should not occur:")
     }
@@ -356,15 +356,15 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     myNode.updatePorts(listenPort, seedInfo, publicFlag)
 
     // create channels
-    userInputChannel            := make(chan string)
-    transmissionChannel     := make(chan *Transmission)
-    newConnChannel          := make(chan net.Conn) // new connections added
-    disconChannel           := make(chan net.Conn) // new disconnestion
-    connRequestChannel      := make(chan net.Conn) // received a request to send connections 
-    sentAddressesChannel    := make(chan []string) // received addresses to make connections
-    minedBlockChannel       := make(chan Block)    // new block was mined
-    blockchainRequestChannel:= make(chan net.Conn)
-    blockchainChannel       := make(chan Blockchain)
+    userInputChannel         := make(chan string)
+    transmissionChannel      := make(chan *Transmission)
+    newConnChannel           := make(chan net.Conn) // new connections added
+    disconChannel            := make(chan net.Conn) // new disconnestion
+    connRequestChannel       := make(chan net.Conn) // received a request to send connections 
+    sentAddressesChannel     := make(chan []string) // received addresses to make connections
+    minedBlockChannel        := make(chan Block)    // new block was mined
+    blockchainRequestChannel := make(chan net.Conn)
+    sentBlockchainChannel    := make(chan Blockchain)
 
     myNode.startListening(listenPort, newConnChannel, userInputChannel)
     if joinFlag { // if the user requested to join a seed node // need to make sure you can't join if you don't supply a seed
@@ -380,7 +380,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
             case conn    := <- newConnChannel: // listener picked up new conn
                 myNode.nextConnID = myNode.nextConnID + 1
                 myNode.connections[conn] = myNode.nextConnID // assign connection an ID
-                go myNode.listenToConn(conn, transmissionChannel, disconChannel, connRequestChannel, sentAddressesChannel, blockchainRequestChannel, blockchainChannel)
+                go myNode.listenToConn(conn, transmissionChannel, disconChannel, connRequestChannel, sentAddressesChannel, blockchainRequestChannel, sentBlockchainChannel)
 
             case disconn := <- disconChannel: // established connection disconnected
                 connID := myNode.connections[disconn]
@@ -401,7 +401,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
             case conn    := <- blockchainRequestChannel:
                 myNode.sendBlockchainToNode(conn, myNode.blockchain)
 
-            case blockchain := <- blockchainChannel: // node was sent a blockchain
+            case blockchain := <- sentBlockchainChannel: // node was sent a blockchain
                 myNode.handleSentBlockchain(blockchain)
 
             case block   := <- minedBlockChannel: // new block was mined (only mined blocks sent here)
