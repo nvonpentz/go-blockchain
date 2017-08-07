@@ -17,3 +17,21 @@ type Communication struct {
     SentAddresses []string
     Blockchain Blockchain
 }
+
+// for testing
+func newComm(ID int) Communication{
+	switch ID {
+	case 0:
+		return Communication{0, Transmission{genesisBlock, false, "127.0.0.1:1999"}, []string{}, Blockchain{[]Block{}}}
+	case 1:
+		return Communication{1, emptyTransmission(), []string{}, Blockchain{[]Block{}}}
+	case 2:
+		return Communication{2, emptyTransmission(), []string{}, Blockchain{[]Block{}}}
+	case 3:
+		return Communication{3, emptyTransmission(), []string{}, Blockchain{[]Block{}}}
+	case 4:
+		return Communication{4, emptyTransmission(), []string{}, Blockchain{[]Block{}}}
+	default:
+		return Communication{0, Transmission{genesisBlock, false, "127.0.0.1:1999"}, []string{}, Blockchain{[]Block{}}}
+	}
+}

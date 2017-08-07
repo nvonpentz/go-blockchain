@@ -14,6 +14,21 @@ type Block struct {
 
 var genesisBlock = Block{0, []byte{0}, "genesis", []byte{0}}
 
+// for testing
+func emptyBlock() Block{
+	return Block{0, []byte{}, "", []byte{}}
+}
+
+// for testing
+func areEqualBlocks(b1 Block, b2 Block) bool {
+	indexEq    := b1.Index == b2.Index
+	prevHashEq := testEqByteSlice(b1.PrevHash, b2.PrevHash)
+	infoEq     := b1.Info == b2.Info
+	hashEq     := testEqByteSlice(b1.Hash, b2.Hash)
+
+	return indexEq && prevHashEq && infoEq && hashEq
+}
+
 func (block *Block) calcHashForBlock() []byte {
 	blockHash := sha256.New()
 

@@ -5,13 +5,13 @@ A simple implementation of a private peer-to-peer blockchain.  There is no crypt
 ## Usage
 ```
 NAME:
-   go-blockchain
+   go-blockchain - blockchain network
 
 USAGE:
    go-blockchain [global options]
 
 COMMANDS:
-   go-p2p      launches a node
+   go-blockchain      launches a node
 
 GLOBAL OPTIONS:
     -l, --listen     assigns the listening port for the server        (default = 1999).
@@ -20,8 +20,8 @@ GLOBAL OPTIONS:
     -h, --help       prints this help info
 
 NODE COMMANDS:
-    send      sends the subsequent text to the network
-    request   requests the list of nodes from your seed node and attempts to connect to each
+    getconns   requests the list of nodes from your seed node and attempts to connect to each
+    getchain  requests seed node for their version of the blockchain
     node      prints the information associated with your node
     help      prints the node command help info
 ```

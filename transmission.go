@@ -19,3 +19,8 @@ func (t *Transmission) updateBeenSent() {
 func (t *Transmission) updateSender(address string){
     t.Sender = address
 }
+
+// testing
+func emptyTransmission() Transmission{
+	return Transmission{emptyBlock(), false, "127.0.0.1"}
+}

@@ -22,7 +22,6 @@ GLOBAL OPTIONS:
     -h, --help       prints this help info
 
 NODE COMMANDS:
-    send      sends the subsequent text to the network
     getconns   requests the list of nodes from your seed node and attempts to connect to each
     getchain  requests seed node for their version of the blockchain
     node      prints the information associated with your node
@@ -33,8 +32,8 @@ func showNodeHelp(){
 fmt.Println(
 `
 NODE COMMANDS:
-    send      sends the subsequent text to the network
-    getconns  requests the list of nodes from your seed node and attempts to connect to each
     node      prints the information associated with your node
+    getchain  requests seed node for their version of the blockchain
+    getconns  requests the list of nodes from your seed node and attempts to connect to each
     help      prints the node command help info`)
 }

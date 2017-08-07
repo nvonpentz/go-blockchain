@@ -91,6 +91,7 @@ func (n *Node) listenToConn(conn                          net.Conn,
         decoder := gob.NewDecoder(conn)
         var communication Communication
         err := decoder.Decode(&communication)
+        fmt.Println("hello!")
         if err != nil {
             fmt.Println(err)
             break
@@ -110,6 +111,7 @@ func (n *Node) listenToConn(conn                          net.Conn,
             blockchainRequestChannel <- conn
         default:
             fmt.Println("There was a problem decoding the message")
+            break
         }
     }
     disconChannel <- conn // disconnect must have occurred if we exit the for loop
@@ -376,37 +378,37 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     // handle go routines
     for {
         select {
-            case conn    := <- newConnChannel: // listener picked up new conn
+            case conn       := <- newConnChannel: // listener picked up new conn
                 myNode.nextConnID = myNode.nextConnID + 1
                 myNode.connections[conn] = myNode.nextConnID // assign connection an ID
                 go myNode.listenToConn(conn, transmissionChannel, disconChannel, connRequestChannel, sentAddressesChannel, blockchainRequestChannel, sentBlockchainChannel)
 
-            case disconn := <- disconChannel: // established connection disconnected
-                connID := myNode.connections[disconn]
-                delete(myNode.connections, disconn) // remove the connection from the nodes list of connections
+            case discon     := <- disconChannel: // established connection disconnected
+                connID := myNode.connections[discon]
+                delete(myNode.connections, discon) // remove the connection from the nodes list of connections
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
-            case trans := <- transmissionChannel:  // new transmission sent to node // handles adding, validating, and sending blocks to network
+            case trans      := <- transmissionChannel:  // new transmission sent to node // handles adding, validating, and sending blocks to network
                 myNode.handleTrans(trans)
 
-            case conn := <-  connRequestChannel:  // was requested addresses to send
+            case conn       := <-  connRequestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
                 myNode.sendConnectionsToNode(conn, addressesToSendTo)
 
-            case addresses := <- sentAddressesChannel:  //received addresses to add
-                fmt.Printf("Seed node sent these addresses to connect to:\n-> %v\n", addresses)
+            case addresses  := <- sentAddressesChannel:  //received addresses to add
                 myNode.handleSentAddresses(addresses, newConnChannel)
+                fmt.Printf("Seed node sent these addresses to connect to:\n-> %v\n", addresses)
 
-            case conn    := <- blockchainRequestChannel:
+            case conn       := <- blockchainRequestChannel:
                 myNode.sendBlockchainToNode(conn, myNode.blockchain)
 
             case blockchain := <- sentBlockchainChannel: // node was sent a blockchain
                 myNode.handleSentBlockchain(blockchain)
 
-            case block   := <- minedBlockChannel: // new block was mined (only mined blocks sent here)
+            case block      := <- minedBlockChannel: // new block was mined (only mined blocks sent here)
                 myNode.handleMinedBlock(block, minedBlockChannel, transmissionChannel)
 
-            case input   := <- userInputChannel: // user entered some input
+            case input      := <- userInputChannel: // user entered some input
                 myNode.handleUserInput(input, minedBlockChannel)
         }
 

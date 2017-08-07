@@ -4,6 +4,8 @@ import (
 	"testing"
 	"net"
 	"fmt"
+	"time"
+	// "encoding/gob"
 )
 
 func createTestListener(port string) *net.Listener {
@@ -15,56 +17,192 @@ func createTestListener(port string) *net.Listener {
     return &listener
 }
 
-func testDial(address string) net.Conn {
-	conn, err := net.Dial("tcp", address)
-    if err != nil {
-        fmt.Println("**Make sure there is someone listening at " + address + "**")
-        fmt.Println(err)
-    }
-
-    return conn
-}
-
-func TestIncrementConnID(t *testing.T) {
-	n := newNode()
-	n.incrementConnID()
-	if n.nextConnID != 1 {
-		t.Error("Expected 1, got %v", n.nextConnID)
-	}
-}
 
 func TestStartListening(t *testing.T){
-	listenPort   := ":1999"
-	connChannel  := make(chan net.Conn)
-	inputChannel := make(chan string)
+	n := newNode()
 
-	startListening(listenPort, connChannel, inputChannel)
+	listenPort       := ":2000" //specific 
+	newConnChannel   := make(chan net.Conn)
+	userInputChannel := make(chan string)
+
+	n.startListening(listenPort, newConnChannel, userInputChannel)
 	conn, err := net.Dial("tcp", "127.0.0.1" + listenPort)
 	if err != nil {
 		t.Error("Unable to make a connection using startListening()")
 		fmt.Println(conn)
 	}
-	conn.Close()
+	conn.SetDeadline(time.Now())
 }
 
 func TestAcceptConn(t *testing.T){
-	listener, err := net.Listen("tcp", ":2000")
+	n := newNode()
+	listenPort       := ":1999"
+	newConnChannel   := make(chan net.Conn)
+	// userInputChannel := make(chan string)
+
+	listener, err := net.Listen("tcp", listenPort)
     if err != nil {
         fmt.Println("There was an error setting up the listener:")
         fmt.Println(err)
     }
-	// listener := *createTestListener(":1999")
-    connChannel := make(chan net.Conn)
-    go acceptConn(listener, connChannel)
+    go n.acceptConn(listener, newConnChannel)
 
-    conn := testDial(":2000")
-    receivedConn := <- connChannel
-    if conn.LocalAddr().String() != receivedConn.RemoteAddr().String() {
-    	t.Error("Could not establish connection using acceptConn().  sending and receiving conns should be the same:")
-    }
-	conn.Close()
+	conn1, err := net.Dial("tcp", "127.0.0.1" + listenPort)
+	if err != nil {
+		t.Error("Unable to make a connection using acceptConn()")
+		fmt.Println(conn1)
+	}
+
+	conn2, err := net.Dial("tcp", "127.0.0.1" + listenPort)
+	if err != nil {
+		t.Error("Unable to make a connection using acceptConn()")
+		fmt.Println(conn2)
+	}
+
+	conn1.Close()
+	conn2.Close()
+	listener.Close()
 }
 
+func TestDialNode(t *testing.T){
+	n := newNode()
+	listenPort       := ":1999"
+	newConnChannel   := make(chan net.Conn)
+
+	listener, err := net.Listen("tcp", listenPort)
+    if err != nil {
+        fmt.Println("There was an error setting up the listener:")
+        fmt.Println(err)
+    }
+	go n.dialNode("127.0.0.1:1999", newConnChannel)
+	acceptedConn, err := listener.Accept()
+	if err != nil {
+		t.Error("Unable to make a connection using n.dialNode()")
+	}
+	deliveredConn := <- newConnChannel
+	if deliveredConn.LocalAddr().String() != acceptedConn.RemoteAddr().String() {
+		t.Error("Unable to make a connection using n.DialNode")
+    }
+    listener.Close()
+    deliveredConn.Close()
+    acceptedConn.Close()
+}
+
+// func TestListenToConn(t *testing.T){
+// 	n          := newNode()
+// 	listenPort := ":1999"
+
+// 	// create channels
+//     transmissionChannel      := make(chan *Transmission)
+//     disconChannel            := make(chan net.Conn) // new disconnestion
+//     connRequestChannel       := make(chan net.Conn) // received a request to send connections 
+//     sentAddressesChannel     := make(chan []string) // received addresses to make connections
+//     blockchainRequestChannel := make(chan net.Conn)
+//     sentBlockchainChannel    := make(chan Blockchain)
+
+//     listener, err := net.Listen("tcp", listenPort)
+//     if err != nil {
+//         fmt.Println("There was an error setting up the listener:")
+//         fmt.Println(err)
+//     }
+//     listener.Accept()
+
+//     conn, err := net.Dial("tcp", "127.0.0.1" + listenPort)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 	}
+
+//     go n.listenToConn(conn,
+//     			   transmissionChannel,
+//     			   disconChannel,
+//     			   connRequestChannel,
+//     			   sentAddressesChannel,
+//     			   blockchainRequestChannel,
+//     			   sentBlockchainChannel)
+
+//     comm0 := newComm(0)
+//     comm1 := newComm(1)
+//     comm2 := newComm(2)
+//     comm3 := newComm(3)
+//     comm4 := newComm(4)
+
+//     encoder := gob.NewEncoder(conn)
+//     err = encoder.Encode(&comm0)
+//     if err != nil {
+//         fmt.Println(err)
+//         t.Error("Error receiving transmission")
+//     }
+//     trans := <- transmissionChannel
+//     fmt.Println(trans)
+//     if trans.Sender != comm0.Trans.Sender {
+//     	t.Error("trans.Sender != comm0.Trans.Sender")
+//     }
+
+//     err = encoder.Encode(&comm1)
+//     if err != nil {
+//         fmt.Println(err)
+//         t.Error("Error receiving sent addresses")
+//     }
+
+//     err = encoder.Encode(&comm2)
+//     if err != nil {
+//         fmt.Println(err)
+//         t.Error("Error sending connections")
+//     }
+//     err = encoder.Encode(&comm3)
+//     if err != nil {
+//         fmt.Println(err)
+//         t.Error("Error receiving blockchain")
+//     }
+//     err = encoder.Encode(&comm4)
+//     if err != nil {
+//         fmt.Println(err)
+//         t.Error("Error sending blockchain")
+//     }
+//     err = encoder.Encode("disconnect")
+//     if err != nil {
+//         fmt.Println(err)
+//     }
+//     discon := <- disconChannel
+//     if discon.LocalAddr().String() != discon.RemoteAddr().String() {
+//     	t.Error("disconnection and connection do not align")
+//     }
+// 	listener.Close()
+// 	conn.Close()
+// }
+
+func TestForwardTransToNewtork(t *testing.T){
+	n := newNode()
+	listenPort       := ":1999"
+	newConnChannel   := make(chan net.Conn)
+	trans := emptyTransmission()
+
+	listener, err := net.Listen("tcp", listenPort)
+    if err != nil {
+        fmt.Println("There was an error setting up the listener:")
+        fmt.Println(err)
+    }
+	
+	go n.dialNode("127.0.0.1:1999", newConnChannel)
+	conn1, err := listener.Accept()
+	go n.dialNode("127.0.0.1:1999", newConnChannel)
+	conn2, err := listener.Accept()
+
+	connections := map[net.Conn]int {conn1:0, conn2:1}
+	n.forwardTransToNetwork(trans, connections)
+
+ //    var comm Communication
+	// decoder := gob.NewDecoder(conn1)
+	// err = decoder.Decode(&comm)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	
+	// fmt.Print(comm.Trans.Sender)
+	conn1.Close()
+	conn2.Close()
+	listener.Close()
+}
 
 
 
