@@ -93,7 +93,7 @@ func TestDialNode(t *testing.T){
 // 	listenPort := ":1999"
 
 // 	// create channels
-//     transmissionChannel      := make(chan *Transmission)
+//     blockWrapperChannel      := make(chan *BlockWrapper)
 //     disconChannel            := make(chan net.Conn) // new disconnestion
 //     connRequestChannel       := make(chan net.Conn) // received a request to send connections 
 //     sentAddressesChannel     := make(chan []string) // received addresses to make connections
@@ -113,7 +113,7 @@ func TestDialNode(t *testing.T){
 // 	}
 
 //     go n.listenToConn(conn,
-//     			   transmissionChannel,
+//     			   blockWrapperChannel,
 //     			   disconChannel,
 //     			   connRequestChannel,
 //     			   sentAddressesChannel,
@@ -130,12 +130,12 @@ func TestDialNode(t *testing.T){
 //     err = encoder.Encode(&comm0)
 //     if err != nil {
 //         fmt.Println(err)
-//         t.Error("Error receiving transmission")
+//         t.Error("Error receiving blockWrapper")
 //     }
-//     trans := <- transmissionChannel
-//     fmt.Println(trans)
-//     if trans.Sender != comm0.Trans.Sender {
-//     	t.Error("trans.Sender != comm0.Trans.Sender")
+//     blockWrapper := <- blockWrapperChannel
+//     fmt.Println(blockWrapper)
+//     if blockWrapper.Sender != comm0.BlockWrapper.Sender {
+//     	t.Error("blockWrapper.Sender != comm0.BlockWrapper.Sender")
 //     }
 
 //     err = encoder.Encode(&comm1)
@@ -171,11 +171,11 @@ func TestDialNode(t *testing.T){
 // 	conn.Close()
 // }
 
-func TestForwardTransToNewtork(t *testing.T){
+func TestForwardBlockWrapperToNewtork(t *testing.T){
 	n := newNode()
 	listenPort       := ":1999"
 	newConnChannel   := make(chan net.Conn)
-	trans := emptyTransmission()
+	blockWrapper := emptyBlockWrapper()
 
 	listener, err := net.Listen("tcp", listenPort)
     if err != nil {
@@ -189,7 +189,7 @@ func TestForwardTransToNewtork(t *testing.T){
 	conn2, err := listener.Accept()
 
 	connections := map[net.Conn]int {conn1:0, conn2:1}
-	n.forwardTransToNetwork(trans, connections)
+	n.forwardBlockWrapperToNetwork(blockWrapper, connections)
 
  //    var comm Communication
 	// decoder := gob.NewDecoder(conn1)
@@ -198,7 +198,7 @@ func TestForwardTransToNewtork(t *testing.T){
 	// 	fmt.Println(err)
 	// }
 	
-	// fmt.Print(comm.Trans.Sender)
+	// fmt.Print(comm.BlockWrapper.Sender)
 	conn1.Close()
 	conn2.Close()
 	listener.Close()

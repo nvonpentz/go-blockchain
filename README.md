@@ -100,28 +100,28 @@ func areValidBlocks(oldBlock Block, newBlock Block) (bool){
   return isValidBlock
 }
 ```
-If the block validates with respect to the Node's blockchain, it is sent throughout the network in the form of a `Transmission`.  A transmission is simply the Block, a bool representing whether it has been sent to the network yet, as well as the most recent sender:
+If the block validates with respect to the Node's blockchain, it is sent throughout the network in the form of a `BlockWrapper`.  A blockWrapper is simply the Block, a bool representing whether it has been sent to the network yet, as well as the most recent sender:
 ```go
-type Transmission struct {
+type BlockWrapper struct {
     Block Block
     BeenSent bool
     Sender string
 }
 ```
-Through the configuration of a transmission, a Node can determine whether it has already seen the transmission and whether a transmission is valid or not.
+Through the configuration of a blockWrapper, a Node can determine whether it has already seen the blockWrapper and whether a blockWrapper is valid or not.
 
-* If the node has already seen the transmission, or if the block is not valid, the node does not add the block to it's chain, and does not forward the block to the rest of the network.
-* If the node has not seen the transmission, and the block contained within is valid with respect to the nodes current chain, it adds the block to its chain, and forwards it to the rest of the network.
-* If a Node receives a transmission containing a block that has a higher `Index` value compared to the last block in its chain (ie. it sees that the node that sent it is claiming to have a **longer chain**), it sends a request to the `Sender` of the transmission for the entire blockchain that is supposedly longer.  Once the Node receives this supposedly longer blockchain, it validates the entire chain, and if it turns out that the chain is valid, the node replaces its own shorter chain with this new valid chain.
+* If the node has already seen the blockWrapper, or if the block is not valid, the node does not add the block to it's chain, and does not forward the block to the rest of the network.
+* If the node has not seen the blockWrapper, and the block contained within is valid with respect to the nodes current chain, it adds the block to its chain, and forwards it to the rest of the network.
+* If a Node receives a blockWrapper containing a block that has a higher `Index` value compared to the last block in its chain (ie. it sees that the node that sent it is claiming to have a **longer chain**), it sends a request to the `Sender` of the blockWrapper for the entire blockchain that is supposedly longer.  Once the Node receives this supposedly longer blockchain, it validates the entire chain, and if it turns out that the chain is valid, the node replaces its own shorter chain with this new valid chain.
 
-This behavior is defined within the `handleTrans()` in `node.go`.
+This behavior is defined within the `handleBlockWrapper()` in `node.go`.
 
 ### Network
 Nodes communicate via TCP.  Every communication passed between nodes in the network is actually just a instance of `Communication` struct:
 ```
 type Communication struct {
     ID int
-    Trans Transmission // wrapper for sent block
+    BlockWrapper BlockWrapper // wrapper for sent block
     SentAddresses []string
     Blockchain Blockchain
 }
