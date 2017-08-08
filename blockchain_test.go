@@ -2,7 +2,6 @@ package main
 
 import(
 	"testing"
-	"fmt"
 )
 
 func TestIsValidBlock(t *testing.T){
@@ -33,14 +32,9 @@ func TestGetLastBlock(t *testing.T){
 	b1    := Block{0, []byte{}, "", []byte{byte('3'), byte('4')}}
 	b2    := Block{1, []byte{byte('3'), byte('4')}, "", []byte{}}
 	chain := Blockchain{[]Block{b1,b2}}
+	lastBlock    := chain.getLastBlock()
 
-	lb    := chain.getLastBlock()
-
-	fmt.Println(b2)
-	fmt.Println(lb)
-
-	if areEqualBlocks(b2, lb) != true {
+	if areEqualBlocks(b2, lastBlock) != true {
 		t.Error("Failed to get last block")
 	}
 }
-
