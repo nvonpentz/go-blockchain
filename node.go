@@ -3,7 +3,7 @@ package main
 import(
     "fmt"
     "net"
-    "bufio"
+    // "bufio"
     "os"
     "encoding/gob"
     "strings"
@@ -14,11 +14,11 @@ import(
 
 type Node struct {
     connections map[net.Conn]int
-    nextConnID int
-    blockchain Blockchain
-    address string
-    seed string
-    seenBlocks map[string]bool
+    nextConnID  int
+    blockchain  Blockchain
+    address     string
+    seed        string
+    seenBlocks  map[string]bool
 }
 
 func newNode() Node {
@@ -36,7 +36,7 @@ func (n *Node) updatePorts(listenPort string, seedInfo string, publicFlag bool) 
     }
 }
 
-func (n *Node) startListening(port string, newConnChannel chan net.Conn, userInputChannel chan string) {
+func (n *Node) listenForConnections(port string, newConnChannel chan net.Conn) {
     listener, err := net.Listen("tcp", port)
     if err != nil {
         fmt.Println("There was an error setting up the listener:")
@@ -44,7 +44,6 @@ func (n *Node) startListening(port string, newConnChannel chan net.Conn, userInp
     }
 
     go n.acceptConn(listener, newConnChannel)
-    go n.listenForUserInput(userInputChannel)
 }
 
 func (n *Node) acceptConn(listener net.Listener, newConnChannel chan net.Conn) {
@@ -66,18 +65,6 @@ func (n *Node) dialNode(address string, newConnChannel chan net.Conn) {
     }
     fmt.Println("Connection established out of port " + conn.LocalAddr().String() + " dialing to " + conn.RemoteAddr().String())
     newConnChannel <- conn
-}
-
-func (n *Node) listenForUserInput(userInputChannel chan string) {
-    for {
-        reader := bufio.NewReader(os.Stdin) //constantly be reading in from std in
-        input, err := reader.ReadString('\n')
-        if (err != nil || input == "\n") {
-        } else {
-            fmt.Println()
-            userInputChannel <- input
-        }
-    }
 }
 
 func (n *Node) listenToConn(conn                          net.Conn, 
@@ -157,36 +144,6 @@ func (n *Node) handleBlockWrapper(blockWrapper *BlockWrapper){
         fmt.Printf("[alreadySent] Already seen block #%v, did not forward\n", blockWrapper.Block.Index)
     } else {
         fmt.Println("Some other case, this should not occur:")
-    }
-}
-
-func (n *Node) handleUserInput(input string, minedBlockChannel chan Block) {
-    outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
-    arg0 := strings.ToLower(outgoingArgs[0])
-    switch arg0 {
-    case "mine":
-        go n.blockchain.mineBlock(minedBlockChannel)                        
-    case "getchain":
-        if n.seed == "" {
-            fmt.Println("You must have a seed node to request a blockchain")
-        } else{
-            seedConn := n.getConnForAddress(n.seed)
-            n.requestBlockchain(seedConn)                        
-        }
-    case "getconns":
-        if n.hasConnectionOfAddress(n.seed){
-            seedConn := n.getConnForAddress(n.seed)
-            fmt.Println("Requesting more connections from seed " + n.seed + " ...")
-            n.requestConnections(seedConn)
-        } else {
-            fmt.Println("You are not connected to your seed node to make a request..")
-        }
-    case "node":
-        n.printNode()
-    case "help":
-        showNodeHelp()
-    default:
-        fmt.Println("Enter 'help' for options.")
     }
 }
 
@@ -367,7 +324,12 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     blockchainRequestChannel := make(chan net.Conn)
     sentBlockchainChannel    := make(chan Blockchain)
 
-    myNode.startListening(listenPort, newConnChannel, userInputChannel)
+    // listen to user input
+    go listenToUserInputChannel(userInputChannel, minedBlockChannel, &myNode)
+    go listenForUserInput(userInputChannel)
+
+    // listen on network
+    myNode.listenForConnections(listenPort, newConnChannel)
     if joinFlag { // if the user requested to join a seed node // need to make sure you can't join if you don't supply a seed
         fmt.Println("Dialing seed node at port " + seedInfo + "...")
          go myNode.dialNode(myNode.seed, newConnChannel)
@@ -407,9 +369,6 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
 
             case block      := <- minedBlockChannel: // new block was mined (only mined blocks sent here)
                 myNode.handleMinedBlock(block, minedBlockChannel, blockWrapperChannel)
-
-            case input      := <- userInputChannel: // user entered some input
-                myNode.handleUserInput(input, minedBlockChannel)
         }
 
     }
