@@ -40,7 +40,7 @@ func (blockchain Blockchain) getLastBlock() Block{
 	return lastBlock
 }
 
-func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
+func (blockchain *Blockchain) mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
 	fmt.Println("-> begin mining..")
 
 	// sleep between 5 - 10 seconds before mining block to simulate a blockchain
@@ -57,6 +57,13 @@ func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
 	newBlockHash := newBlock.calcHashForBlock()
 	newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockInfo, newBlockHash}
 
-	// send to control center to 
-	blockChannel <- newBlock 
+	// send to control center to
+	handleMinedBlock(newBlock, blockWrapperChannel, n)
+
+	// minedBlockChannel <- newBlock 
 }
+
+
+
+
+

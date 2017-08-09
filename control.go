@@ -19,7 +19,7 @@ func listenForUserInput(minedBlockChannel chan Block, blockWrapperChannel chan *
         if (err != nil || input == "\n") {
         } else {
             fmt.Println()
-            go handleUserInput(input, minedBlockChannel, blockWrapperChannel, n)
+            go handleUserInput(input, blockWrapperChannel, n)
         }
     }
 }
@@ -34,14 +34,14 @@ func listenForUserInput(minedBlockChannel chan Block, blockWrapperChannel chan *
 // 	}
 // }
 
-func handleUserInput(input string, minedBlockChannel chan Block, blockWrapperChannel chan *BlockWrapper, n *Node) {
+func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, n *Node) {
     fmt.Println("handling user input")
     outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
     arg0 := strings.ToLower(outgoingArgs[0])
     switch arg0 {
     case "mine":
-        go listenToMinedBlockChannel(minedBlockChannel, blockWrapperChannel, n)
-        go n.blockchain.mineBlock(minedBlockChannel)                        
+        // go listenToMinedBlockChannel(minedBlockChannel, blockWrapperChannel, n)
+        go n.blockchain.mineBlock(blockWrapperChannel, n)                        
     case "getchain":
         if n.seed == "" {
             fmt.Println("You must have a seed node to request a blockchain")

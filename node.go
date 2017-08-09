@@ -318,7 +318,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     go listenForUserInput(minedBlockChannel, blockWrapperChannel, &myNode)
 
     // listen to on mining
-    go listenToMinedBlockChannel(minedBlockChannel, blockWrapperChannel, &myNode)
+    // go listenToMinedBlockChannel(minedBlockChannel, blockWrapperChannel, &myNode)
 
     // listen on network
     myNode.listenForConnections(listenPort, newConnChannel)
