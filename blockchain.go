@@ -33,8 +33,3 @@ func (blockchain Blockchain) getLastBlock() Block{
 	lastBlock := blockchain.Blocks[len(blockchain.Blocks) - 1]
 	return lastBlock
 }
-
-
-
-
-

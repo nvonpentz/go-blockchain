@@ -6,10 +6,10 @@ import (
 )
 
 type Block struct {
-	Index uint32
+	Index     uint32
 	PrevHash []byte
-	Info string
-	Hash []byte
+	Info     string // The data stored on the block
+	Hash     []byte
 }
 
 var genesisBlock = Block{0, []byte{0}, "genesis", []byte{0}}
@@ -52,25 +52,6 @@ func (oldBlock *Block) isValidNextBlock(newBlock *Block) (bool){
 	isValidBlock := isValidIndex && isValidHash
 
 	return isValidBlock
-}
-
-// used for comparison of hash byte slices
-func testEqByteSlice (a, b []byte) bool {
-    if a == nil && b == nil { 
-        return true; 
-    }
-    if a == nil || b == nil { 
-        return false; 
-    }
-    if len(a) != len(b) {
-        return false
-    }
-    for i := range a {
-        if a[i] != b[i] {
-            return false
-        }
-    }
-    return true
 }
 
 

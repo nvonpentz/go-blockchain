@@ -303,7 +303,6 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     myNode.updatePorts(listenPort, seedInfo, publicFlag)
 
     // create channels
-    // userInputChannel         := make(chan string)
     blockWrapperChannel      := make(chan *BlockWrapper)
     newConnChannel           := make(chan net.Conn) // new connections added
     disconChannel            := make(chan net.Conn) // new disconnestion
@@ -314,11 +313,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     sentBlockchainChannel    := make(chan Blockchain)
 
     // listen to user input
-    // go listenToUserInputChannel(userInputChannel, minedBlockChannel, blockWrapperChannel, &myNode)
     go listenForUserInput(minedBlockChannel, blockWrapperChannel, &myNode)
-
-    // listen to on mining
-    // go listenToMinedBlockChannel(minedBlockChannel, blockWrapperChannel, &myNode)
 
     // listen on network
     myNode.listenForConnections(listenPort, newConnChannel)
@@ -329,7 +324,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
 
     myNode.printNode()
 
-    // handle go routines
+    // handle network go routines
     for {
         select {
             case conn       := <- newConnChannel: // listener picked up new conn

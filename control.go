@@ -24,16 +24,6 @@ func listenForUserInput(minedBlockChannel chan Block, blockWrapperChannel chan *
     }
 }
 
-// func listenToUserInputChannel(userInputChannel    chan string,
-//                               minedBlockChannel   chan Block,
-//                               blockWrapperChannel chan *BlockWrapper,
-//                               myNode              *Node) {
-// 	for {
-//         input := <- userInputChannel // user entered some input
-//         handleUserInput(input, minedBlockChannel, blockWrapperChannel, myNode)
-// 	}
-// }
-
 func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, n *Node) {
     fmt.Println("handling user input")
     outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace

@@ -34,8 +34,5 @@ func mineBlock(blockchain *Blockchain, blockWrapperChannel chan *BlockWrapper, n
 	newBlockHash := newBlock.calcHashForBlock()
 	newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockInfo, newBlockHash}
 
-	// send to control center to
 	handleMinedBlock(newBlock, blockWrapperChannel, n)
-
-	// minedBlockChannel <- newBlock 
 }
