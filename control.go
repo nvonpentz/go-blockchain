@@ -25,7 +25,6 @@ func listenForUserInput(minedBlockChannel chan Block, blockWrapperChannel chan *
 }
 
 func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, n *Node) {
-    fmt.Println("handling user input")
     outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
     arg0 := strings.ToLower(outgoingArgs[0])
     switch arg0 {
@@ -37,13 +36,13 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, n *No
             fmt.Println("You must have a seed node to request a blockchain")
         } else{
             seedConn := n.getConnForAddress(n.seed)
-            n.requestBlockchain(seedConn)                        
+            requestBlockchain(seedConn)                        
         }
     case "getconns":
         if n.hasConnectionOfAddress(n.seed){
             seedConn := n.getConnForAddress(n.seed)
             fmt.Println("Requesting more connections from seed " + n.seed + " ...")
-            n.requestConnections(seedConn)
+            requestConnections(seedConn)
         } else {
             fmt.Println("You are not connected to your seed node to make a request..")
         }
