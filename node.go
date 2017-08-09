@@ -78,7 +78,7 @@ func (n *Node) listenToConn(conn                          net.Conn,
         decoder := gob.NewDecoder(conn)
         var communication Communication
         err := decoder.Decode(&communication)
-        fmt.Println("hello!")
+
         if err != nil {
             fmt.Println(err)
             break
@@ -158,17 +158,6 @@ func (n *Node) handleSentAddresses(addresses []string, newConnChannel chan net.C
         }
     }
     fmt.Printf("These new connections will be added:\n->%v\n", approvedAddresses)
-}
-
-func (n *Node) handleMinedBlock(block Block, minedBlockChannel chan Block, blockWrapperChannel chan *BlockWrapper) {
-    if n.blockchain.isValidBlock(block){
-        n.blockchain.addBlock(block)
-        n.seenBlocks[string(block.Hash)] = true // specify weve now seen this block but don't update the blockWrapper address until its processed there
-        go n.sendBlockWrapperFromMinedBlock(block, blockWrapperChannel)
-    } else {
-        fmt.Printf("Did not add mined block #%v\n", block.Index)
-    }
-    go n.blockchain.mineBlock(minedBlockChannel)
 }
 
 func (n *Node) handleSentBlockchain(blockchain Blockchain){
@@ -325,7 +314,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     sentBlockchainChannel    := make(chan Blockchain)
 
     // listen to user input
-    go listenToUserInputChannel(userInputChannel, minedBlockChannel, &myNode)
+    go listenToUserInputChannel(userInputChannel, minedBlockChannel, blockWrapperChannel, &myNode)
     go listenForUserInput(userInputChannel)
 
     // listen on network
@@ -366,9 +355,6 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
 
             case blockchain := <- sentBlockchainChannel: // node was sent a blockchain
                 myNode.handleSentBlockchain(blockchain)
-
-            case block      := <- minedBlockChannel: // new block was mined (only mined blocks sent here)
-                myNode.handleMinedBlock(block, minedBlockChannel, blockWrapperChannel)
         }
 
     }

@@ -19,18 +19,22 @@ func listenForUserInput(userInputChannel chan string) {
     }
 }
 
-func listenToUserInputChannel(userInputChannel chan string, minedBlockChannel chan Block, myNode *Node) {
+func listenToUserInputChannel(userInputChannel    chan string,
+                              minedBlockChannel   chan Block,
+                              blockWrapperChannel chan *BlockWrapper,
+                              myNode              *Node) {
 	for {
         input := <- userInputChannel // user entered some input
-        handleUserInput(input, minedBlockChannel, myNode)
+        handleUserInput(input, minedBlockChannel, blockWrapperChannel, myNode)
 	}
 }
 
-func handleUserInput(input string, minedBlockChannel chan Block, n *Node) {
+func handleUserInput(input string, minedBlockChannel chan Block, blockWrapperChannel chan *BlockWrapper, n *Node) {
     outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
     arg0 := strings.ToLower(outgoingArgs[0])
     switch arg0 {
     case "mine":
+        go listenToMinedBlockChannel(minedBlockChannel, blockWrapperChannel, n)
         go n.blockchain.mineBlock(minedBlockChannel)                        
     case "getchain":
         if n.seed == "" {
