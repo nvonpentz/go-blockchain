@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+/*
+control.go handles all user interaction with the node
+
+*/
+
 func listenForUserInput(userInputChannel chan string) {
     for {
         reader := bufio.NewReader(os.Stdin) //constantly be reading in from std in
