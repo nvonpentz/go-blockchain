@@ -1,11 +1,5 @@
 package main 
 
-import (
-	"fmt"
-	"time"
-	"math/rand"
-)
-
 type Blockchain struct {
 	Blocks []Block
 }
@@ -38,29 +32,6 @@ func (blockchain *Blockchain) isValidChain() bool {
 func (blockchain Blockchain) getLastBlock() Block{
 	lastBlock := blockchain.Blocks[len(blockchain.Blocks) - 1]
 	return lastBlock
-}
-
-func (blockchain *Blockchain) mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
-	fmt.Println("-> begin mining..")
-
-	// sleep between 5 - 10 seconds before mining block to simulate a blockchain
-	sleepTime := time.Duration((rand.Int() % 3) + 1)
-    time.Sleep(time.Second * sleepTime)
-
-    //create new block
-    prevBlock     := blockchain.getLastBlock()
-	newBlockIndex := prevBlock.Index + 1
-	newBlockInfo  := "new block!"
-	newBlock := Block{newBlockIndex, prevBlock.Hash, newBlockInfo, []byte{}}
-
-	// must calculate the hash of this block
-	newBlockHash := newBlock.calcHashForBlock()
-	newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockInfo, newBlockHash}
-
-	// send to control center to
-	handleMinedBlock(newBlock, blockWrapperChannel, n)
-
-	// minedBlockChannel <- newBlock 
 }
 
 
