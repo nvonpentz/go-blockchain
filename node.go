@@ -21,10 +21,9 @@ type Node struct {
     seenBlocks  map[string]bool
 }
 
-func newNode() Node {
-    myNode := Node{make(map[net.Conn]int), 0, Blockchain{[]Block{genesisBlock}}, "", "", map[string]bool{}}
-    return myNode
-}
+/*-----------*
+ *  METHODS  * 
+ *-----------*/
 
 func (n *Node) updatePorts(listenPort string, seedInfo string, publicFlag bool) {
     if publicFlag{
@@ -35,75 +34,6 @@ func (n *Node) updatePorts(listenPort string, seedInfo string, publicFlag bool) 
         n.address = getPrivateIP() + listenPort
     }
 }
-
-func listenForConnections(port string, newConnChannel chan net.Conn) {
-    listener, err := net.Listen("tcp", port)
-    if err != nil {
-        fmt.Println("There was an error setting up the listener:")
-        fmt.Println(err)
-    }
-
-    go acceptConn(listener, newConnChannel)
-}
-
-func acceptConn(listener net.Listener, newConnChannel chan net.Conn) {
-    for {
-        conn, err := listener.Accept()
-        if err != nil {
-            fmt.Printf("There was an error accepting a new connection: \n %v", err)
-        }
-        fmt.Println("* Listener accepted connection through port " + conn.LocalAddr().String() + " from " + conn.RemoteAddr().String())
-        newConnChannel <- conn //send to conection channel
-    }
-}
-
-func dialNode(address string, newConnChannel chan net.Conn) {
-    conn, err := net.Dial("tcp", address)
-    if err != nil {
-        fmt.Println("**Make sure there is someone listening at " + address + "**")
-        fmt.Println(err)
-    }
-    fmt.Println("Connection established out of port " + conn.LocalAddr().String() + " dialing to " + conn.RemoteAddr().String())
-    newConnChannel <- conn
-}
-
-func listenToConn(conn                          net.Conn, 
-                            blockWrapperChannel      chan *BlockWrapper,
-                            disconChannel            chan net.Conn,
-                            connRequestChannel       chan net.Conn,
-                            sentAddressesChannel     chan []string,
-                            blockchainRequestChannel chan net.Conn,
-                            sentBlockchainChannel    chan Blockchain) {
-    for {
-        decoder := gob.NewDecoder(conn)
-        var communication Communication
-        err := decoder.Decode(&communication)
-
-        if err != nil {
-            fmt.Println(err)
-            break
-        }
-        switch communication.ID {
-        case 0:
-            blockWrapperChannel <- &communication.BlockWrapper
-        case 1:
-            sentAddressesChannel <- communication.SentAddresses
-        case 2:
-            fmt.Println("You have been requested to send your connection addresses to a peer at " + conn.RemoteAddr().String() + " ...")
-            connRequestChannel <- conn
-        case 3:
-            sentBlockchainChannel <- communication.Blockchain
-        case 4:
-            fmt.Println("You have been requested to send your blockchain address to a peer at " + conn.RemoteAddr().String() + " ...")
-            blockchainRequestChannel <- conn
-        default:
-            fmt.Println("There was a problem decoding the message")
-            break
-        }
-    }
-    disconChannel <- conn // disconnect must have occurred if we exit the for loop
-}
-
 func (n *Node) forwardBlockWrapperToNetwork(blockWrapper BlockWrapper, connections map[net.Conn]int) {
     for conn, _ := range connections { // loop through all this nodes connections
         // destinationAddr := conn.RemoteAddr().String() // get the destination of the connection
@@ -171,34 +101,15 @@ func (n *Node) handleSentBlockchain(blockchain Blockchain){
     }
 }
 
-func requestConnections(conn net.Conn){
-    communication := Communication{2, BlockWrapper{}, []string{}, Blockchain{}}
-    encoder       := gob.NewEncoder(conn)
-    encoder.Encode(communication)
-}
-
-func sendConnectionsToNode(conn net.Conn, addresses []string){
-    communication := Communication{1, BlockWrapper{}, addresses, Blockchain{}}
-    encoder       := gob.NewEncoder(conn)
-    encoder.Encode(communication)
-}
-
-func sendBlockchainToNode(conn net.Conn, blockchain Blockchain){
-    communication := Communication{3, BlockWrapper{}, []string{}, blockchain}
-    encoder   := gob.NewEncoder(conn)
-    encoder.Encode(communication)
-    fmt.Printf("Sent my copy of blockchain to %v", conn.RemoteAddr().String())
-}
-
-func requestBlockchain(conn net.Conn){
-    communication := Communication{4, BlockWrapper{}, []string{}, Blockchain{}}
-    encoder   := gob.NewEncoder(conn)
-    encoder.Encode(communication)
-}
-
-func sendBlockWrapperFromMinedBlock(block Block, blockWrapperChannel chan *BlockWrapper){
-    blockWrapper := BlockWrapper{block, false, ""}
-    blockWrapperChannel <- &blockWrapper
+func (n Node) getConnForAddress(address string) (net.Conn){
+    for conn := range n.connections {
+        remoteAddr := conn.RemoteAddr().String()
+        if address == remoteAddr {
+            return conn
+        }
+    }
+    var emptyConn net.Conn
+    return emptyConn
 }
 
 func (n Node) getRemoteAddresses() (remoteAddresses []string) {
@@ -218,48 +129,6 @@ func (n Node) hasConnectionOfAddress(address string) (bool) {
         }
     }
     return false
-}
-
-func (n Node) getConnForAddress(address string) (net.Conn){
-    for conn := range n.connections {
-        remoteAddr := conn.RemoteAddr().String()
-        if address == remoteAddr {
-            return conn
-        }
-    }
-    var emptyConn net.Conn
-    return emptyConn
-}
-
-func getPrivateIP() string {
-    name, err := os.Hostname()
-    if err != nil {
-        return ""
-    }
-    address, err := net.LookupHost(name)
-    if err != nil {
-        return ""
-    }
-
-    return address[0]
-}
-
-func getPublicIP() string {
-    resp, err := http.Get("http://myexternalip.com/raw")
-    if err != nil {
-        os.Stderr.WriteString(err.Error())
-        os.Stderr.WriteString("\n")
-        os.Exit(1)
-    }
-    defer resp.Body.Close()
-
-    myPublicIP, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        fmt.Println(err)
-    }
-
-    myPublicIPstring := strings.Trim(string(myPublicIP), "\n")
-    return myPublicIPstring
 }
 
 func (n Node) printSeenBlockWrapper(){
@@ -345,8 +214,8 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 sendConnectionsToNode(conn, addressesToSendTo)
 
             case addresses  := <- sentAddressesChannel:  //received addresses to add
-                myNode.handleSentAddresses(addresses, newConnChannel)
                 fmt.Printf("Seed node sent these addresses to connect to:\n-> %v\n", addresses)
+                myNode.handleSentAddresses(addresses, newConnChannel)
 
             case conn       := <- blockchainRequestChannel:
                 sendBlockchainToNode(conn, myNode.blockchain)
@@ -356,6 +225,146 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
         }
 
     }
+}
+
+/*-------------*
+ *  FUNCTIONS  * 
+ *-------------*/
+
+func newNode() Node {
+    myNode := Node{make(map[net.Conn]int), 0, Blockchain{[]Block{genesisBlock}}, "", "", map[string]bool{}}
+    return myNode
+}
+
+
+func listenForConnections(port string, newConnChannel chan net.Conn) {
+    listener, err := net.Listen("tcp", port)
+    if err != nil {
+        fmt.Println("There was an error setting up the listener:")
+        fmt.Println(err)
+    }
+
+    go acceptConn(listener, newConnChannel)
+}
+
+func acceptConn(listener net.Listener, newConnChannel chan net.Conn) {
+    for {
+        conn, err := listener.Accept()
+        if err != nil {
+            fmt.Printf("There was an error accepting a new connection: \n %v", err)
+        }
+        fmt.Println("* Listener accepted connection through port " + conn.LocalAddr().String() + " from " + conn.RemoteAddr().String())
+        newConnChannel <- conn //send to conection channel
+    }
+}
+
+func dialNode(address string, newConnChannel chan net.Conn) {
+    conn, err := net.Dial("tcp", address)
+    if err != nil {
+        fmt.Println("**Make sure there is someone listening at " + address + "**")
+        fmt.Println(err)
+    }
+    fmt.Println("Connection established out of port " + conn.LocalAddr().String() + " dialing to " + conn.RemoteAddr().String())
+    newConnChannel <- conn
+}
+
+func listenToConn(conn                          net.Conn, 
+                            blockWrapperChannel      chan *BlockWrapper,
+                            disconChannel            chan net.Conn,
+                            connRequestChannel       chan net.Conn,
+                            sentAddressesChannel     chan []string,
+                            blockchainRequestChannel chan net.Conn,
+                            sentBlockchainChannel    chan Blockchain) {
+    for {
+        decoder := gob.NewDecoder(conn)
+        var communication Communication
+        err := decoder.Decode(&communication)
+
+        if err != nil {
+            fmt.Println(err)
+            break
+        }
+        switch communication.ID {
+        case 0:
+            blockWrapperChannel <- &communication.BlockWrapper
+        case 1:
+            sentAddressesChannel <- communication.SentAddresses
+        case 2:
+            fmt.Println("You have been requested to send your connection addresses to a peer at " + conn.RemoteAddr().String() + " ...")
+            connRequestChannel <- conn
+        case 3:
+            sentBlockchainChannel <- communication.Blockchain
+        case 4:
+            fmt.Println("You have been requested to send your blockchain address to a peer at " + conn.RemoteAddr().String() + " ...")
+            blockchainRequestChannel <- conn
+        default:
+            fmt.Println("There was a problem decoding the message")
+            break
+        }
+    }
+    disconChannel <- conn // disconnect must have occurred if we exit the for loop
+}
+
+func requestConnections(conn net.Conn){
+    communication := Communication{2, BlockWrapper{}, []string{}, Blockchain{}}
+    encoder       := gob.NewEncoder(conn)
+    encoder.Encode(communication)
+}
+
+func sendConnectionsToNode(conn net.Conn, addresses []string){
+    communication := Communication{1, BlockWrapper{}, addresses, Blockchain{}}
+    encoder       := gob.NewEncoder(conn)
+    encoder.Encode(communication)
+}
+
+func sendBlockchainToNode(conn net.Conn, blockchain Blockchain){
+    communication := Communication{3, BlockWrapper{}, []string{}, blockchain}
+    encoder   := gob.NewEncoder(conn)
+    encoder.Encode(communication)
+    fmt.Printf("Sent my copy of blockchain to %v", conn.RemoteAddr().String())
+}
+
+func requestBlockchain(conn net.Conn){
+    communication := Communication{4, BlockWrapper{}, []string{}, Blockchain{}}
+    encoder   := gob.NewEncoder(conn)
+    encoder.Encode(communication)
+}
+
+func sendBlockWrapperFromMinedBlock(block Block, blockWrapperChannel chan *BlockWrapper){
+    blockWrapper := BlockWrapper{block, false, ""}
+    blockWrapperChannel <- &blockWrapper
+}
+
+
+func getPrivateIP() string {
+    name, err := os.Hostname()
+    if err != nil {
+        return ""
+    }
+    address, err := net.LookupHost(name)
+    if err != nil {
+        return ""
+    }
+
+    return address[0]
+}
+
+func getPublicIP() string {
+    resp, err := http.Get("http://myexternalip.com/raw")
+    if err != nil {
+        os.Stderr.WriteString(err.Error())
+        os.Stderr.WriteString("\n")
+        os.Exit(1)
+    }
+    defer resp.Body.Close()
+
+    myPublicIP, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    myPublicIPstring := strings.Trim(string(myPublicIP), "\n")
+    return myPublicIPstring
 }
 
 
