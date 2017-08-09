@@ -17,15 +17,12 @@ func createTestListener(port string) *net.Listener {
     return &listener
 }
 
-
 func TestStartListening(t *testing.T){
-	n := newNode()
-
 	listenPort       := ":2000" //specific 
 	newConnChannel   := make(chan net.Conn)
 	userInputChannel := make(chan string)
 
-	n.startListening(listenPort, newConnChannel, userInputChannel)
+	startListening(listenPort, newConnChannel, userInputChannel)
 	conn, err := net.Dial("tcp", "127.0.0.1" + listenPort)
 	if err != nil {
 		t.Error("Unable to make a connection using startListening()")

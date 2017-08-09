@@ -3,7 +3,6 @@ package main
 import(
     "fmt"
     "net"
-    // "bufio"
     "os"
     "encoding/gob"
     "strings"
@@ -24,6 +23,69 @@ type Node struct {
 /*-----------*
  *  METHODS  * 
  *-----------*/
+
+func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
+    joinFlag := false
+    if seedInfo != "" { joinFlag = true }
+    
+    // specify ports to seed and listen to
+    myNode.updatePorts(listenPort, seedInfo, publicFlag)
+
+    // create channels
+    blockWrapperChannel      := make(chan *BlockWrapper)
+    newConnChannel           := make(chan net.Conn) // new connections added
+    disconChannel            := make(chan net.Conn) // new disconnestion
+    connRequestChannel       := make(chan net.Conn) // received a request to send connections 
+    sentAddressesChannel     := make(chan []string) // received addresses to make connections
+    minedBlockChannel        := make(chan Block)    // new block was mined
+    blockchainRequestChannel := make(chan net.Conn)
+    sentBlockchainChannel    := make(chan Blockchain)
+
+    // listen to user input
+    go listenForUserInput(minedBlockChannel, blockWrapperChannel, &myNode)
+
+    // listen on network
+    listenForConnections(listenPort, newConnChannel)
+    if joinFlag { // if the user requested to join a seed node // need to make sure you can't join if you don't supply a seed
+        fmt.Println("Dialing seed node at port " + seedInfo + "...")
+         go dialNode(myNode.seed, newConnChannel)
+    }
+
+    myNode.printNode()
+
+    // handle network go routines
+    for {
+        select {
+            case conn         := <- newConnChannel: // listener picked up new conn
+                myNode.nextConnID = myNode.nextConnID + 1
+                myNode.connections[conn] = myNode.nextConnID // assign connection an ID
+                go listenToConn(conn, blockWrapperChannel, disconChannel, connRequestChannel, sentAddressesChannel, blockchainRequestChannel, sentBlockchainChannel)
+
+            case discon       := <- disconChannel: // established connection disconnected
+                connID := myNode.connections[discon]
+                delete(myNode.connections, discon) // remove the connection from the nodes list of connections
+                fmt.Printf("* Connection %v has been disconnected \n", connID)
+
+            case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
+                myNode.handleBlockWrapper(blockWrapper)
+
+            case conn         := <-  connRequestChannel:  // was requested addresses to send
+                addressesToSendTo := myNode.getRemoteAddresses()
+                sendConnectionsToNode(conn, addressesToSendTo)
+
+            case addresses    := <- sentAddressesChannel:  //received addresses to add
+                fmt.Printf("Seed node sent these addresses to connect to:\n-> %v\n", addresses)
+                myNode.handleSentAddresses(addresses, newConnChannel)
+
+            case conn         := <- blockchainRequestChannel:
+                sendBlockchainToNode(conn, myNode.blockchain)
+
+            case blockchain   := <- sentBlockchainChannel: // node was sent a blockchain
+                myNode.handleSentBlockchain(blockchain)
+        }
+
+    }
+}
 
 func (n *Node) updatePorts(listenPort string, seedInfo string, publicFlag bool) {
     if publicFlag{
@@ -164,69 +226,6 @@ func (n Node) printNode(){
     fmt.Println("*------------------*")
 }
 
-func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
-    joinFlag := false
-    if seedInfo != "" { joinFlag = true }
-    
-    // specify ports to seed and listen to
-    myNode.updatePorts(listenPort, seedInfo, publicFlag)
-
-    // create channels
-    blockWrapperChannel      := make(chan *BlockWrapper)
-    newConnChannel           := make(chan net.Conn) // new connections added
-    disconChannel            := make(chan net.Conn) // new disconnestion
-    connRequestChannel       := make(chan net.Conn) // received a request to send connections 
-    sentAddressesChannel     := make(chan []string) // received addresses to make connections
-    minedBlockChannel        := make(chan Block)    // new block was mined
-    blockchainRequestChannel := make(chan net.Conn)
-    sentBlockchainChannel    := make(chan Blockchain)
-
-    // listen to user input
-    go listenForUserInput(minedBlockChannel, blockWrapperChannel, &myNode)
-
-    // listen on network
-    listenForConnections(listenPort, newConnChannel)
-    if joinFlag { // if the user requested to join a seed node // need to make sure you can't join if you don't supply a seed
-        fmt.Println("Dialing seed node at port " + seedInfo + "...")
-         go dialNode(myNode.seed, newConnChannel)
-    }
-
-    myNode.printNode()
-
-    // handle network go routines
-    for {
-        select {
-            case conn       := <- newConnChannel: // listener picked up new conn
-                myNode.nextConnID = myNode.nextConnID + 1
-                myNode.connections[conn] = myNode.nextConnID // assign connection an ID
-                go listenToConn(conn, blockWrapperChannel, disconChannel, connRequestChannel, sentAddressesChannel, blockchainRequestChannel, sentBlockchainChannel)
-
-            case discon     := <- disconChannel: // established connection disconnected
-                connID := myNode.connections[discon]
-                delete(myNode.connections, discon) // remove the connection from the nodes list of connections
-                fmt.Printf("* Connection %v has been disconnected \n", connID)
-
-            case blockWrapper      := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
-                myNode.handleBlockWrapper(blockWrapper)
-
-            case conn       := <-  connRequestChannel:  // was requested addresses to send
-                addressesToSendTo := myNode.getRemoteAddresses()
-                sendConnectionsToNode(conn, addressesToSendTo)
-
-            case addresses  := <- sentAddressesChannel:  //received addresses to add
-                fmt.Printf("Seed node sent these addresses to connect to:\n-> %v\n", addresses)
-                myNode.handleSentAddresses(addresses, newConnChannel)
-
-            case conn       := <- blockchainRequestChannel:
-                sendBlockchainToNode(conn, myNode.blockchain)
-
-            case blockchain := <- sentBlockchainChannel: // node was sent a blockchain
-                myNode.handleSentBlockchain(blockchain)
-        }
-
-    }
-}
-
 /*-------------*
  *  FUNCTIONS  * 
  *-------------*/
@@ -335,7 +334,6 @@ func sendBlockWrapperFromMinedBlock(block Block, blockWrapperChannel chan *Block
     blockWrapperChannel <- &blockWrapper
 }
 
-
 func getPrivateIP() string {
     name, err := os.Hostname()
     if err != nil {
@@ -366,7 +364,4 @@ func getPublicIP() string {
     myPublicIPstring := strings.Trim(string(myPublicIP), "\n")
     return myPublicIPstring
 }
-
-
-
 
