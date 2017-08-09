@@ -44,7 +44,7 @@ func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
 	fmt.Println("-> begin mining..")
 
 	// sleep between 5 - 10 seconds before mining block to simulate a blockchain
-	sleepTime := time.Duration((rand.Int() % 10) + 5)
+	sleepTime := time.Duration((rand.Int() % 3) + 1)
     time.Sleep(time.Second * sleepTime)
 
     //create new block

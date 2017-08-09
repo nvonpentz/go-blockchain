@@ -1,6 +1,6 @@
 package main 
 
-import "fmt"
+import ("fmt")
 
 func listenToMinedBlockChannel(minedBlockChannel chan Block, blockWrapperChannel chan *BlockWrapper, myNode *Node,) {
 	for {

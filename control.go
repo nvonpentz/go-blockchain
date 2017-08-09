@@ -12,29 +12,30 @@ control.go handles all user interaction with the node
 
 */
 
-func listenForUserInput(userInputChannel chan string) {
+func listenForUserInput(minedBlockChannel chan Block, blockWrapperChannel chan *BlockWrapper, n *Node) {
     for {
         reader := bufio.NewReader(os.Stdin) //constantly be reading in from std in
         input, err := reader.ReadString('\n')
         if (err != nil || input == "\n") {
         } else {
             fmt.Println()
-            userInputChannel <- input
+            go handleUserInput(input, minedBlockChannel, blockWrapperChannel, n)
         }
     }
 }
 
-func listenToUserInputChannel(userInputChannel    chan string,
-                              minedBlockChannel   chan Block,
-                              blockWrapperChannel chan *BlockWrapper,
-                              myNode              *Node) {
-	for {
-        input := <- userInputChannel // user entered some input
-        handleUserInput(input, minedBlockChannel, blockWrapperChannel, myNode)
-	}
-}
+// func listenToUserInputChannel(userInputChannel    chan string,
+//                               minedBlockChannel   chan Block,
+//                               blockWrapperChannel chan *BlockWrapper,
+//                               myNode              *Node) {
+// 	for {
+//         input := <- userInputChannel // user entered some input
+//         handleUserInput(input, minedBlockChannel, blockWrapperChannel, myNode)
+// 	}
+// }
 
 func handleUserInput(input string, minedBlockChannel chan Block, blockWrapperChannel chan *BlockWrapper, n *Node) {
+    fmt.Println("handling user input")
     outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
     arg0 := strings.ToLower(outgoingArgs[0])
     switch arg0 {
