@@ -235,7 +235,6 @@ func newNode() Node {
     return myNode
 }
 
-
 func listenForConnections(port string, newConnChannel chan net.Conn) {
     listener, err := net.Listen("tcp", port)
     if err != nil {
