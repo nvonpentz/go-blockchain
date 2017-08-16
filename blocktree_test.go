@@ -22,7 +22,7 @@ func TestIsValidNextBTNode(t *testing.T){
 	b1.Hash  = b1.calcBTNodeHash()
 	b2valid := BTNode{1, &b1, b1.Hash, "Data", []byte{0}}
 
-	 if b1.isValidNextBTNode(b2valid) != true {
+	if b1.isValidNextBTNode(&b2valid) != true {
 	 	t.Error("Valid node does not validate")
 	 }
 }

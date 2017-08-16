@@ -25,7 +25,7 @@ func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) {
 	nodesAtLevelOfParent := bt.Levels[parentHeight]
 
 	for _ , oldBTNode := range nodesAtLevelOfParent {
-		if oldBTNode.isValidNextBTNode(*newBTNode) {
+		if oldBTNode.isValidNextBTNode(newBTNode) {
 			// append to parent level
 			bt.Levels[newBTNode.Height] = append(bt.Levels[newBTNode.Height], newBTNode)
 		} else {
@@ -34,11 +34,11 @@ func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) {
 	}
 } // should check to see which is now the longest
 
-func (oldBTNode BTNode) isValidNextBTNode(newBTNode BTNode) bool {
+func (oldBTNode *BTNode) isValidNextBTNode(newBTNode *BTNode) bool {
 	heightValid := oldBTNode.Height + 1 == newBTNode.Height
 	fmt.Printf("Height valid: %v\n", heightValid)
 
-	parentValid := (newBTNode.Parent == &oldBTNode)
+	parentValid := (oldBTNode == newBTNode.Parent)
 	fmt.Printf("newBTNode.Parent %v\n", newBTNode.Parent)
 	fmt.Printf("&oldBTNode       %v\n", &oldBTNode)
 	fmt.Printf("Parent valid:    %v\n", parentValid)
