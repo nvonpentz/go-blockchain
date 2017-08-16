@@ -25,7 +25,7 @@ func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) {
 	nodesAtLevelOfParent := bt.Levels[parentHeight]
 
 	for _ , oldBTNode := range nodesAtLevelOfParent {
-		if oldBTNode.isValidBTNode(*newBTNode) {
+		if oldBTNode.isValidNextBTNode(*newBTNode) {
 			// append to parent level
 			bt.Levels[newBTNode.Height] = append(bt.Levels[newBTNode.Height], newBTNode)
 		} else {
@@ -34,10 +34,17 @@ func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) {
 	}
 } // should check to see which is now the longest
 
-func (oldBTNode BTNode) isValidBTNode(newBTNode BTNode) bool {
+func (oldBTNode BTNode) isValidNextBTNode(newBTNode BTNode) bool {
 	heightValid := oldBTNode.Height + 1 == newBTNode.Height
-	parentValid := newBTNode.Parent == &oldBTNode
+	fmt.Printf("Height valid: %v\n", heightValid)
+
+	parentValid := (newBTNode.Parent == &oldBTNode)
+	fmt.Printf("newBTNode.Parent %v\n", newBTNode.Parent)
+	fmt.Printf("&oldBTNode       %v\n", &oldBTNode)
+	fmt.Printf("Parent valid:    %v\n", parentValid)
+
 	hashValid   := testEqByteSlice(oldBTNode.Hash, newBTNode.ParentHash)
+	fmt.Printf("Hash valid: %v\n", hashValid)
 
 	return heightValid && parentValid && hashValid
 }
@@ -52,7 +59,7 @@ func equalBTNodes(b1, b2 BTNode) bool {
 }
 
 func (b *BTNode) calcBTNodeHash() []byte {
-	var height []byte
+	height := make([]byte, 4)
 	binary.LittleEndian.PutUint32(height, b.Height)
 	data := []byte(b.Data)
 
