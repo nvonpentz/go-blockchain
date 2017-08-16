@@ -30,7 +30,7 @@ func handleUserInput(input string, blockChannel chan *BlockWrapper, n *Node) {
     case "mine":
         go mine(blockChannel, n)
     case "getchain":
-        if n.seed == "" {
+        if n.seed == "" { /* THIS NEEDS TO BE FIXED*/
             fmt.Println("You must have a seed node to request a blockchain")
         } else{
             seedConn := n.getConnForAddress(n.seed)

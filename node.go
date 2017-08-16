@@ -346,7 +346,7 @@ func sendRequestedBlockchain(conn net.Conn, requestedChain []*BTNode){
     communication := Communication{3, &BlockWrapper{&BTNode{}, ""}, []string{}, requestedChain}
     encoder   := gob.NewEncoder(conn)
     encoder.Encode(communication)
-    fmt.Printf("Sent my copy of blockchain to %v", conn.RemoteAddr().String())
+    fmt.Printf("Sent my copy of blockchain to %v\n", conn.RemoteAddr().String())
 }
 
 func requestConnections(conn net.Conn){
@@ -369,6 +369,7 @@ func sendConnectionsToNode(conn net.Conn, addresses []string){
 // }
 
 func requestBlockchain(conn net.Conn, proposedBlock *BTNode){
+    fmt.Println("requesting blockchain..")
     communication := Communication{4, &BlockWrapper{proposedBlock, ""}, []string{}, []*BTNode{}}
     encoder   := gob.NewEncoder(conn)
     encoder.Encode(communication)
