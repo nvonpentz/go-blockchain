@@ -73,6 +73,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                     myNode.blocktree.addBTNodeIfValid(block)
                     // blockValid := myNode.blocktree.addBTNodeIfValid(block)
                     myNode.forwardBlockToNetwork(block, myNode.connections)
+                    fmt.Println("sent blockchain to network")
                 }
             // case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
             //     myNode.handleBlockWrapper(blockWrapper)
@@ -307,8 +308,8 @@ func listenToConn(conn                          net.Conn,
             break
         }
         switch communication.ID {
-        // case 0:
-        //     blockWrapperChannel <- &communication.BlockWrapper
+        case 0:
+            blockChannel <- communication.Block
         case 1:
             sentAddressesChannel <- communication.SentAddresses
         case 2:

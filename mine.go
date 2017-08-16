@@ -54,6 +54,7 @@ func mine(topBlock *BTNode, blockChannel chan *BTNode, n *Node) {
     							 Data: newBlockData,
     							 Hash: []byte{}}
     newBlock.calcBTNodeHash()
+    fmt.Println("mined a block!")
     blockChannel <- &newBlock
 }
 

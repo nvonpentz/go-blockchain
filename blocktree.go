@@ -32,6 +32,9 @@ it does, it adds it to the appropirate level of the blocktree and
 returns true, otherwise returns false. 
 */
 func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) bool {
+	// base case, must take care of the genesis block which has no parent
+	fmt.Printf("Height of node attempting to be added is: %v\n", newBTNode.Height)
+	// other case
 	parentHeight         := newBTNode.Height - 1
 	nodesAtLevelOfParent := bt.Levels[parentHeight]
 
@@ -57,8 +60,16 @@ func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) bool {
 
 func (oldBTNode *BTNode) isValidNextBTNode(newBTNode *BTNode) bool {
 	heightValid    := oldBTNode.Height + 1 == newBTNode.Height
-	parentValid    := (oldBTNode == newBTNode.Parent)
-	parenHashValid := testEqByteSlice(oldBTNode.Hash, newBTNode.ParentHash)
+	fmt.Printf("Height valid: %v\n", heightValid)
+	var parentValid bool
+	if newBTNode.Parent != nil{
+		parentValid = equalBTNodes(*oldBTNode, *newBTNode.Parent)		
+	} else {
+		parentValid = false
+	}
+	fmt.Printf("Parent valid: %v\n", parentValid)
+	parentHashValid := testEqByteSlice(oldBTNode.Hash, newBTNode.ParentHash)
+	fmt.Printf("Parent hash valid: %v\n", parentHashValid)
 
 	/* 
 	need to include hash valid that checks if the hash of this
@@ -68,7 +79,7 @@ func (oldBTNode *BTNode) isValidNextBTNode(newBTNode *BTNode) bool {
 	include trandactions for the cryptocoin branch of this project
 	*/
 
-	return heightValid && parentValid && parenHashValid
+	return heightValid && parentValid && parentHashValid
 }
 
 func equalBTNodes(b1, b2 BTNode) bool {
