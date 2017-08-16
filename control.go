@@ -29,7 +29,7 @@ func handleUserInput(input string, blockChannel chan *BTNode, n *Node) {
     arg0 := strings.ToLower(outgoingArgs[0])
     switch arg0 {
     case "mine":
-        // go mine()
+        go mine(n.blocktree.Top, blockChannel, n)
         // go mineBlock(&n.blockchain, blockWrapperChannel, n) 
     case "getchain":
         if n.seed == "" {

@@ -38,7 +38,7 @@ import (
 // }
 
 
-func mine(topBlock *BTNode, blockChannel chan *BTNode) {
+func mine(topBlock *BTNode, blockChannel chan *BTNode, n *Node) {
 	fmt.Println("begin mining")
 	
 	// sleep between 5 - 10 seconds before mining block to simulate a blockchain

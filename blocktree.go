@@ -85,7 +85,3 @@ func (b *BTNode) calcBTNodeHash(){
 This is the function that decides which branch in the blocktree is most valid.
 Currently it is set to the longest chain, but could abide by other rules.
 */
-
-func (b *BTNode) getTopBlock() {
-
-}
