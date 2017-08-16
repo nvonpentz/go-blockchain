@@ -20,6 +20,10 @@ type Node struct {
     seenBlocks  map[string]bool
 }
 
+type BlockchainRequest struct {
+    Connection   net.Conn
+    Block        *BTNode
+}
 /*-----------*
  *  METHODS  * 
  *-----------*/
@@ -39,7 +43,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     connRequestChannel       := make(chan net.Conn) // received a request to send connections 
     sentAddressesChannel     := make(chan []string) // received addresses to make connections
     // minedBlockChannel        := make(chan Block)    // new block was mined
-    blockchainRequestChannel := make(chan net.Conn)
+    blockchainRequestChannel := make(chan *BlockchainRequest)
     sentBlockTreeChannel     := make(chan *BlockTree)
 
     // listen to user input
@@ -91,9 +95,11 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 fmt.Printf("Seed node sent these addresses to connect to:\n-> %v\n", addresses)
                 myNode.handleSentAddresses(addresses, newConnChannel)
 
-            // case conn         := <- blockchainRequestChannel:
-            //     sendBlockchainToNode(conn, myNode.blockchain)
-
+            case blockchainRequest := <- blockchainRequestChannel:
+                topOfRequestedBlockchain := blockchainRequest.Block
+                conn                     := blockchainRequest.Connection
+                requestedChain           := myNode.blocktree.deriveChainToBlock(topOfRequestedBlockchain)
+                sendRequestedBlockchain(conn, requestedChain)
             // case blockchain   := <- sentBlockTreeChannel: // node was sent a blockchain
             //     myNode.handleSentBlockchain(blockchain)
         }
@@ -302,7 +308,7 @@ func listenToConn(conn                          net.Conn,
                   disconChannel            chan net.Conn,
                   connRequestChannel       chan net.Conn,
                   sentAddressesChannel     chan []string,
-                  blockchainRequestChannel chan net.Conn,
+                  blockchainRequestChannel chan *BlockchainRequest,
                   sentBlockTreeChannel     chan *BlockTree) {
     for {
         decoder := gob.NewDecoder(conn)
@@ -325,10 +331,9 @@ func listenToConn(conn                          net.Conn,
         //     sentBlockTreeChannel <- communication.Blocktree
         case 4:
             fmt.Println("You have been requested to send your blockchain address to a peer at " + conn.RemoteAddr().String() + " ...")
-            // topOfRequestedBlockchain := communication.BlockWrapper.Block
-            // requestedChain := myNode.blocktree.deriveChainFromTopAndTree(topOfRequestedBlockchain)
-            // sendRequestedBlockchain(conn, requestedChain)
-            // blockchainRequestChannel <- conn
+            topOfRequestedBlockchain := communication.BlockWrapper.Block
+            blockchainRequest := BlockchainRequest{conn, topOfRequestedBlockchain}
+            blockchainRequestChannel <- &blockchainRequest
         default:
             fmt.Println("There was a problem decoding the message")
             break
