@@ -36,15 +36,15 @@ func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) {
 
 func (oldBTNode *BTNode) isValidNextBTNode(newBTNode *BTNode) bool {
 	heightValid := oldBTNode.Height + 1 == newBTNode.Height
-	fmt.Printf("Height valid: %v\n", heightValid)
+	// fmt.Printf("Height valid: %v\n", heightValid)
 
 	parentValid := (oldBTNode == newBTNode.Parent)
-	fmt.Printf("newBTNode.Parent %v\n", newBTNode.Parent)
-	fmt.Printf("&oldBTNode       %v\n", &oldBTNode)
-	fmt.Printf("Parent valid:    %v\n", parentValid)
+	// fmt.Printf("newBTNode.Parent %v\n", newBTNode.Parent)
+	// fmt.Printf("&oldBTNode       %v\n", &oldBTNode)
+	// fmt.Printf("Parent valid:    %v\n", parentValid)
 
 	hashValid   := testEqByteSlice(oldBTNode.Hash, newBTNode.ParentHash)
-	fmt.Printf("Hash valid: %v\n", hashValid)
+	// fmt.Printf("Hash valid: %v\n", hashValid)
 
 	return heightValid && parentValid && hashValid
 }
