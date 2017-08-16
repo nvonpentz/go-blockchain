@@ -16,6 +16,7 @@ type BTNode struct {
 
 type BlockTree struct {
 	Levels [][]*BTNode
+	Top        *BTNode
 }
 
 var genesisNode = BTNode{Height: 0, Parent: nil, ParentHash: []byte{0}, Data: "Genesis", Hash: []byte{0}}
@@ -78,4 +79,13 @@ func (b *BTNode) calcBTNodeHash(){
 	h.Write(b.ParentHash)
 
 	b.Hash = h.Sum(nil)
+}
+
+/*
+This is the function that decides which branch in the blocktree is most valid.
+Currently it is set to the longest chain, but could abide by other rules.
+*/
+
+func (b *BTNode) getTopBlock() {
+
 }

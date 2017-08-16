@@ -14,7 +14,7 @@ import(
 type Node struct {
     connections map[net.Conn]int
     nextConnID  int
-    blockchain  Blockchain
+    blocktree   *BlockTree
     address     string
     seed        string
     seenBlocks  map[string]bool
@@ -78,11 +78,11 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 fmt.Printf("Seed node sent these addresses to connect to:\n-> %v\n", addresses)
                 myNode.handleSentAddresses(addresses, newConnChannel)
 
-            case conn         := <- blockchainRequestChannel:
-                sendBlockchainToNode(conn, myNode.blockchain)
+            // case conn         := <- blockchainRequestChannel:
+            //     sendBlockchainToNode(conn, myNode.blockchain)
 
-            case blockchain   := <- sentBlockchainChannel: // node was sent a blockchain
-                myNode.handleSentBlockchain(blockchain)
+            // case blockchain   := <- sentBlockchainChannel: // node was sent a blockchain
+            //     myNode.handleSentBlockchain(blockchain)
         }
 
     }
@@ -153,16 +153,16 @@ func (n *Node) handleSentAddresses(addresses []string, newConnChannel chan net.C
     fmt.Printf("These new connections will be added:\n->%v\n", approvedAddresses)
 }
 
-func (n *Node) handleSentBlockchain(blockchain Blockchain){
-    fmt.Println("You were sent a blockchain")
-    if blockchain.isValidChain() {
-        n.blockchain = blockchain
-        fmt.Println("Blockchain accepted: ")
-        fmt.Println(blockchain)
-    } else {
-        fmt.Println("Blockchain rejected, invalid")
-    }
-}
+// func (n *Node) handleSentBlockchain(blockchain Blockchain){
+//     fmt.Println("You were sent a blockchain")
+//     if blockchain.isValidChain() {
+//         n.blockchain = blockchain
+//         fmt.Println("Blockchain accepted: ")
+//         fmt.Println(blockchain)
+//     } else {
+//         fmt.Println("Blockchain rejected, invalid")
+//     }
+// }
 
 func (n Node) getConnForAddress(address string) (net.Conn){
     for conn := range n.connections {
@@ -201,12 +201,13 @@ func (n Node) hasConnectionOfAddress(address string) (bool) {
 //     }
 // }
 
-func (n Node) printBlockchain(){
-    for i := range n.blockchain.Blocks {
-        block := n.blockchain.Blocks[i]
-        fmt.Printf("  Block %d is: \n   PrevHash: %v \n   Info:     %v \n   Hash:     %v \n", i, block.PrevHash, block.Info, block.Hash)
-    }
-}
+// func (n Node) printBlockchain(){
+//     for i := range n.blockchain.Blocks {
+//         block := n.blockchain.Blocks[i]
+//         fmt.Printf("  Block %d is: \n   PrevHash: %v \n   Info:     %v \n   Hash:     %v \n", i, block.PrevHash, block.Info, block.Hash)
+//     }
+// }
+
 
 func (n Node) printConnections(){
     for conn, id := range n.connections {
@@ -223,7 +224,7 @@ func (n Node) printNode(){
     fmt.Println(" Seen Blocks:")
     // n.printSeenBlockWrapper()
     // fmt.Println(" Blockchain:")
-    n.printBlockchain()
+    // n.printBlockchain()
     fmt.Println("*------------------*")
 }
 
@@ -232,7 +233,12 @@ func (n Node) printNode(){
  *-------------*/
 
 func newNode() Node {
-    myNode := Node{make(map[net.Conn]int), 0, Blockchain{[]Block{genesisBlock}}, "", "", map[string]bool{}}
+    myNode := Node{connections: make(map[net.Conn]int),
+                   nextConnID: 0,
+                   blocktree: &BlockTree{[][]*BTNode{{&genesisNode}}, &genesisNode},
+                   address: "",
+                   seed: "",
+                   seenBlocks: map[string]bool{}}
     return myNode
 }
 
@@ -316,12 +322,12 @@ func sendConnectionsToNode(conn net.Conn, addresses []string){
     encoder.Encode(communication)
 }
 
-func sendBlockchainToNode(conn net.Conn, blockchain Blockchain){
-    communication := Communication{3, BlockWrapper{}, []string{}, blockchain}
-    encoder   := gob.NewEncoder(conn)
-    encoder.Encode(communication)
-    fmt.Printf("Sent my copy of blockchain to %v", conn.RemoteAddr().String())
-}
+// func sendBlockchainToNode(conn net.Conn, blockchain Blockchain){
+//     communication := Communication{3, BlockWrapper{}, []string{}, blockchain}
+//     encoder   := gob.NewEncoder(conn)
+//     encoder.Encode(communication)
+//     fmt.Printf("Sent my copy of blockchain to %v", conn.RemoteAddr().String())
+// }
 
 func requestBlockchain(conn net.Conn){
     communication := Communication{4, BlockWrapper{}, []string{}, Blockchain{}}

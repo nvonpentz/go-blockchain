@@ -29,6 +29,7 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, n *No
     arg0 := strings.ToLower(outgoingArgs[0])
     switch arg0 {
     case "mine":
+        // go mine()
         // go mineBlock(&n.blockchain, blockWrapperChannel, n) 
     case "getchain":
         if n.seed == "" {

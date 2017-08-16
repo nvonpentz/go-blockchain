@@ -62,9 +62,3 @@ func mine(topBlock *BTNode, blockChannel chan *BTNode) {
 
 
 
-
-
-
-
-
-
