@@ -89,9 +89,24 @@ func TestAddBTNodeIfValid(t *testing.T){
 		t.Error("Heights do not align between genesis node and second level")
 	}
 
-	// // child of right child of genesis node
-	// b20Valid := BTNode{Height:2, Parent: &b11Valid, ParentHash: b11Valid.Hash, Data: "Data", Hash: []byte{0}}
-	// b20Valid.calcBTNodeHash()
+	// now to add a third layer, child of right child of genesis node
+	b20Valid := BTNode{Height:2, Parent: &b11Valid, ParentHash: b11Valid.Hash, Data: "Data", Hash: []byte{0}}
+	b20Valid.calcBTNodeHash()
+
+	bt.addBTNodeIfValid(&b20Valid)
+	if bt.Levels[2][0].Parent != &b11Valid {
+		t.Error("Parent of second level should be genesis node")
+	}
+
+	// check if paren hash match
+	if testEqByteSlice(bt.Levels[2][0].ParentHash, b11Valid.Hash) == false {
+		t.Error("Parent hash of second level does not equal genesis node hash")
+	}
+
+	// check heights
+	if bt.Levels[2][0].Height != b11Valid.Height + 1{
+		t.Error("Heights do not align between genesis node and second level")
+	}
 
 
 	// var levelOne  []*BTNode
