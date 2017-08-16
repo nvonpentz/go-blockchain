@@ -11,7 +11,7 @@ import (
 control.go handles all user interaction with the node
 
 */
-func listenForUserInput(blockChannel chan *BTNode, n *Node) {
+func listenForUserInput(blockChannel chan *BlockWrapper, n *Node) {
     for {
         reader := bufio.NewReader(os.Stdin) //constantly be reading in from std in
         input, err := reader.ReadString('\n')
@@ -23,7 +23,7 @@ func listenForUserInput(blockChannel chan *BTNode, n *Node) {
     }
 }
 
-func handleUserInput(input string, blockChannel chan *BTNode, n *Node) {
+func handleUserInput(input string, blockChannel chan *BlockWrapper, n *Node) {
     outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
     arg0 := strings.ToLower(outgoingArgs[0])
     switch arg0 {

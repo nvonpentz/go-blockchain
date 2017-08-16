@@ -14,6 +14,11 @@ type BTNode struct {
 	Hash 	   []byte
 }
 
+type BlockWrapper struct {
+	Block  *BTNode
+	Sender string
+}
+
 type BlockTree struct {
 	Levels [][]*BTNode
 	Top        *BTNode
@@ -59,16 +64,16 @@ func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) bool {
 
 func (oldBTNode *BTNode) isValidNextBTNode(newBTNode *BTNode) bool {
 	heightValid    := oldBTNode.Height + 1 == newBTNode.Height
-	fmt.Printf("Height valid: %v\n", heightValid)
+	// fmt.Printf("Height valid: %v\n", heightValid)
 	var parentValid bool
 	if newBTNode.Parent != nil{
 		parentValid = equalBTNodes(*oldBTNode, *newBTNode.Parent)		
 	} else {
 		parentValid = false
 	}
-	fmt.Printf("Parent valid: %v\n", parentValid)
+	// fmt.Printf("Parent valid: %v\n", parentValid)
 	parentHashValid := testEqByteSlice(oldBTNode.Hash, newBTNode.ParentHash)
-	fmt.Printf("Parent hash valid: %v\n", parentHashValid)
+	// fmt.Printf("Parent hash valid: %v\n", parentHashValid)
 
 	/* 
 	need to include hash valid that checks if the hash of this

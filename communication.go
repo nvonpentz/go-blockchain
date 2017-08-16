@@ -13,7 +13,7 @@ through sending this communication object.  The ID represents the type:
 
 type Communication struct {
     ID 				int
-    Block        	*BTNode
+    Block        	*BlockWrapper
     SentAddresses   []string
     Blocktree 		*BlockTree
 }
