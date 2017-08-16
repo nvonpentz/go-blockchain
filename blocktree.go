@@ -21,6 +21,10 @@ type BlockTree struct {
 
 var genesisNode = BTNode{Height: 0, Parent: nil, ParentHash: []byte{0}, Data: "Genesis", Hash: []byte{0}}
 
+func emptyBlock() BTNode {
+	return BTNode{Height: 0, Parent: nil, ParentHash: nil, Data: "", Hash: nil}
+}
+
 /* 
 addBTNodeIfValid takes a proposed block and an existing block tree
 and checks if the parent of this node exists on the blockchain. If

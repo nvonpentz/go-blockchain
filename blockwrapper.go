@@ -21,6 +21,6 @@ func (t *BlockWrapper) updateSender(address string){
 }
 
 // testing
-func emptyBlockWrapper() BlockWrapper{
-	return BlockWrapper{emptyBlock(), false, "127.0.0.1"}
-}
+// func emptyBlockWrapper() BlockWrapper{
+// 	return BlockWrapper{emptyBlock(), false, "127.0.0.1"}
+// }
