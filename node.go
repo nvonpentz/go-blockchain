@@ -67,8 +67,8 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 delete(myNode.connections, discon) // remove the connection from the nodes list of connections
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
-            case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
-                myNode.handleBlockWrapper(blockWrapper)
+            // case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
+            //     myNode.handleBlockWrapper(blockWrapper)
 
             case conn         := <-  connRequestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
@@ -106,39 +106,39 @@ func (n *Node) forwardBlockWrapperToNetwork(blockWrapper BlockWrapper, connectio
     }
 }
 
-func (n *Node) handleBlockWrapper(blockWrapper *BlockWrapper){
+// func (n *Node) handleBlockWrapper(blockWrapper *BlockWrapper){
     
-    notMinedAndValid   := n.seenBlocks[string(blockWrapper.Block.Hash)] == false  && blockWrapper.BeenSent == true && n.blockchain.isValidBlock(blockWrapper.Block)
-    notMinedAndInvalid := n.seenBlocks[string(blockWrapper.Block.Hash)] == false  && blockWrapper.BeenSent == true && !n.blockchain.isValidBlock(blockWrapper.Block)
-    minedButNotSent    := n.seenBlocks[string(blockWrapper.Block.Hash)] == true   && blockWrapper.BeenSent == false
-    alreadySent        := n.seenBlocks[string(blockWrapper.Block.Hash)] == true   && blockWrapper.BeenSent == true
+//     notMinedAndValid   := n.seenBlocks[string(blockWrapper.Block.Hash)] == false  && blockWrapper.BeenSent == true && n.blockchain.isValidBlock(blockWrapper.Block)
+//     notMinedAndInvalid := n.seenBlocks[string(blockWrapper.Block.Hash)] == false  && blockWrapper.BeenSent == true && !n.blockchain.isValidBlock(blockWrapper.Block)
+//     minedButNotSent    := n.seenBlocks[string(blockWrapper.Block.Hash)] == true   && blockWrapper.BeenSent == false
+//     alreadySent        := n.seenBlocks[string(blockWrapper.Block.Hash)] == true   && blockWrapper.BeenSent == true
     
-    if notMinedAndValid {
-        n.seenBlocks[string(blockWrapper.Block.Hash)] = true
-        n.blockchain.addBlock(blockWrapper.Block)
-        fmt.Printf("[notMinedAndValid] Added block #%v sent from network to my blockchain, and sending it to network\n", blockWrapper.Block.Index)
-        blockWrapper.updateSender(n.address)
-        n.forwardBlockWrapperToNetwork(*blockWrapper, n.connections) // forward messages to the rest of network
-    } else if notMinedAndInvalid {
-        n.seenBlocks[string(blockWrapper.Block.Hash)] = true
-        myBlockchainLength := n.blockchain.getLastBlock().Index
-        if blockWrapper.Block.Index > myBlockchainLength {
-            connThatSentHigherBlockIndex := n.getConnForAddress(blockWrapper.Sender)
-            fmt.Println("I was sent a block with a higher index, now requesting full chain to validate")
-            requestBlockchain(connThatSentHigherBlockIndex)
-        }
-        fmt.Printf("[notMinedAndInvalid] Did not add block #%v sent from network to my chain, did not forward\n", blockWrapper.Block.Index)
-    } else if minedButNotSent { //mined but not sent out yet,
-        blockWrapper.updateBeenSent()
-        blockWrapper.updateSender(n.address) 
-        fmt.Printf("[minedButNotSent] Mined block #%v, sending to network\n", blockWrapper.Block.Index)
-        n.forwardBlockWrapperToNetwork(*blockWrapper, n.connections) // forward messages to the rest of network
-    } else if alreadySent{
-        fmt.Printf("[alreadySent] Already seen block #%v, did not forward\n", blockWrapper.Block.Index)
-    } else {
-        fmt.Println("Some other case, this should not occur:")
-    }
-}
+//     if notMinedAndValid {
+//         n.seenBlocks[string(blockWrapper.Block.Hash)] = true
+//         n.blockchain.addBlock(blockWrapper.Block)
+//         fmt.Printf("[notMinedAndValid] Added block #%v sent from network to my blockchain, and sending it to network\n", blockWrapper.Block.Index)
+//         blockWrapper.updateSender(n.address)
+//         n.forwardBlockWrapperToNetwork(*blockWrapper, n.connections) // forward messages to the rest of network
+//     } else if notMinedAndInvalid {
+//         n.seenBlocks[string(blockWrapper.Block.Hash)] = true
+//         myBlockchainLength := n.blockchain.getLastBlock().Index
+//         if blockWrapper.Block.Index > myBlockchainLength {
+//             connThatSentHigherBlockIndex := n.getConnForAddress(blockWrapper.Sender)
+//             fmt.Println("I was sent a block with a higher index, now requesting full chain to validate")
+//             requestBlockchain(connThatSentHigherBlockIndex)
+//         }
+//         fmt.Printf("[notMinedAndInvalid] Did not add block #%v sent from network to my chain, did not forward\n", blockWrapper.Block.Index)
+//     } else if minedButNotSent { //mined but not sent out yet,
+//         blockWrapper.updateBeenSent()
+//         blockWrapper.updateSender(n.address) 
+//         fmt.Printf("[minedButNotSent] Mined block #%v, sending to network\n", blockWrapper.Block.Index)
+//         n.forwardBlockWrapperToNetwork(*blockWrapper, n.connections) // forward messages to the rest of network
+//     } else if alreadySent{
+//         fmt.Printf("[alreadySent] Already seen block #%v, did not forward\n", blockWrapper.Block.Index)
+//     } else {
+//         fmt.Println("Some other case, this should not occur:")
+//     }
+// }
 
 func (n *Node) handleSentAddresses(addresses []string, newConnChannel chan net.Conn){
     approvedAddresses := []string{}
@@ -194,12 +194,12 @@ func (n Node) hasConnectionOfAddress(address string) (bool) {
     return false
 }
 
-func (n Node) printSeenBlockWrapper(){
-    for blockHashString, _  := range n.seenBlocks{
-        blockHashBytes := []byte(blockHashString)
-        fmt.Printf("  %v\n", blockHashBytes)
-    }
-}
+// func (n Node) printSeenBlockWrapper(){
+//     for blockHashString, _  := range n.seenBlocks{
+//         blockHashBytes := []byte(blockHashString)
+//         fmt.Printf("  %v\n", blockHashBytes)
+//     }
+// }
 
 func (n Node) printBlockchain(){
     for i := range n.blockchain.Blocks {
@@ -221,8 +221,8 @@ func (n Node) printNode(){
     fmt.Printf(" Your Address:\n  %v \n Seed Address:\n  %v\n", n.address, n.seed)
     n.printConnections()
     fmt.Println(" Seen Blocks:")
-    n.printSeenBlockWrapper()
-    fmt.Println(" Blockchain:")
+    // n.printSeenBlockWrapper()
+    // fmt.Println(" Blockchain:")
     n.printBlockchain()
     fmt.Println("*------------------*")
 }
@@ -329,10 +329,10 @@ func requestBlockchain(conn net.Conn){
     encoder.Encode(communication)
 }
 
-func sendBlockWrapperFromMinedBlock(block Block, blockWrapperChannel chan *BlockWrapper){
-    blockWrapper := BlockWrapper{block, false, ""}
-    blockWrapperChannel <- &blockWrapper
-}
+// func sendBlockWrapperFromMinedBlock(block Block, blockWrapperChannel chan *BlockWrapper){
+//     blockWrapper := BlockWrapper{block, false, ""}
+//     blockWrapperChannel <- &blockWrapper
+// }
 
 func getPrivateIP() string {
     name, err := os.Hostname()
