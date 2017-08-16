@@ -32,9 +32,6 @@ it does, it adds it to the appropirate level of the blocktree and
 returns true, otherwise returns false. 
 */
 func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) bool {
-	// base case, must take care of the genesis block which has no parent
-	fmt.Printf("Height of node attempting to be added is: %v\n", newBTNode.Height)
-	// other case
 	parentHeight         := newBTNode.Height - 1
 	nodesAtLevelOfParent := bt.Levels[parentHeight]
 
@@ -46,6 +43,8 @@ func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) bool {
 				var newLevel []*BTNode
 				newLevel = append(newLevel, newBTNode) // new level containing the only block high enough
 				bt.Levels = append(bt.Levels, newLevel) // should automatically be at correct height
+				bt.Top = newBTNode
+				fmt.Println("just added new top of blockchain")
 			} else {
 				// not the longest chain, directly inject into height at newBTNode.height		
 				bt.Levels[newBTNode.Height] = append(bt.Levels[newBTNode.Height], newBTNode)

@@ -38,13 +38,13 @@ import (
 // }
 
 
-func mine(topBlock *BTNode, blockChannel chan *BTNode, n *Node) {
+func mine(blockChannel chan *BTNode, n *Node) {
 	fmt.Println("begin mining")
 	
 	// sleep between 5 - 10 seconds before mining block to simulate a blockchain
 	sleepTime := time.Duration((rand.Int() % 3) + 1)
     time.Sleep(time.Second * sleepTime)
-
+    topBlock 		   := n.blocktree.Top
     newBlockHeight     := topBlock.Height + 1
     newBlockParentHash := topBlock.Hash
     newBlockData       := "new block"
@@ -56,6 +56,7 @@ func mine(topBlock *BTNode, blockChannel chan *BTNode, n *Node) {
     newBlock.calcBTNodeHash()
     fmt.Println("mined a block!")
     blockChannel <- &newBlock
+	mine(blockChannel, n)
 }
 
 
