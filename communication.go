@@ -13,9 +13,9 @@ through sending this communication object.  The ID represents the type:
 
 type Communication struct {
     ID 				int
-    Block        	*BlockWrapper
+    BlockWrapper    *BlockWrapper
     SentAddresses   []string
-    Blocktree 		*BlockTree
+    blockchain 		[]*BTNode
 }
 
 // for testing

@@ -34,7 +34,7 @@ func handleUserInput(input string, blockChannel chan *BlockWrapper, n *Node) {
             fmt.Println("You must have a seed node to request a blockchain")
         } else{
             seedConn := n.getConnForAddress(n.seed)
-            requestBlockchain(seedConn)                        
+            requestBlockchain(seedConn, &genesisNode)                        
         }
     case "getconns":
         if n.hasConnectionOfAddress(n.seed){

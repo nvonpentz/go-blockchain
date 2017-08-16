@@ -112,7 +112,39 @@ func (b *BTNode) calcBTNodeHash(){
 	b.Hash = h.Sum(nil)
 }
 
-/*
-This is the function that decides which branch in the blocktree is most valid.
-Currently it is set to the longest chain, but could abide by other rules.
-*/
+func (bt *BlockTree) deriveChainToBlock(topBlock *BTNode) []*BTNode{
+	var treeLevelOfNode []*BTNode
+	empty := []*BTNode{}
+
+	if uint32(len(bt.Levels) - 1) >= topBlock.Height { // have a level corresponding to this height
+		treeLevelOfNode = bt.Levels[topBlock.Height]
+	} else{
+		return empty //none exists
+	}
+
+	for _ , block := range treeLevelOfNode{
+		if equalBTNodes(*block, *topBlock) {
+			fmt.Println("Found the block they want")
+			chain := block.constructChain()
+			return chain
+		}
+	}
+
+	return empty
+}
+
+func (b *BTNode) constructChain() (chain []*BTNode) {
+	block := b
+	for block.Parent != nil {
+		chain = append(chain, block.Parent)
+		block = block.Parent
+	}
+	return chain
+}
+
+
+
+
+
+
+
