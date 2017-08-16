@@ -12,7 +12,7 @@ control.go handles all user interaction with the node
 
 */
 
-func listenForUserInput(minedBlockChannel chan Block, blockChannel chan *BTNode, n *Node) {
+func listenForUserInput(blockChannel chan *BTNode, n *Node) {
     for {
         reader := bufio.NewReader(os.Stdin) //constantly be reading in from std in
         input, err := reader.ReadString('\n')

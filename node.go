@@ -38,12 +38,12 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     disconChannel            := make(chan net.Conn) // new disconnestion
     connRequestChannel       := make(chan net.Conn) // received a request to send connections 
     sentAddressesChannel     := make(chan []string) // received addresses to make connections
-    minedBlockChannel        := make(chan Block)    // new block was mined
+    // minedBlockChannel        := make(chan Block)    // new block was mined
     blockchainRequestChannel := make(chan net.Conn)
     sentBlockchainChannel    := make(chan Blockchain)
 
     // listen to user input
-    go listenForUserInput(minedBlockChannel, blockChannel, &myNode)
+    go listenForUserInput(blockChannel, &myNode)
 
     // listen on network
     listenForConnections(listenPort, newConnChannel)
@@ -66,10 +66,15 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 connID := myNode.connections[discon]
                 delete(myNode.connections, discon) // remove the connection from the nodes list of connections
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
-
+            case block        := <- blockChannel:
+                seenBlock := myNode.seenBlocks[string(block.Hash)] == true
+                if !seenBlock {
+                    myNode.seenBlocks[string(block.Hash)] = true
+                    blockValid := myNode.blocktree.addBTNodeIfValid(block)
+                    myNode.forwardBlockToNetwork(block, myNode.connections)
+                }
             // case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
             //     myNode.handleBlockWrapper(blockWrapper)
-
             case conn         := <-  connRequestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
                 sendConnectionsToNode(conn, addressesToSendTo)
@@ -97,14 +102,25 @@ func (n *Node) updatePorts(listenPort string, seedInfo string, publicFlag bool) 
         n.address = getPrivateIP() + listenPort
     }
 }
-func (n *Node) forwardBlockWrapperToNetwork(blockWrapper BlockWrapper, connections map[net.Conn]int) {
+
+func (n *Node) forwardBlockToNetwork(block *BTNode, connections map[net.Conn]int) {
     for conn, _ := range connections { // loop through all this nodes connections
         // destinationAddr := conn.RemoteAddr().String() // get the destination of the connection
-        communication := Communication{0, blockWrapper, []string{}, Blockchain{}}
+        communication := Communication{0, block, []string{}, Blockchain{}}
         encoder       := gob.NewEncoder(conn)
         encoder.Encode(communication)        
     }
 }
+
+
+// func (n *Node) forwardBlockWrapperToNetwork(blockWrapper BlockWrapper, connections map[net.Conn]int) {
+//     for conn, _ := range connections { // loop through all this nodes connections
+//         // destinationAddr := conn.RemoteAddr().String() // get the destination of the connection
+//         communication := Communication{0, blockWrapper, []string{}, Blockchain{}}
+//         encoder       := gob.NewEncoder(conn)
+//         encoder.Encode(communication)        
+//     }
+// }
 
 // func (n *Node) handleBlockWrapper(blockWrapper *BlockWrapper){
     

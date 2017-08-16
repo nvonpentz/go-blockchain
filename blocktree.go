@@ -21,7 +21,13 @@ type BlockTree struct {
 
 var genesisNode = BTNode{Height: 0, Parent: nil, ParentHash: []byte{0}, Data: "Genesis", Hash: []byte{0}}
 
-func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) {
+/* 
+addBTNodeIfValid takes a proposed block and an existing block tree
+and checks if the parent of this node exists on the blockchain. If
+it does, it adds it to the appropirate level of the blocktree and
+returns true, otherwise returns false. 
+*/
+func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) bool {
 	parentHeight         := newBTNode.Height - 1
 	nodesAtLevelOfParent := bt.Levels[parentHeight]
 
@@ -37,10 +43,12 @@ func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) {
 				// not the longest chain, directly inject into height at newBTNode.height		
 				bt.Levels[newBTNode.Height] = append(bt.Levels[newBTNode.Height], newBTNode)
 			}
+			return true
 		} else {
 			fmt.Println("No matching node found")
 		}
 	}
+	return false
 } // should check to see which is now the longest
 
 func (oldBTNode *BTNode) isValidNextBTNode(newBTNode *BTNode) bool {
