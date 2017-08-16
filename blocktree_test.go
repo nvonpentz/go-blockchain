@@ -108,17 +108,28 @@ func TestAddBTNodeIfValid(t *testing.T){
 		t.Error("Heights do not align between genesis node and second level")
 	}
 
+	// lets try to add invalid nodes
+	b20Invalid := BTNode{Height:2, Parent: &b11Valid, ParentHash: genesisNode.Hash, Data: "Feta", Hash: []byte{0}}
+	b20Invalid.calcBTNodeHash()
 
-	// var levelOne  []*BTNode
-	// var levelTwo  []*BTNode
-	// levelOne  = append(levelOne, &b10Valid) // left child
-	// levelOne  = append(levelOne, &b11Valid) // right child
-	// levelTwo  = append(levelTwo, &b20Valid) //child of b11
+	bt.addBTNodeIfValid(&b20Invalid)
+	if len(bt.Levels[2]) != 1 && len(bt.Levels[1]) != 2 && len(bt.Levels[0]) != 1 {
+		t.Error("an invalid node with mismatched Parent and parent hash has made its way into the blocktree")
+	}
 
-	// bt = append(bt, levelOne)
-	// bt = append(bt, levelTwo)
+	b21Invalid := BTNode{Height:2, Parent: nil, ParentHash: b11Valid.Hash, Data: "Feta", Hash: []byte{0}}
+	b21Invalid.calcBTNodeHash()
+	bt.addBTNodeIfValid(&b21Invalid)
+	if len(bt.Levels[2]) != 1 && len(bt.Levels[1]) != 2 && len(bt.Levels[0]) != 1 {
+		t.Error("an invalid node with nil Parent has made its way into the blocktree")
+	}
 
-
+	b22Invalid := BTNode{Height:1, Parent: &b11Valid, ParentHash: b11Valid.Hash, Data: "Feta", Hash: []byte{0}}
+	b22Invalid.calcBTNodeHash()
+	bt.addBTNodeIfValid(&b22Invalid)
+	if len(bt.Levels[2]) != 1 && len(bt.Levels[1]) != 2 && len(bt.Levels[0]) != 1 {
+		t.Error("an invalid node with mismatched Parent and height has made its way into the blocktree")
+	}
 }
 
 
