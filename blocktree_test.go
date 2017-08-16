@@ -2,6 +2,7 @@ package main
 
 import(
 	"testing"
+	"fmt"
 )
 
 func TestEqualBTNodes(t *testing.T){
@@ -19,7 +20,7 @@ func TestCalcBTNodeHash(t *testing.T) {}
 
 func TestIsValidNextBTNode(t *testing.T){
 	b1                   := BTNode{0, &genesisNode, []byte{0}, "Data", []byte{0}}
-	b1.Hash               = b1.calcBTNodeHash()
+	b1.calcBTNodeHash()
 	b2Valid              := BTNode{1, &b1, b1.Hash, "Data", []byte{0}}
 	b2InvalidHeight      := BTNode{0, &b1, b1.Hash, "Data", []byte{0}}
 	b2InvalidParent      := BTNode{1, &genesisNode, b1.Hash, "Data", []byte{0}}
@@ -38,3 +39,54 @@ func TestIsValidNextBTNode(t *testing.T){
 	 	t.Error("Invalid parent hash validates")
 	}
 }
+
+func TestAddBTNodeIfValid(t *testing.T){
+	// create BlockTree with only genesis node
+	var bt BlockTree
+	var levelZero []*BTNode
+	levelZero = append(levelZero, &genesisNode) // just genesis
+	bt.Levels = append(bt.Levels, levelZero)
+
+	//  left child of genesis node
+	b10Valid := BTNode{Height: 1, Parent: &genesisNode, ParentHash: []byte{0}, Data: "Left", Hash: []byte{0}}
+	b10Valid.calcBTNodeHash()
+
+	bt.addBTNodeIfValid(&b10Valid)
+
+	fmt.Println(bt)
+
+
+
+
+	// // right child of genesis node
+	// b11Valid := BTNode{Height:1, Parent: &genesisNode, ParentHash: b10Valid.Hash, Data: "Right", Hash: []byte{0}}
+	// b11Valid.calcBTNodeHash()
+
+	// // child of right child of genesis node
+	// b20Valid := BTNode{Height:2, Parent: &b11Valid, ParentHash: b11Valid.Hash, Data: "Data", Hash: []byte{0}}
+	// b20Valid.calcBTNodeHash()
+
+
+	// var levelOne  []*BTNode
+	// var levelTwo  []*BTNode
+	// levelOne  = append(levelOne, &b10Valid) // left child
+	// levelOne  = append(levelOne, &b11Valid) // right child
+	// levelTwo  = append(levelTwo, &b20Valid) //child of b11
+
+	// bt = append(bt, levelOne)
+	// bt = append(bt, levelTwo)
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
