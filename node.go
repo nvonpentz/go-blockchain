@@ -32,8 +32,8 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     myNode.updatePorts(listenPort, seedInfo, publicFlag)
 
     // create channels
-    blockWrapperChannel      := make(chan *BlockWrapper)
-    // blockChannel             := make(chan *BTNode)
+    // blockWrapperChannel      := make(chan *BlockWrapper)
+    blockChannel             := make(chan *BTNode)
     newConnChannel           := make(chan net.Conn) // new connections added
     disconChannel            := make(chan net.Conn) // new disconnestion
     connRequestChannel       := make(chan net.Conn) // received a request to send connections 
@@ -43,7 +43,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     sentBlockchainChannel    := make(chan Blockchain)
 
     // listen to user input
-    go listenForUserInput(minedBlockChannel, blockWrapperChannel, &myNode)
+    go listenForUserInput(minedBlockChannel, blockChannel, &myNode)
 
     // listen on network
     listenForConnections(listenPort, newConnChannel)
@@ -60,7 +60,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
             case conn         := <- newConnChannel: // listener picked up new conn
                 myNode.nextConnID = myNode.nextConnID + 1
                 myNode.connections[conn] = myNode.nextConnID // assign connection an ID
-                go listenToConn(conn, blockWrapperChannel, disconChannel, connRequestChannel, sentAddressesChannel, blockchainRequestChannel, sentBlockchainChannel)
+                go listenToConn(conn, blockChannel, disconChannel, connRequestChannel, sentAddressesChannel, blockchainRequestChannel, sentBlockchainChannel)
 
             case discon       := <- disconChannel: // established connection disconnected
                 connID := myNode.connections[discon]
@@ -274,12 +274,12 @@ func dialNode(address string, newConnChannel chan net.Conn) {
 }
 
 func listenToConn(conn                          net.Conn, 
-                            blockWrapperChannel      chan *BlockWrapper,
-                            disconChannel            chan net.Conn,
-                            connRequestChannel       chan net.Conn,
-                            sentAddressesChannel     chan []string,
-                            blockchainRequestChannel chan net.Conn,
-                            sentBlockchainChannel    chan Blockchain) {
+                  blockChannel             chan *BTNode,
+                  disconChannel            chan net.Conn,
+                  connRequestChannel       chan net.Conn,
+                  sentAddressesChannel     chan []string,
+                  blockchainRequestChannel chan net.Conn,
+                  sentBlockchainChannel    chan Blockchain) {
     for {
         decoder := gob.NewDecoder(conn)
         var communication Communication
@@ -290,8 +290,8 @@ func listenToConn(conn                          net.Conn,
             break
         }
         switch communication.ID {
-        case 0:
-            blockWrapperChannel <- &communication.BlockWrapper
+        // case 0:
+        //     blockWrapperChannel <- &communication.BlockWrapper
         case 1:
             sentAddressesChannel <- communication.SentAddresses
         case 2:

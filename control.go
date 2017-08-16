@@ -12,19 +12,19 @@ control.go handles all user interaction with the node
 
 */
 
-func listenForUserInput(minedBlockChannel chan Block, blockWrapperChannel chan *BlockWrapper, n *Node) {
+func listenForUserInput(minedBlockChannel chan Block, blockChannel chan *BTNode, n *Node) {
     for {
         reader := bufio.NewReader(os.Stdin) //constantly be reading in from std in
         input, err := reader.ReadString('\n')
         if (err != nil || input == "\n") {
         } else {
             fmt.Println()
-            go handleUserInput(input, blockWrapperChannel, n)
+            go handleUserInput(input, blockChannel, n)
         }
     }
 }
 
-func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, n *Node) {
+func handleUserInput(input string, blockChannel chan *BTNode, n *Node) {
     outgoingArgs := strings.Fields(strings.Split(input,"\n")[0]) // remove newline char and seperate into array by whitespace
     arg0 := strings.ToLower(outgoingArgs[0])
     switch arg0 {
