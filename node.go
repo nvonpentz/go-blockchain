@@ -33,6 +33,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
 
     // create channels
     blockWrapperChannel      := make(chan *BlockWrapper)
+    // blockChannel             := make(chan *BTNode)
     newConnChannel           := make(chan net.Conn) // new connections added
     disconChannel            := make(chan net.Conn) // new disconnestion
     connRequestChannel       := make(chan net.Conn) // received a request to send connections 
