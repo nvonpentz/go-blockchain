@@ -2,7 +2,7 @@ package main
 
 import(
 	"testing"
-	"fmt"
+	// "fmt"
 )
 
 func TestEqualBTNodes(t *testing.T){
@@ -53,9 +53,20 @@ func TestAddBTNodeIfValid(t *testing.T){
 
 	bt.addBTNodeIfValid(&b10Valid)
 
-	fmt.Println(bt)
+	// check if added parent correctly.
+	if bt.Levels[1][0].Parent != &genesisNode {
+		t.Error("Parent of second level should be genesis node")
+	}
 
+	// check if paren hash match
+	if testEqByteSlice(bt.Levels[1][0].ParentHash, genesisNode.Hash) == false {
+		t.Error("Parent hash of second level does not equal genesis node hash")
+	}
 
+	// check heights
+	if bt.Levels[1][0].Height != genesisNode.Height + 1{
+		t.Error("Heights do not align between genesis node and second level")
+	}
 
 
 	// // right child of genesis node

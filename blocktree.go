@@ -43,11 +43,19 @@ func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) {
 } // should check to see which is now the longest
 
 func (oldBTNode *BTNode) isValidNextBTNode(newBTNode *BTNode) bool {
-	heightValid := oldBTNode.Height + 1 == newBTNode.Height
-	parentValid := (oldBTNode == newBTNode.Parent)
-	hashValid   := testEqByteSlice(oldBTNode.Hash, newBTNode.ParentHash)
+	heightValid    := oldBTNode.Height + 1 == newBTNode.Height
+	parentValid    := (oldBTNode == newBTNode.Parent)
+	parenHashValid := testEqByteSlice(oldBTNode.Hash, newBTNode.ParentHash)
 
-	return heightValid && parentValid && hashValid
+	/* 
+	need to include hash valid that checks if the hash of this
+	block (the thing added by calcBTNodeHash()) is correct.
+
+	evenutally I will need to expand the calcBTNodeHash() function to
+	include trandactions for the cryptocoin branch of this project
+	*/
+
+	return heightValid && parentValid && parenHashValid
 }
 
 func equalBTNodes(b1, b2 BTNode) bool {
