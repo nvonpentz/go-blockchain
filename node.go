@@ -78,7 +78,6 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                         fmt.Println("sent blockchain to network")
                     } else {
                         fmt.Println("block was not considered valid, making request for whole chain to compare..")                        
-
                     }
                 }
             // case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network

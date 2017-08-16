@@ -38,6 +38,10 @@ returns true, otherwise returns false.
 */
 func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) bool {
 	parentHeight         := newBTNode.Height - 1
+	if uint32(len(bt.Levels)) <= parentHeight  {
+		// does not have the parent, so appears as nil.
+		return false
+	}
 	nodesAtLevelOfParent := bt.Levels[parentHeight]
 
 	for _ , oldBTNode := range nodesAtLevelOfParent {
