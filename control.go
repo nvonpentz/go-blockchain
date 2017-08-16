@@ -11,7 +11,6 @@ import (
 control.go handles all user interaction with the node
 
 */
-
 func listenForUserInput(blockChannel chan *BTNode, n *Node) {
     for {
         reader := bufio.NewReader(os.Stdin) //constantly be reading in from std in
@@ -30,7 +29,6 @@ func handleUserInput(input string, blockChannel chan *BTNode, n *Node) {
     switch arg0 {
     case "mine":
         go mine(blockChannel, n)
-        // go mineBlock(&n.blockchain, blockWrapperChannel, n) 
     case "getchain":
         if n.seed == "" {
             fmt.Println("You must have a seed node to request a blockchain")

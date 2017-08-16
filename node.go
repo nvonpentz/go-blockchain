@@ -71,9 +71,14 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 if !seenBlock {
                     myNode.seenBlocks[string(block.Hash)] = true
                     myNode.blocktree.addBTNodeIfValid(block)
-                    // blockValid := myNode.blocktree.addBTNodeIfValid(block)
-                    myNode.forwardBlockToNetwork(block, myNode.connections)
-                    fmt.Println("sent blockchain to network")
+                    blockValid := myNode.blocktree.addBTNodeIfValid(block)
+                    if blockValid {
+                        myNode.forwardBlockToNetwork(block, myNode.connections)                        
+                        fmt.Println("sent blockchain to network")
+                    } else {
+                        fmt.Println("block was not considered valid, making request for whole chain to compare..")                        
+
+                    }
                 }
             // case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
             //     myNode.handleBlockWrapper(blockWrapper)
