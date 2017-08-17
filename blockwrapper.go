@@ -8,13 +8,12 @@ already received the BlockWrapper
 
 type BlockWrapper struct {
     Block Block
-    BeenSent bool
     Sender string
 }
 
-func (t *BlockWrapper) updateBeenSent() {
-    t.BeenSent = true
-}
+// func (t *BlockWrapper) updateBeenSent() {
+//     t.BeenSent = true
+// }
 
 func (t *BlockWrapper) updateSender(address string){
     t.Sender = address
@@ -22,5 +21,5 @@ func (t *BlockWrapper) updateSender(address string){
 
 // testing
 func emptyBlockWrapper() BlockWrapper{
-	return BlockWrapper{emptyBlock(), false, "127.0.0.1"}
+	return BlockWrapper{emptyBlock(), "127.0.0.1"}
 }

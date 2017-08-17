@@ -29,7 +29,7 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, n *No
     arg0 := strings.ToLower(outgoingArgs[0])
     switch arg0 {
     case "mine":
-        // go mineBlock(&n.blockchain, blockWrapperChannel, n) 
+        go mineBlock(blockWrapperChannel, n) 
     case "getchain":
         if n.seed == "" {
             fmt.Println("You must have a seed node to request a blockchain")

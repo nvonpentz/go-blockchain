@@ -21,12 +21,13 @@ func mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
 	fmt.Println("-> begin mining..")
 
 	// sleep between 5 - 10 seconds before mining block to simulate a blockchain
-	sleepTime := time.Duration((rand.Int() % 3) + 1)
+	sleepTime := time.Duration((rand.Int() % 2) + 1)
     time.Sleep(time.Second * sleepTime)
 
     //create new block
     prevBlock     := n.blockchain.getLastBlock()
 	newBlockIndex := prevBlock.Index + 1
+    fmt.Printf("newBlockIndex: %v\n:", newBlockIndex)
 	newBlockInfo  := "new block!"
 	newBlock := Block{newBlockIndex, prevBlock.Hash, newBlockInfo, []byte{}}
 
