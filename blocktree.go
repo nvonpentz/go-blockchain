@@ -112,7 +112,9 @@ func (b *BTNode) calcBTNodeHash(){
 	b.Hash = h.Sum(nil)
 }
 
-func (bt *BlockTree) deriveChainToBlock(topBlock *BTNode) []*BTNode{
+// if youve sent a block that the other doesn't have, they'll request
+// the full chain that it is derived from so they can validate
+func (bt *BlockTree) deriveChainToBlock(topBlock *BTNode) []*BTNode {
 	var treeLevelOfNode []*BTNode
 	empty := []*BTNode{}
 
@@ -129,10 +131,9 @@ func (bt *BlockTree) deriveChainToBlock(topBlock *BTNode) []*BTNode{
 			return chain
 		}
 	}
-
 	return empty
 }
-
+// constructs a blockchain from given tip 
 func (b *BTNode) constructChain() (chain []*BTNode) {
 	block := b
 	for block.Parent != nil {
@@ -140,6 +141,20 @@ func (b *BTNode) constructChain() (chain []*BTNode) {
 		block = block.Parent
 	}
 	return chain
+}
+
+/*
+Realizing now that some of this logic might be unnecessary,
+and we could just pipeline every block in the chain to the 
+blockchannel, regardless of if we have them or not.
+
+I'll do that instead...ugh.
+*/
+func (bt *BlockTree) addMissingBlocks(blockchainSubset []*BTNode, blockChannel chan *BlockWrapper){
+	for _ , b :=range blockchainSubset {
+		blockWrapper := BlockWrapper{b, ""}
+		blockChannel <- &blockWrapper //send it to the block channel to be processed as normal
+	}
 }
 
 func (bt *BlockTree) findMissingBlocks(blockchain []*BTNode) []*BTNode{
@@ -176,15 +191,15 @@ func levelHasBTNode(level []*BTNode, block *BTNode) bool{
 	return false
 }
 
-func getBTNodeFromLevel(level []*BTNode, block *BTNode) *BTNode{
-	for _ , b := range level {
-		if equalBTNodes(*b, *block){
-			return b
-		}
-	}
-	fmt.Println("No similar block was found in level, returing empty block")
-	return &BTNode{} // if we loop through and find nothing
-}
+// func getBTNodeFromLevel(level []*BTNode, block *BTNode) *BTNode{
+// 	for _ , b := range level {
+// 		if equalBTNodes(*b, *block){
+// 			return b
+// 		}
+// 	}
+// 	fmt.Println("No similar block was found in level, returing empty block")
+// 	return &BTNode{} // if we loop through and find nothing
+// }
 
 
 

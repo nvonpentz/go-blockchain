@@ -45,7 +45,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     // minedBlockChannel        := make(chan Block)    // new block was mined
     blockchainRequestChannel := make(chan *BlockchainRequest)
     // blockchainSentChannel    := make(chan []*BTNode)
-    sentBlockTreeChannel     := make(chan *BlockTree)
+    sentBlockchainChannel     := make(chan []*BTNode)
 
     // listen to user input
     go listenForUserInput(blockChannel, &myNode)
@@ -65,7 +65,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
             case conn         := <- newConnChannel: // listener picked up new conn
                 myNode.nextConnID = myNode.nextConnID + 1
                 myNode.connections[conn] = myNode.nextConnID // assign connection an ID
-                go listenToConn(conn, blockChannel, disconChannel, connRequestChannel, sentAddressesChannel, blockchainRequestChannel, sentBlockTreeChannel)
+                go listenToConn(conn, blockChannel, disconChannel, connRequestChannel, sentAddressesChannel, blockchainRequestChannel, sentBlockchainChannel)
 
             case discon       := <- disconChannel: // established connection disconnected
                 connID := myNode.connections[discon]
@@ -101,10 +101,12 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 conn                     := blockchainRequest.Connection
                 requestedChain           := myNode.blocktree.deriveChainToBlock(topOfRequestedBlockchain)
                 sendRequestedBlockchain(conn, requestedChain)
-            // case blockchain := blockchainSentChannel:
-                //starting at the 
-            // case blockchain   := <- sentBlockTreeChannel: // node was sent a blockchain
-            //     myNode.handleSentBlockchain(blockchain)
+            case blockchain := <- sentBlockchainChannel:
+                for _, block := range blockchain{
+                    blockWrapper := BlockWrapper{block, ""}
+                    fmt.Println("sent block to blockchannel")
+                    blockChannel <- &blockWrapper
+                }
         }
 
     }
@@ -312,7 +314,7 @@ func listenToConn(conn                          net.Conn,
                   connRequestChannel       chan net.Conn,
                   sentAddressesChannel     chan []string,
                   blockchainRequestChannel chan *BlockchainRequest,
-                  sentBlockTreeChannel     chan *BlockTree) {
+                  sentBlockchainChannel    chan []*BTNode) {
     for {
         decoder := gob.NewDecoder(conn)
         var communication Communication
@@ -330,8 +332,8 @@ func listenToConn(conn                          net.Conn,
         case 2:
             fmt.Println("You have been requested to send your connection addresses to a peer at " + conn.RemoteAddr().String() + " ...")
             connRequestChannel <- conn
-        // case 3:
-        //     sentBlockTreeChannel <- communication.Blocktree
+        case 3:
+            sentBlockchainChannel <- communication.blockchain
         case 4:
             fmt.Println("You have been requested to send your blockchain address to a peer at " + conn.RemoteAddr().String() + " ...")
             topOfRequestedBlockchain := communication.BlockWrapper.Block
