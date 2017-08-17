@@ -67,6 +67,23 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
             case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
+                block  := blockWrapper.Block
+                seenBlock := myNode.seenBlocks[string(block.Hash)] == true
+                // if !seenBlock {
+                //     blockValid := myNode.isValidBlock(block)
+                //     if blockValid {
+                //         myNode.seenBlocks[string(block.Hash)] = true // only set to seen if we validate it, otherwise it will come around again
+                //         myNode.forwardBlockToNetwork(&BlockWrapper{Block: block, Sender: myNode.address}, myNode.connections)                        
+                //         fmt.Println("sent blockchain to network")
+                //     } else {
+                //         if blockWrapper.Sender == "SELF"{
+                //             fmt.Println("block is invalid but I'm not requesting for the whole chain, since SELF")
+                //         } else {
+                //             fmt.Println("block was not considered valid, making request for whole chain to compare..")                        
+                //             requestBlockchain(myNode.getConnForAddress(blockWrapper.Sender), block) //request blockchain ending in block, ba                            
+                //         }
+                //     }
+
                 // myNode.handleBlockWrapper(blockWrapper)
             case conn         := <-  connRequestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
