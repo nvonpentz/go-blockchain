@@ -15,9 +15,9 @@ type Block struct {
 var genesisBlock = Block{0, []byte{0}, "genesis", []byte{0}}
 
 // for testing
-// func emptyBlock() Block{
-// 	return Block{0, []byte{}, "", []byte{}}
-// }
+func emptyBlock() Block{
+	return Block{0, []byte{}, "", []byte{}}
+}
 
 // for testing
 func areEqualBlocks(b1 Block, b2 Block) bool {

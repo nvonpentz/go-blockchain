@@ -130,13 +130,6 @@ func TestAddBTNodeIfValid(t *testing.T){
 	if len(bt.Levels[2]) != 1 && len(bt.Levels[1]) != 2 && len(bt.Levels[0]) != 1 {
 		t.Error("an invalid node with mismatched Parent and height has made its way into the blocktree")
 	}
-	//
-	b30Invalid := BTNode{Height:3, Parent: &b11Valid, ParentHash: b11Valid.Hash, Data: "Beta", Hash: []byte{0}}
-	b30Invalid.calcBTNodeHash()
-	bt.addBTNodeIfValid(&b22Invalid)
-	if len(bt.Levels[2]) != 1 && len(bt.Levels[1]) != 2 && len(bt.Levels[0]) != 1  && bt.Levels[3] != nil {
-		t.Error("an otherwise valid node with a height that doesn't exist is in the blocktree")
-	}
 }
 
 
