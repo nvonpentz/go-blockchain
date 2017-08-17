@@ -33,7 +33,6 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
 
     // create channels
     blockWrapperChannel      := make(chan *BlockWrapper)
-    // blockChannel             := make(chan *BTNode)
     newConnChannel           := make(chan net.Conn) // new connections added
     disconChannel            := make(chan net.Conn) // new disconnestion
     connRequestChannel       := make(chan net.Conn) // received a request to send connections 
@@ -68,8 +67,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
             case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
-                myNode.handleBlockWrapper(blockWrapper)
-
+                // myNode.handleBlockWrapper(blockWrapper)
             case conn         := <-  connRequestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
                 sendConnectionsToNode(conn, addressesToSendTo)

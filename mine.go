@@ -34,9 +34,9 @@ func mineBlock(blockchain *Blockchain, blockWrapperChannel chan *BlockWrapper, n
 	newBlockHash := newBlock.calcHashForBlock()
 	newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockInfo, newBlockHash}
 
-	handleMinedBlock(newBlock, blockWrapperChannel, n)
+    blockWrapperChannel <- &BlockWrapper{Block: &newBlock, Sender: n.address}
+	// handleMinedBlock(newBlock, blockWrapperChannel, n)
 }
-
 
 func mine(topBlock *BTNode, blockChannel chan *BTNode) {
 	fmt.Println("begin mining")
@@ -57,7 +57,6 @@ func mine(topBlock *BTNode, blockChannel chan *BTNode) {
 
     blockChannel <- &newBlock
 }
-
 
 
 
