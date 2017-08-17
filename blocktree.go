@@ -142,12 +142,22 @@ func (b *BTNode) constructChain() (chain []*BTNode) {
 	return chain
 }
 
-func (bt *BlockTree) findMissingBlock(blockchain []*BTNode) {
-
-
-	// for _ , block := range blockchain{
-
-	// }
+func (bt *BlockTree) findMissingBlocks(blockchain []*BTNode) []*BTNode{
+	// loop through blocks starting at top going toward genesis
+	for i, block := range blockchain{
+		if bt.hasLevelAtHeight(block.Height){ // if our blockchain has that height it is a candidate
+			level := bt.Levels[block.Height] // get the level to examine
+			if levelHasBTNode(level, block){
+				fmt.Println("Found the first common block")
+				return blockchain[:i] // get the last block up to the one I have
+			} else {
+				fmt.Println("despite having the correct blockheight, no blocks in the level matched, trying next block..")
+			}
+		} else {
+			fmt.Println("You do not have the blocktree level associated with this block")
+		}
+	}
+	return []*BTNode{}
 	// return slice between what I have and the proposed node
 }
 
@@ -157,8 +167,24 @@ func (bt *BlockTree) hasLevelAtHeight(height uint32) bool {
 	return hasLevel
 }
 
+func levelHasBTNode(level []*BTNode, block *BTNode) bool{
+	for _ , b := range level {
+		if equalBTNodes(*b, *block){
+			return true
+		}
+	}
+	return false
+}
 
-
+func getBTNodeFromLevel(level []*BTNode, block *BTNode) *BTNode{
+	for _ , b := range level {
+		if equalBTNodes(*b, *block){
+			return b
+		}
+	}
+	fmt.Println("No similar block was found in level, returing empty block")
+	return &BTNode{} // if we loop through and find nothing
+}
 
 
 
