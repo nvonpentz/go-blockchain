@@ -44,6 +44,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     sentAddressesChannel     := make(chan []string) // received addresses to make connections
     // minedBlockChannel        := make(chan Block)    // new block was mined
     blockchainRequestChannel := make(chan *BlockchainRequest)
+    // blockchainSentChannel    := make(chan []*BTNode)
     sentBlockTreeChannel     := make(chan *BlockTree)
 
     // listen to user input
@@ -100,6 +101,8 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 conn                     := blockchainRequest.Connection
                 requestedChain           := myNode.blocktree.deriveChainToBlock(topOfRequestedBlockchain)
                 sendRequestedBlockchain(conn, requestedChain)
+            // case blockchain := blockchainSentChannel:
+                //starting at the 
             // case blockchain   := <- sentBlockTreeChannel: // node was sent a blockchain
             //     myNode.handleSentBlockchain(blockchain)
         }

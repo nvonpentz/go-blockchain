@@ -47,7 +47,7 @@ func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) bool {
 	for _ , oldBTNode := range nodesAtLevelOfParent {
 		if oldBTNode.isValidNextBTNode(newBTNode) {
 			// append to parent level
-			if uint32(len(bt.Levels)) <= newBTNode.Height { // we define genesis block at height 0
+			if !bt.hasLevelAtHeight(newBTNode.Height) { // we define genesis block at height 0 // does not have height
 				// this is now the longest chain, append a new level
 				var newLevel []*BTNode
 				newLevel = append(newLevel, newBTNode) // new level containing the only block high enough
@@ -116,7 +116,7 @@ func (bt *BlockTree) deriveChainToBlock(topBlock *BTNode) []*BTNode{
 	var treeLevelOfNode []*BTNode
 	empty := []*BTNode{}
 
-	if uint32(len(bt.Levels) - 1) >= topBlock.Height { // have a level corresponding to this height
+	if bt.hasLevelAtHeight(topBlock.Height){ // have a level corresponding to this height
 		treeLevelOfNode = bt.Levels[topBlock.Height]
 	} else{
 		return empty //none exists
@@ -141,6 +141,34 @@ func (b *BTNode) constructChain() (chain []*BTNode) {
 	}
 	return chain
 }
+
+func (bt *BlockTree) findMissingBlock(blockchain []*BTNode) {
+
+
+	// for _ , block := range blockchain{
+
+	// }
+	// return slice between what I have and the proposed node
+}
+
+func (bt *BlockTree) hasLevelAtHeight(height uint32) bool {
+	blockTreeHeight := uint32(len(bt.Levels) - 1)
+	hasLevel := blockTreeHeight >= height
+	return hasLevel
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
