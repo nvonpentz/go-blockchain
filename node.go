@@ -77,6 +77,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                     if blockValid {
                         myNode.seenBlocks[string(block.Hash)] = true // only set to seen if we validate it, otherwise it will come around again
                         myNode.forwardBlockWrapperToNetwork(BlockWrapper{Block: block, Sender: myNode.address}, myNode.connections)                        
+                        myNode.blockchain.addBlock(block)
                         fmt.Println("sent blockchain to network")
                     } else {
                         fmt.Println("block was not considered valid, making request for whole chain to compare..")                        
@@ -176,7 +177,7 @@ func (n *Node) handleSentBlockchain(blockchain Blockchain, blockWrapperChannel c
         semiReplacementChain := Blockchain{blockchain.Blocks[:lastIndex]}
         n.blockchain = semiReplacementChain
         
-        var seenBlocks map[string]bool // need a new set of seen blocks associated with 
+        seenBlocks := make(map[string]bool)  // need a new set of seen blocks associated with 
         for _ , b := range semiReplacementChain.Blocks{
             seenBlocks[string(b.Hash)] = true
         }
@@ -187,7 +188,7 @@ func (n *Node) handleSentBlockchain(blockchain Blockchain, blockWrapperChannel c
 
         lastBlock := blockchain.Blocks[lastIndex]
         blockWrapper := BlockWrapper{Block: lastBlock, Sender: n.address}
-        blockWrapperChannel <- &blockWrapper
+        go func () {blockWrapperChannel <- &blockWrapper}()
         fmt.Println("sent the tip of the replacement chain to the blockchannel")
     } else {
         fmt.Println("Blockchain rejected, invalid!")
