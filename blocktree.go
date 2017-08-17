@@ -38,6 +38,7 @@ returns true, otherwise returns false.
 */
 func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) bool {
 	parentHeight := newBTNode.Height - 1
+	fmt.Printf("block.Hash:  %v\n", newBTNode.Hash)
 	fmt.Printf("parentHeight: %v\n", parentHeight)
 	treeHeight   := uint32(len(bt.Levels) - 1)
 	fmt.Printf("treeHeight: %v\n", treeHeight)

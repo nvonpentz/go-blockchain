@@ -72,19 +72,24 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 delete(myNode.connections, discon) // remove the connection from the nodes list of connections
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
             case blockWrapper := <- blockChannel:
+                fmt.Println("in block chan")
                 block  := blockWrapper.Block
                 seenBlock := myNode.seenBlocks[string(block.Hash)] == true
                 if !seenBlock {
-                    fmt.Printf("my blocktree before: %v\n", myNode.blocktree)
+                    // fmt.Printf("my blocktree before: %v\n", myNode.blocktree)
                     blockValid := myNode.blocktree.addBTNodeIfValid(block)
-                    fmt.Printf("my blocktree after: %v\n", myNode.blocktree)
+                    // fmt.Printf("my blocktree after: %v\n", myNode.blocktree)
                     if blockValid {
                         myNode.seenBlocks[string(block.Hash)] = true // only set to seen if we validate it, otherwise it will come around again
                         myNode.forwardBlockToNetwork(&BlockWrapper{Block: block, Sender: myNode.address}, myNode.connections)                        
                         fmt.Println("sent blockchain to network")
                     } else {
-                        fmt.Println("block was not considered valid, making request for whole chain to compare..")                        
-                        requestBlockchain(myNode.getConnForAddress(blockWrapper.Sender), block) //request blockchain ending in block, ba
+                        if blockWrapper.Sender == "SELF"{
+                            fmt.Println("block is invalid but I'm not requesting for the whole chain, since SELF")
+                        } else {
+                            fmt.Println("block was not considered valid, making request for whole chain to compare..")                        
+                            requestBlockchain(myNode.getConnForAddress(blockWrapper.Sender), block) //request blockchain ending in block, ba                            
+                        }
                     }
                 } else {
                     fmt.Println("I've seen this block.. ignord.")
@@ -107,27 +112,47 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
             case blockchain := <- sentBlockchainChannel:
                 fmt.Printf("length of blockchain sent to me : %v \n", len(blockchain))
                 for i, block := range blockchain{
-                    fmt.Println(i)
-                    fmt.Printf("on block %v\n", block.Hash)
+                    fmt.Printf("block # %v of received blockchain\n", i)
+                    if block.Parent != nil {
+                        fmt.Printf("It's parent height is %v\n", block.Parent.Height)
+                    } else{
+                        fmt.Println("block parent is nil")
+                    } 
                     seenBlock := myNode.seenBlocks[string(block.Hash)] == true
-                    fmt.Printf("seen block: %v\n", seenBlock)
                     if !seenBlock {
-                        myNode.seenBlocks[string(block.Hash)] = true
-                        fmt.Printf("my blocktree before: %v\n", myNode.blocktree)
-                        blockValid := myNode.blocktree.addBTNodeIfValid(block)
-                        fmt.Printf("my blocktree after: %v\n", myNode.blocktree)
-                        if blockValid {
-                            // go myNode.forwardBlockToNetwork(&BlockWrapper{Block: block, Sender: myNode.address}, myNode.connections)                        
-                            fmt.Println("the guy wasn't LYING, the blockchain is correct even though I didn't know!")
-                        } else {
-                            fmt.Println("block was not considered valid, BREAKING from checking the rest..")    
-                            break                    
-                        }
+                        fmt.Printf("It's height is %v\n", block.Height)
+                        fmt.Printf("It;s hash is %v\n", block.Hash)
+                        blockWrapper := BlockWrapper{Block: block, Sender: "SELF"}
+                        fmt.Println("sending to blockchannel")
+                        go sendToBlockChannel(blockChannel, &blockWrapper)
+                    } else {
+                        fmt.Println("seen this block before, not sending it to block channel")
                     }
+                //     fmt.Println(i)
+                //     fmt.Printf("on block %v\n", block.Hash)
+                //     seenBlock := myNode.seenBlocks[string(block.Hash)] == true
+                //     fmt.Printf("seen block: %v\n", seenBlock)
+                //     if !seenBlock {
+                //         myNode.seenBlocks[string(block.Hash)] = true
+                //         fmt.Printf("my blocktree before: %v\n", myNode.blocktree)
+                //         blockValid := myNode.blocktree.addBTNodeIfValid(block)
+                //         fmt.Printf("my blocktree after: %v\n", myNode.blocktree)
+                //         if blockValid {
+                //             // go myNode.forwardBlockToNetwork(&BlockWrapper{Block: block, Sender: myNode.address}, myNode.connections)                        
+                //             fmt.Println("the guy wasn't LYING, the blockchain is correct even though I didn't know!")
+                //         } else {
+                //             fmt.Println("block was not considered valid, BREAKING from checking the rest..")    
+                //             break                    
+                //         }
+                //     }
                 }
         }
 
     }
+}
+
+func sendToBlockChannel(blockChannel chan *BlockWrapper, blockWrapper *BlockWrapper){
+    blockChannel <- blockWrapper
 }
 
 func (n *Node) updatePorts(listenPort string, seedInfo string, publicFlag bool) {
