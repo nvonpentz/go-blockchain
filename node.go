@@ -67,8 +67,8 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
 
             case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
-                block  := blockWrapper.Block
-                seenBlock := myNode.seenBlocks[string(block.Hash)] == true
+                // block  := blockWrapper.Block
+                // seenBlock := myNode.seenBlocks[string(block.Hash)] == true
                 // if !seenBlock {
                 //     blockValid := myNode.isValidBlock(block)
                 //     if blockValid {

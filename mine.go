@@ -6,18 +6,18 @@ import (
 	"math/rand"
 )
 
-func handleMinedBlock(block Block, blockWrapperChannel chan *BlockWrapper, n *Node) {
-    if n.blockchain.isValidBlock(block){
-        n.blockchain.addBlock(block)
-        n.seenBlocks[string(block.Hash)] = true // specify weve now seen this block but don't update the blockWrapper address until its processed there
-        go sendBlockWrapperFromMinedBlock(block, blockWrapperChannel)
-    } else {
-        fmt.Printf("Did not add mined block #%v\n", block.Index)
-    }
-    go mineBlock(&n.blockchain, blockWrapperChannel, n)
-}
+// func handleMinedBlock(block Block, blockWrapperChannel chan *BlockWrapper, n *Node) {
+//     if n.blockchain.isValidBlock(block){
+//         n.blockchain.addBlock(block)
+//         n.seenBlocks[string(block.Hash)] = true // specify weve now seen this block but don't update the blockWrapper address until its processed there
+//         go sendBlockWrapperFromMinedBlock(block, blockWrapperChannel)
+//     } else {
+//         fmt.Printf("Did not add mined block #%v\n", block.Index)
+//     }
+//     go mineBlock(&n.blockchain, blockWrapperChannel, n)
+// }
 
-func mineBlock(blockchain *Blockchain, blockWrapperChannel chan *BlockWrapper, n *Node){
+func mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
 	fmt.Println("-> begin mining..")
 
 	// sleep between 5 - 10 seconds before mining block to simulate a blockchain
@@ -25,7 +25,7 @@ func mineBlock(blockchain *Blockchain, blockWrapperChannel chan *BlockWrapper, n
     time.Sleep(time.Second * sleepTime)
 
     //create new block
-    prevBlock     := blockchain.getLastBlock()
+    prevBlock     := n.blockchain.getLastBlock()
 	newBlockIndex := prevBlock.Index + 1
 	newBlockInfo  := "new block!"
 	newBlock := Block{newBlockIndex, prevBlock.Hash, newBlockInfo, []byte{}}
@@ -34,8 +34,9 @@ func mineBlock(blockchain *Blockchain, blockWrapperChannel chan *BlockWrapper, n
 	newBlockHash := newBlock.calcHashForBlock()
 	newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockInfo, newBlockHash}
 
-    blockWrapperChannel <- &BlockWrapper{Block: &newBlock, Sender: n.address}
+    blockWrapperChannel <- &BlockWrapper{Block: newBlock, Sender: n.address}
 	// handleMinedBlock(newBlock, blockWrapperChannel, n)
+    mineBlock(blockWrapperChannel, n)
 }
 
 func mine(topBlock *BTNode, blockChannel chan *BTNode) {
