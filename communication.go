@@ -15,7 +15,7 @@ type Communication struct {
     ID 				int
     BlockWrapper    *BlockWrapper
     SentAddresses   []string
-    blockchain 		[]*BTNode
+    Blockchain 		[]*BTNode
 }
 
 // for testing

@@ -37,8 +37,12 @@ it does, it adds it to the appropirate level of the blocktree and
 returns true, otherwise returns false. 
 */
 func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) bool {
-	parentHeight         := newBTNode.Height - 1
-	if uint32(len(bt.Levels)) <= parentHeight  {
+	parentHeight := newBTNode.Height - 1
+	fmt.Printf("parentHeight: %v\n", parentHeight)
+	treeHeight   := uint32(len(bt.Levels) - 1)
+	fmt.Printf("treeHeight: %v\n", treeHeight)
+	if parentHeight > treeHeight  {
+		fmt.Println("proposed node does not have parent")
 		// does not have the parent, so appears as nil.
 		return false
 	}
@@ -57,6 +61,7 @@ func (bt *BlockTree) addBTNodeIfValid(newBTNode *BTNode) bool {
 			} else {
 				// not the longest chain, directly inject into height at newBTNode.height		
 				bt.Levels[newBTNode.Height] = append(bt.Levels[newBTNode.Height], newBTNode)
+				fmt.Printf("block valid, appended to height %v\n", newBTNode.Height)
 			}
 			return true
 		} else {
@@ -114,6 +119,7 @@ func (b *BTNode) calcBTNodeHash(){
 
 // if youve sent a block that the other doesn't have, they'll request
 // the full chain that it is derived from so they can validate
+// result will be in order of [top -> genesis]
 func (bt *BlockTree) deriveChainToBlock(topBlock *BTNode) []*BTNode {
 	var treeLevelOfNode []*BTNode
 	empty := []*BTNode{}
@@ -133,14 +139,25 @@ func (bt *BlockTree) deriveChainToBlock(topBlock *BTNode) []*BTNode {
 	}
 	return empty
 }
-// constructs a blockchain from given tip 
+// constructs a blockchain from given tip to genesis
 func (b *BTNode) constructChain() (chain []*BTNode) {
 	block := b
-	for block.Parent != nil {
-		chain = append(chain, block.Parent)
+	for block.Parent != nil { //add the blocks until you get to a block whos parent is nil (genesis)
+		chain = append(chain, block)
 		block = block.Parent
 	}
-	return chain
+	chain = append(chain, block) // append the genesis
+	return reverseChain(chain)
+}
+
+func reverseChain(chain []*BTNode) []*BTNode{
+	fmt.Printf("Chain length is: %v\n", len(chain))
+	var rev []*BTNode
+	for i := (len(chain)-1); i >= 0; i-- {
+		rev = append(rev, chain[i])
+	}
+	fmt.Printf("REV length is: %v\n", len(rev))
+	return rev
 }
 
 /*
