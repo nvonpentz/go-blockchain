@@ -6,17 +6,6 @@ import (
 	"math/rand"
 )
 
-// func handleMinedBlock(block Block, blockWrapperChannel chan *BlockWrapper, n *Node) {
-//     if n.blockchain.isValidBlock(block){
-//         n.blockchain.addBlock(block)
-//         n.seenBlocks[string(block.Hash)] = true // specify weve now seen this block but don't update the blockWrapper address until its processed there
-//         go sendBlockWrapperFromMinedBlock(block, blockWrapperChannel)
-//     } else {
-//         fmt.Printf("Did not add mined block #%v\n", block.Index)
-//     }
-//     go mineBlock(&n.blockchain, blockWrapperChannel, n)
-// }
-
 func mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
 	fmt.Println("-> begin mining..")
 
@@ -39,30 +28,6 @@ func mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
 	// handleMinedBlock(newBlock, blockWrapperChannel, n)
     mineBlock(blockWrapperChannel, n)
 }
-
-func mine(topBlock *BTNode, blockChannel chan *BTNode) {
-	fmt.Println("begin mining")
-	
-	// sleep between 5 - 10 seconds before mining block to simulate a blockchain
-	sleepTime := time.Duration((rand.Int() % 3) + 1)
-    time.Sleep(time.Second * sleepTime)
-
-    newBlockHeight     := topBlock.Height + 1
-    newBlockParentHash := topBlock.Hash
-    newBlockData       := "new block"
-    newBlock  	       := BTNode{Height: newBlockHeight,
-    							 Parent: topBlock,
-    							 ParentHash: newBlockParentHash,
-    							 Data: newBlockData,
-    							 Hash: []byte{}}
-    newBlock.calcBTNodeHash()
-
-    blockChannel <- &newBlock
-}
-
-
-
-
 
 
 

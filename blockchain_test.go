@@ -38,3 +38,46 @@ func TestGetLastBlock(t *testing.T){
 		t.Error("Failed to get last block")
 	}
 }
+
+func TestAddBlock(t *testing.T){
+	g  := genesisBlock
+	b1 := &Block{Index: g.Index+1, PrevHash: g.Hash, Info: "Second", Hash: []byte{}}
+	b1.calcHashForBlock()
+	b2 := &Block{Index: g.Index, PrevHash: g.Hash, Info: "Second", Hash: []byte{}}
+	b2.calcHashForBlock()
+
+	chain1 := &Blockchain{[]Block{g}}
+	chain1.addBlock(*b1)
+	chain2 := &Blockchain{[]Block{g}}
+	chain2.addBlock(*b2)
+
+
+	// make sure valid is added
+	if len(chain1.Blocks) != 2 {
+		t.Error("failed to add valid block")
+	}
+
+	// make sure invalid is not added
+	if len(chain2.Blocks) != 1 {
+		t.Error("added invalid block when we shouldn't")
+	}
+
+}
+
+// func TestIsValidChain(t *testing.T) {
+// 	chain1 := &Blockchain{[]Block{g}}
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
