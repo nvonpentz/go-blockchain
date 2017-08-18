@@ -9,7 +9,7 @@ import (
 
 /*
 control.go handles all user interaction with the node
-
+done by entering text via commandline
 */
 
 func listenForUserInput(minedBlockChannel chan Block, blockWrapperChannel chan *BlockWrapper, n *Node) {

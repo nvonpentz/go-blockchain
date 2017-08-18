@@ -20,6 +20,10 @@ type BlockWrapper struct {
     Sender string
 }
 
+func emptyBlockWrapper() BlockWrapper{
+	return BlockWrapper{Block: emptyBlock(), Sender: "127.0.0.1:1999"}
+}
+
 var genesisBlock = Block{0, []byte{0}, "genesis", []byte{0}}
 
 func (block *Block) calcHashForBlock() []byte {

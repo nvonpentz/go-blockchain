@@ -21,13 +21,6 @@ func (blockchain *Blockchain) isValidBlock(block Block) bool{
 func (blockchain *Blockchain) isValidChain() bool {
 	blockchainLength := len(blockchain.Blocks)
 	if blockchain == nil || blockchainLength == 0 || blockchainLength == 1 { return false }
-	// if blockchainLength == 2 {
-	// 	firstBlock  := blockchain.Blocks[0]
-	// 	secondBlock := blockchain.Blocks[1]
-	// 	return firstBlock.isValidNextBlock(&secondBlock)
-	// } else {
-	// 	fmt.Println("not length two")
-	// }
 
 	for i:=blockchainLength-1; i>=1; i-- {
 		b2 := blockchain.Blocks[i]
@@ -37,7 +30,6 @@ func (blockchain *Blockchain) isValidChain() bool {
 		} else{
 		}
 	}
-	// fmt.Println("about to return")
 	return true
 }
 
