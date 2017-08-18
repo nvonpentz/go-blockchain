@@ -39,7 +39,7 @@ func main() {
 }
 
 // used for comparison of hash byte slices
-func testEqByteSlice (a, b []byte) bool {
+func byteSlicesEqual(a, b []byte) bool {
     if a == nil && b == nil { 
         return true; 
     }

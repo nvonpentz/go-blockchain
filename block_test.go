@@ -4,15 +4,11 @@ import(
 	"testing"
 )
 
-func emptyBlock() Block{
-	return Block{Index: 0, PrevHash: []byte{}, Info: "", Hash: []byte{}}
-}
-
 func areEqualBlocks(b1 Block, b2 Block) bool {
 	indexEq    := b1.Index == b2.Index
-	prevHashEq := testEqByteSlice(b1.PrevHash, b2.PrevHash)
+	prevHashEq := byteSlicesEqual(b1.PrevHash, b2.PrevHash)
 	infoEq     := b1.Info == b2.Info
-	hashEq     := testEqByteSlice(b1.Hash, b2.Hash)
+	hashEq     := byteSlicesEqual(b1.Hash, b2.Hash)
 
 	return indexEq && prevHashEq && infoEq && hashEq
 }

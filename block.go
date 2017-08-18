@@ -20,6 +20,10 @@ type BlockWrapper struct {
     Sender string
 }
 
+func emptyBlock() Block{
+	return Block{Index: 0, PrevHash: []byte{}, Info: "", Hash: []byte{}}
+}
+
 func emptyBlockWrapper() BlockWrapper{
 	return BlockWrapper{Block: emptyBlock(), Sender: "127.0.0.1:1999"}
 }
@@ -45,7 +49,7 @@ func (oldBlock *Block) isValidNextBlock(newBlock *Block) (bool){
 	isValidIndex := newBlock.Index == oldBlock.Index + 1
 
 	// new block's previous hash has to equal the hash of the old block
-	isValidPrevHash := testEqByteSlice(newBlock.PrevHash, oldBlock.Hash)
+	isValidPrevHash := byteSlicesEqual(newBlock.PrevHash, oldBlock.Hash)
 	isValidBlock := isValidIndex && isValidPrevHash
 
 	//this is where proof of work comes to validate the calculated hash
