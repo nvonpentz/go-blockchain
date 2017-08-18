@@ -26,7 +26,7 @@ type Node struct {
 
 func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     joinFlag := false
-    if seedInfo != "" { joinFlag = true }
+    if seedInfo != "" { joinFlag = true } // join if user specifies a seed node 
     
     // specify ports to seed and listen to
     myNode.updatePorts(listenPort, seedInfo, publicFlag)
@@ -34,7 +34,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     // create channels
     blockWrapperChannel      := make(chan *BlockWrapper)
     newConnChannel           := make(chan net.Conn) // new connections added
-    disconChannel            := make(chan net.Conn) // new disconnestion
+    disconChannel            := make(chan net.Conn) // new disconnection
     connRequestChannel       := make(chan net.Conn) // received a request to send connections 
     sentAddressesChannel     := make(chan []string) // received addresses to make connections
     minedBlockChannel        := make(chan Block)    // new block was mined

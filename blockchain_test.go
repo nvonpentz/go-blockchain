@@ -64,9 +64,67 @@ func TestAddBlock(t *testing.T){
 
 }
 
-// func TestIsValidChain(t *testing.T) {
-// 	chain1 := &Blockchain{[]Block{g}}
-// }
+func TestIsValidChain(t *testing.T) {
+	var chain Blockchain
+	g := genesisBlock
+
+	// base cases
+	chain = Blockchain{[]Block{}}
+	if chain.isValidChain(){
+		t.Error("Validates empty chain")
+	}
+
+	chain = Blockchain{[]Block{g}}
+	if chain.isValidChain(){
+		t.Error("Validates chain of length 1")
+	}
+
+	// valid two block chain
+	b1 := Block{Index: g.Index+1, PrevHash: g.Hash, Info: "Second", Hash: []byte{}}
+	b1.calcHashForBlock()
+	chain = Blockchain{[]Block{g, b1}}
+	if !chain.isValidChain(){
+		t.Error("does not accept valid chain")
+	}
+
+	//invalid two blockchain
+	b2 := Block{Index: g.Index, PrevHash: g.Hash, Info: "Second", Hash: []byte{}}
+	b2.calcHashForBlock()
+	chain = Blockchain{[]Block{g, b2}}
+	if chain.isValidChain(){
+		t.Error("validates invalid chain of length two")
+	}
+
+	//valid three block chain
+	b3 := Block{Index: b1.Index+1, PrevHash: b1.Hash, Info: "Third", Hash: []byte{}}
+	b3.calcHashForBlock()
+	chain = Blockchain{[]Block{g, b1, b3}}
+	if !chain.isValidChain(){
+		t.Error("fails to validate valid chain of length 3")
+	}
+
+	// invalid three block chain
+	b4 := Block{Index: b2.Index+1, PrevHash: b2.Hash, Info: "Third", Hash: []byte{}}
+	b4.calcHashForBlock()
+	chain = Blockchain{[]Block{g, b2, b4}}
+	if chain.isValidChain(){
+		t.Error("validates invalid chain of length three")
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
