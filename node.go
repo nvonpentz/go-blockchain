@@ -68,23 +68,21 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
 
             case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
                 block  := blockWrapper.Block
-                // fmt.Printf("here is seen blocks:\n %v\n", myNode.seenBlocks)
-                // fmt.Printf("here is the hash of the newly mined block: %v\n", block.Hash)
+                if blockWrapper.Sender == myNode.address{ fmt.Printf("Received block #%vfrom network\n", block.Index) }
                 seenBlock := myNode.seenBlocks[string(block.Hash)] == true
-                // fmt.Printf("here is seenBock %v\n", seenBlock)
                 if !seenBlock {
                     blockValid := myNode.blockchain.isValidBlock(block)
                     if blockValid {
                         myNode.seenBlocks[string(block.Hash)] = true // only set to seen if we validate it, otherwise it will come around again
                         myNode.forwardBlockWrapperToNetwork(BlockWrapper{Block: block, Sender: myNode.address}, myNode.connections)                        
                         myNode.blockchain.addBlock(block)
-                        fmt.Println("sent blockchain to network")
+                        fmt.Printf("Block #%v is valid, adding to blockchain and forwarding to network\n", block.Index)
                     } else {
-                        fmt.Println("block was not considered valid, making request for whole chain to compare..")                        
+                        fmt.Printf("Received invalid block %v, requesting full blockchain...\n", block.Index)                        
                         requestBlockchain(myNode.getConnForAddress(blockWrapper.Sender)) //request blockchain ending in block, ba                            
                     }
                 } else {
-                    fmt.Println("seen this block before, ignoring..")
+                    fmt.Printf("Already seen block #%v before, ignoring..\n", block.Index)
                 }
                 // myNode.handleBlockWrapper(blockWrapper)
             case conn         := <-  connRequestChannel:  // was requested addresses to send
@@ -137,7 +135,7 @@ func (n *Node) handleSentAddresses(addresses []string, newConnChannel chan net.C
 }
 
 func (n *Node) handleSentBlockchain(blockchain Blockchain, blockWrapperChannel chan *BlockWrapper){
-    fmt.Println("You were sent a blockchain")
+    fmt.Println("You were sent a blockchain!")
     if blockchain.isValidChain() {
         lastIndex := len(blockchain.Blocks)-1
         semiReplacementChain := Blockchain{blockchain.Blocks[:lastIndex]}
@@ -149,9 +147,7 @@ func (n *Node) handleSentBlockchain(blockchain Blockchain, blockWrapperChannel c
         }
         n.seenBlocks = seenBlocks //replace with the associated seen blocks
 
-        fmt.Println("Blockchain accepted: ")
-        fmt.Println(blockchain)
-
+        fmt.Printf("Accepted blockchain of length %v \n", len(blockchain.Blocks))
         lastBlock := blockchain.Blocks[lastIndex]
         blockWrapper := BlockWrapper{Block: lastBlock, Sender: n.address}
         go func () {blockWrapperChannel <- &blockWrapper}()
