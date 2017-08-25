@@ -49,7 +49,7 @@ func (oldBlock *Block) isValidNextBlock(newBlock *Block) (bool){
 	isValidIndex := newBlock.Index == oldBlock.Index + 1
 
 	// new block's previous hash has to equal the hash of the old block
-	isValidPrevHash := byteSlicesEqual(newBlock.PrevHash, oldBlock.Hash)
+	isValidPrevHash := string(newBlock.PrevHash) == string(oldBlock.Hash)
 	isValidBlock := isValidIndex && isValidPrevHash
 
 	//this is where proof of work comes to validate the calculated hash

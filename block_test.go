@@ -6,9 +6,9 @@ import(
 
 func areEqualBlocks(b1 Block, b2 Block) bool {
 	indexEq    := b1.Index == b2.Index
-	prevHashEq := byteSlicesEqual(b1.PrevHash, b2.PrevHash)
+	prevHashEq := string(b1.PrevHash) == string(b2.PrevHash)
 	DataEq     := b1.Data == b2.Data
-	hashEq     := byteSlicesEqual(b1.Hash, b2.Hash)
+	hashEq     := string(b1.Hash) == string(b2.Hash)
 
 	return indexEq && prevHashEq && DataEq && hashEq
 }

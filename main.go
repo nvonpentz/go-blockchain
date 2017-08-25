@@ -13,9 +13,9 @@ func main() {
     flag.StringVar(&listenPort, "l", "", "")
     flag.StringVar(&listenPort, "listen", "", "")
 
-    var seedInfo string
-    flag.StringVar(&seedInfo, "s", "", "")
-    flag.StringVar(&seedInfo, "seed", "", "")
+    var seedData string
+    flag.StringVar(&seedData, "s", "", "")
+    flag.StringVar(&seedData, "seed", "", "")
 
     var helpFlag bool
     flag.BoolVar(&helpFlag, "h", false, "")
@@ -35,24 +35,5 @@ func main() {
     }
 
     myNode := newNode()
-    myNode.run(listenPort, seedInfo, publicFlag)
-}
-
-// used for comparison of hash byte slices
-func byteSlicesEqual(a, b []byte) bool {
-    if a == nil && b == nil { 
-        return true; 
-    }
-    if a == nil || b == nil { 
-        return false; 
-    }
-    if len(a) != len(b) {
-        return false
-    }
-    for i := range a {
-        if a[i] != b[i] {
-            return false
-        }
-    }
-    return true
+    myNode.run(listenPort, seedData, publicFlag)
 }
