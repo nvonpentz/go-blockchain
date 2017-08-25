@@ -47,11 +47,28 @@ func createPacket(filepath string, keys hashkeys.Keypair) Packet {
 	return Packet{Hash: documentHash, Signature: signature, Owner: keys.Public}
 }
 
-
-
 func verifyPacketSignature(packet Packet) bool {
 	return hashkeys.SignatureVerify(packet.Owner, packet.Signature, packet.Hash)
 }
+
+func hashPacketList(list []Packet) []byte {
+	h := sha256.New()
+	for _ , packet :=range list {
+		h.Write(packet.Hash)
+		h.Write(packet.Signature)
+		h.Write(packet.Owner)
+	}
+
+	return h.Sum(nil)
+}
+
+
+
+
+
+
+
+
 
 
 

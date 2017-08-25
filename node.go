@@ -12,12 +12,13 @@ import(
 )
 
 type Node struct {
-    connections map[net.Conn]int
-    nextConnID  int
-    blockchain  Blockchain
-    address     string
-    seed        string
-    seenBlocks  map[string]bool
+    connections   map[net.Conn]int
+    nextConnID    int
+    blockchain    Blockchain
+    curPacketList []Packet
+    address       string
+    seed          string
+    seenBlocks    map[string]bool
 }
 
 /*-----------*
@@ -220,7 +221,13 @@ func (n Node) printNode(){
  *-------------*/
 
 func newNode() Node {
-    myNode := Node{make(map[net.Conn]int), 0, Blockchain{[]Block{genesisBlock}}, "", "", map[string]bool{}}
+    myNode := Node{connections:   make(map[net.Conn]int),
+                   nextConnID:    0,
+                   blockchain:    Blockchain{[]Block{genesisBlock}},
+                   curPacketList: []Packet{},
+                   address:       "",
+                   seed:          "",
+                   seenBlocks:    map[string]bool{}}
     return myNode
 }
 

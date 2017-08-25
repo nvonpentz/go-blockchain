@@ -1,1 +1,3 @@
-Example document to be put onto the blockchain
+Proof of work blockchain
+
+by Nick von Pent

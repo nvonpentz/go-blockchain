@@ -8,7 +8,7 @@ import (
 type Block struct {
 	Index     uint32
 	PrevHash []byte
-	Data     string // The data stored on the block
+	Data     []Packet
 	Hash     []byte
 }
 
@@ -21,27 +21,30 @@ type BlockWrapper struct {
 }
 
 func emptyBlock() Block{
-	return Block{Index: 0, PrevHash: []byte{}, Data: "", Hash: []byte{}}
+	return Block{Index: 0, PrevHash: []byte{}, Data: []Packet{}, Hash: []byte{}}
 }
 
 func emptyBlockWrapper() BlockWrapper{
 	return BlockWrapper{Block: emptyBlock(), Sender: "127.0.0.1:1999"}
 }
 
-var genesisBlock = Block{0, []byte{0}, "genesis", []byte{0}}
+var genesisBlock = Block{Index: 0, PrevHash: []byte{0}, Data: []Packet{}, Hash: []byte{0}}
 
 func (block *Block) calcHashForBlock() []byte {
-	blockHash := sha256.New()
+	h := sha256.New()
 
-	nbIndexBytes := make([]byte, 4)
-	binary.LittleEndian.PutUint32(nbIndexBytes, block.Index)
-	pbHashBytes  := []byte(block.PrevHash)
-	nbDataBytes  := []byte(block.Data)
-	toHash := append(nbIndexBytes, pbHashBytes...)
-	toHash  = append(toHash, nbDataBytes...)
-	blockHash.Write(toHash)
+	// convert block index to hash
+	blockIndex := make([]byte, 4)
+	binary.LittleEndian.PutUint32(blockIndex, block.Index)
 
-	return blockHash.Sum(nil)
+	// hash the block data
+	blockPacketsHash := hashPacketList(block.Data)
+
+	h.Write(blockIndex)
+	h.Write(block.PrevHash)
+	h.Write(blockPacketsHash)
+	
+	return h.Sum(nil)
 }
 
 func (oldBlock *Block) isValidNextBlock(newBlock *Block) (bool){
