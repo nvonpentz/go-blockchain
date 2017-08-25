@@ -2,31 +2,42 @@ package main
 
 import (
 	"fmt"
+	"encoding/binary"
 	// "time"
 	// "math/rand"
 )
+const difficulty = 20000
 
 func mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
 	fmt.Println("-> begin mining")
 
-	
-	// // sleep between 5 - 10 seconds before mining block to simulate a blockchain
-	// sleepTime := time.Duration((rand.Int() % 4) + 2)
- //    time.Sleep(time.Second * sleepTime)
+	var blockHashAsInt uint32
+	var nonce          uint32
+	nonce          = 0
+	blockHashAsInt = 4294967295 // max value ensures we will enter mining loop
 
- //    //create new block
- //    prevBlock     := n.blockchain.getLastBlock()
-	// newBlockIndex := prevBlock.Index + 1
- //    fmt.Printf("newBlockIndex: %v\n:", newBlockIndex)
-	// newBlockData  := "new block!"
-	// newBlock := Block{newBlockIndex, prevBlock.Hash, newBlockData, []byte{}}
+	var lastBlock      Block
+	var block          Block
+	var currentPackets []Packet
+	var blockHash      []byte
 
-	// // must calculate the hash of this block
-	// newBlockHash := newBlock.calcHashForBlock()
-	// newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockData, newBlockHash}
- //    fmt.Printf("Mined block: %v\n", newBlock.Index)
- //    blockWrapperChannel <- &BlockWrapper{Block: newBlock, Sender: n.address}
-	// handleMinedBlock(newBlock, blockWrapperChannel, n)
+	for blockHashAsInt > difficulty {
+		lastBlock 	   := n.blockchain.getLastBlock()
+		currentPackets := n.curPacketList
+		block 		    = Block{Index:    lastBlock.Index + 1,
+								Nonce:    nonce,
+								PrevHash: lastBlock.Hash,
+								Data:     currentPackets,
+								Hash:     []byte{}}
+		blockHash       = block.calcHashForBlock(nonce)
+		blockHashAsInt  = binary.LittleEndian.Uint32(blockHash)
+		nonce           = nonce + 1
+	}
+
+	block.Hash    = blockHash
+	blockWrapper := &BlockWrapper{Block: block, Sender: n.address}
+
+	blockWrapperChannel <- blockWrapper
     mineBlock(blockWrapperChannel, n)
 }
 

@@ -7,6 +7,7 @@ import (
 
 type Block struct {
 	Index     uint32
+	Nonce	  uint32
 	PrevHash []byte
 	Data     []Packet
 	Hash     []byte
