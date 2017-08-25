@@ -22,8 +22,8 @@ func mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
 	var blockHash      []byte
 
 	for blockHashAsInt > difficulty {
-		lastBlock 	   := n.blockchain.getLastBlock()
-		currentPackets := n.curPacketList
+		lastBlock 	    = n.blockchain.getLastBlock()
+		currentPackets  = n.curPacketList
 		block 		    = Block{Index:    lastBlock.Index + 1,
 								Nonce:    nonce,
 								PrevHash: lastBlock.Hash,

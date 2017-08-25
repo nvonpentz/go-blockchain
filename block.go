@@ -31,10 +31,14 @@ func emptyBlockWrapper() BlockWrapper{
 
 var genesisBlock = Block{Index: 0, PrevHash: []byte{0}, Data: []Packet{}, Hash: []byte{0}}
 
-func (block *Block) calcHashForBlock() []byte {
+func (block *Block) calcHashForBlock(nonce uint32) []byte {
 	h := sha256.New()
 
-	// convert block index to hash
+	// convert nonce to bytes
+	nonceBytes := make([]byte, 4)
+	binary.LittleEndian.PutUint32(nonceBytes, nonce)
+
+	// convert block index to bytes
 	blockIndex := make([]byte, 4)
 	binary.LittleEndian.PutUint32(blockIndex, block.Index)
 
@@ -44,6 +48,7 @@ func (block *Block) calcHashForBlock() []byte {
 	h.Write(blockIndex)
 	h.Write(block.PrevHash)
 	h.Write(blockPacketsHash)
+	h.Write(nonceBytes)
 	
 	return h.Sum(nil)
 }
