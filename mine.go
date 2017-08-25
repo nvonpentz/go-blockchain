@@ -17,12 +17,12 @@ func mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
     prevBlock     := n.blockchain.getLastBlock()
 	newBlockIndex := prevBlock.Index + 1
     fmt.Printf("newBlockIndex: %v\n:", newBlockIndex)
-	newBlockInfo  := "new block!"
-	newBlock := Block{newBlockIndex, prevBlock.Hash, newBlockInfo, []byte{}}
+	newBlockData  := "new block!"
+	newBlock := Block{newBlockIndex, prevBlock.Hash, newBlockData, []byte{}}
 
 	// must calculate the hash of this block
 	newBlockHash := newBlock.calcHashForBlock()
-	newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockInfo, newBlockHash}
+	newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockData, newBlockHash}
     fmt.Printf("Mined block: %v\n", newBlock.Index)
     blockWrapperChannel <- &BlockWrapper{Block: newBlock, Sender: n.address}
 	// handleMinedBlock(newBlock, blockWrapperChannel, n)

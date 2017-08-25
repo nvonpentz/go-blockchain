@@ -9,7 +9,7 @@ type Blockchain struct {
 func (b Blockchain) printBlockchain(){
     for i := range b.Blocks {
         block := b.Blocks[i]
-        fmt.Printf("  Block %d is: \n   PrevHash: %v \n   Info:     %v \n   Hash:     %v \n", i, block.PrevHash, block.Info, block.Hash)
+        fmt.Printf("  Block %d is: \n   PrevHash: %v \n   Data:     %v \n   Hash:     %v \n", i, block.PrevHash, block.Data, block.Hash)
     }
 }
 

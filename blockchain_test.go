@@ -41,9 +41,9 @@ func TestGetLastBlock(t *testing.T){
 
 func TestAddBlock(t *testing.T){
 	g  := genesisBlock
-	b1 := &Block{Index: g.Index+1, PrevHash: g.Hash, Info: "Second", Hash: []byte{}}
+	b1 := &Block{Index: g.Index+1, PrevHash: g.Hash, Data: "Second", Hash: []byte{}}
 	b1.calcHashForBlock()
-	b2 := &Block{Index: g.Index, PrevHash: g.Hash, Info: "Second", Hash: []byte{}}
+	b2 := &Block{Index: g.Index, PrevHash: g.Hash, Data: "Second", Hash: []byte{}}
 	b2.calcHashForBlock()
 
 	chain1 := &Blockchain{[]Block{g}}
@@ -80,7 +80,7 @@ func TestIsValidChain(t *testing.T) {
 	}
 
 	// valid two block chain
-	b1 := Block{Index: g.Index+1, PrevHash: g.Hash, Info: "Second", Hash: []byte{}}
+	b1 := Block{Index: g.Index+1, PrevHash: g.Hash, Data: "Second", Hash: []byte{}}
 	b1.calcHashForBlock()
 	chain = Blockchain{[]Block{g, b1}}
 	if !chain.isValidChain(){
@@ -88,7 +88,7 @@ func TestIsValidChain(t *testing.T) {
 	}
 
 	//invalid two blockchain
-	b2 := Block{Index: g.Index, PrevHash: g.Hash, Info: "Second", Hash: []byte{}}
+	b2 := Block{Index: g.Index, PrevHash: g.Hash, Data: "Second", Hash: []byte{}}
 	b2.calcHashForBlock()
 	chain = Blockchain{[]Block{g, b2}}
 	if chain.isValidChain(){
@@ -96,7 +96,7 @@ func TestIsValidChain(t *testing.T) {
 	}
 
 	//valid three block chain
-	b3 := Block{Index: b1.Index+1, PrevHash: b1.Hash, Info: "Third", Hash: []byte{}}
+	b3 := Block{Index: b1.Index+1, PrevHash: b1.Hash, Data: "Third", Hash: []byte{}}
 	b3.calcHashForBlock()
 	chain = Blockchain{[]Block{g, b1, b3}}
 	if !chain.isValidChain(){
@@ -104,7 +104,7 @@ func TestIsValidChain(t *testing.T) {
 	}
 
 	// invalid three block chain
-	b4 := Block{Index: b2.Index+1, PrevHash: b2.Hash, Info: "Third", Hash: []byte{}}
+	b4 := Block{Index: b2.Index+1, PrevHash: b2.Hash, Data: "Third", Hash: []byte{}}
 	b4.calcHashForBlock()
 	chain = Blockchain{[]Block{g, b2, b4}}
 	if chain.isValidChain(){

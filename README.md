@@ -17,13 +17,13 @@ GLOBAL OPTIONS:
     -l, --listen     assigns the listening port for the server        (default = 1999).
     -s, --seed       assigns the port of the seed                     (default = 2000).
     -p, --public     launch node using a your public IP               (default = false).
-    -h, --help       prints this help info
+    -h, --help       prints this help Data
 
 NODE COMMANDS:
     getconns   requests the list of nodes from your seed node and attempts to connect to each
     getchain  requests seed node for their version of the blockchain
-    node      prints the information associated with your node
-    help      prints the node command help info
+    node      prints the Datarmation associated with your node
+    help      prints the node command help Data
 ```
 ## Getting Started
 ### Setup
@@ -76,12 +76,12 @@ func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
   //create new block
   prevBlock     := blockchain.getLastBlock()
   newBlockIndex := prevBlock.Index + 1
-  newBlockInfo  := "new block!"
-  newBlock := Block{newBlockIndex, prevBlock.Hash, newBlockInfo, []byte{}}
+  newBlockData  := "new block!"
+  newBlock := Block{newBlockIndex, prevBlock.Hash, newBlockData, []byte{}}
 
   // must calculate the hash of this block
   newBlockHash := calcHashForBlock(newBlock)
-  newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockInfo, newBlockHash}
+  newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockData, newBlockHash}
 
   // send to control center to 
   blockChannel <- newBlock 
@@ -133,7 +133,7 @@ Depending on the value of the `Communication.ID`, the communication instance is 
 * A response of a blockchain (ID = 3)
 * A request to send a blockchain (ID = 4)
 
-When a communication is sent over the network, it is parsed by the `listenToConnection()` go routine, and redirects the information to the appropriate channel.
+When a communication is sent over the network, it is parsed by the `listenToConnection()` go routine, and redirects the Datarmation to the appropriate channel.
 
 ## Why Private?
 This is a private blockchain, which means it cannot easily be run beyond a private network because of the challenges of getting past routers and NAT.  Theoretically this blockchain would work as public blockchain if users setup port forwarding on their router, or if universal plug and play (UPNP) was implemented.

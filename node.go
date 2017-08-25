@@ -24,12 +24,12 @@ type Node struct {
  *  METHODS  * 
  *-----------*/
 
-func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
+func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
     joinFlag := false
-    if seedInfo != "" { joinFlag = true } // join if user specifies a seed node 
+    if seedData != "" { joinFlag = true } // join if user specifies a seed node 
     
     // specify ports to seed and listen to
-    myNode.updatePorts(listenPort, seedInfo, publicFlag)
+    myNode.updatePorts(listenPort, seedData, publicFlag)
 
     // create channels
     blockWrapperChannel      := make(chan *BlockWrapper)
@@ -47,7 +47,7 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     // listen on network
     listenForConnections(listenPort, newConnChannel)
     if joinFlag { // if the user requested to join a seed node // need to make sure you can't join if you don't supply a seed
-        fmt.Println("Dialing seed node at port " + seedInfo + "...")
+        fmt.Println("Dialing seed node at port " + seedData + "...")
          go dialNode(myNode.seed, newConnChannel)
     }
 
@@ -105,12 +105,12 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
     }
 }
 
-func (n *Node) updatePorts(listenPort string, seedInfo string, publicFlag bool) {
+func (n *Node) updatePorts(listenPort string, seedData string, publicFlag bool) {
     if publicFlag{
-        n.seed = seedInfo + ":1999" // if public ip, seed is specifiec seedInfo:1999
+        n.seed = seedData + ":1999" // if public ip, seed is specifiec seedData:1999
         n.address = getPublicIP() + ":1999" // must set up port forwarding
     } else { 
-        n.seed = getPrivateIP() + ":" + seedInfo  // no default seed
+        n.seed = getPrivateIP() + ":" + seedData  // no default seed
         n.address = getPrivateIP() + listenPort
     }
 }

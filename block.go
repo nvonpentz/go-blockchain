@@ -8,7 +8,7 @@ import (
 type Block struct {
 	Index     uint32
 	PrevHash []byte
-	Info     string // The data stored on the block
+	Data     string // The data stored on the block
 	Hash     []byte
 }
 
@@ -21,7 +21,7 @@ type BlockWrapper struct {
 }
 
 func emptyBlock() Block{
-	return Block{Index: 0, PrevHash: []byte{}, Info: "", Hash: []byte{}}
+	return Block{Index: 0, PrevHash: []byte{}, Data: "", Hash: []byte{}}
 }
 
 func emptyBlockWrapper() BlockWrapper{
@@ -36,9 +36,9 @@ func (block *Block) calcHashForBlock() []byte {
 	nbIndexBytes := make([]byte, 4)
 	binary.LittleEndian.PutUint32(nbIndexBytes, block.Index)
 	pbHashBytes  := []byte(block.PrevHash)
-	nbInfoBytes  := []byte(block.Info)
+	nbDataBytes  := []byte(block.Data)
 	toHash := append(nbIndexBytes, pbHashBytes...)
-	toHash  = append(toHash, nbInfoBytes...)
+	toHash  = append(toHash, nbDataBytes...)
 	blockHash.Write(toHash)
 
 	return blockHash.Sum(nil)
