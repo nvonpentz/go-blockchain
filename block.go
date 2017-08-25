@@ -59,6 +59,13 @@ func (oldBlock *Block) isValidNextBlock(newBlock *Block) (bool){
 
 	// new block's previous hash has to equal the hash of the old block
 	isValidPrevHash := string(newBlock.PrevHash) == string(oldBlock.Hash)
+
+	// all packets in block data must be valid
+
+	// hash value must be below difficulty
+
+	// hash of entire block must equal the claimed block hash
+
 	isValidBlock := isValidIndex && isValidPrevHash
 
 	//this is where proof of work comes to validate the calculated hash

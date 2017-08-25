@@ -69,11 +69,10 @@ func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
 
             case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
                 block  := blockWrapper.Block
-                if blockWrapper.Sender == myNode.address{ fmt.Printf("Received block #%vfrom network\n", block.Index) }
+                if blockWrapper.Sender != myNode.address{ fmt.Printf("Received block #%vfrom network\n", block.Index) }
                 seenBlock := myNode.seenBlocks[string(block.Hash)] == true
                 if !seenBlock {
                     lastBlock := myNode.blockchain.getLastBlock()
-
                     blockValid := lastBlock.isValidNextBlock(&block)
                     if blockValid {
                         myNode.seenBlocks[string(block.Hash)] = true // only set to seen if we validate it, otherwise it will come around again

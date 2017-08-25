@@ -3,13 +3,12 @@ package main
 import (
 	"fmt"
 	"encoding/binary"
-	// "time"
-	// "math/rand"
 )
+
 const difficulty = 20000
 
 func mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
-	fmt.Println("-> begin mining")
+	fmt.Println("-> begin mining...")
 
 	var blockHashAsInt uint32
 	var nonce          uint32
