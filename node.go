@@ -71,7 +71,9 @@ func (myNode Node) run(listenPort string, seedInfo string, publicFlag bool) {
                 if blockWrapper.Sender == myNode.address{ fmt.Printf("Received block #%vfrom network\n", block.Index) }
                 seenBlock := myNode.seenBlocks[string(block.Hash)] == true
                 if !seenBlock {
-                    blockValid := myNode.blockchain.isValidBlock(block)
+                    lastBlock := myNode.blockchain.getLastBlock()
+
+                    blockValid := lastBlock.isValidNextBlock(&block)
                     if blockValid {
                         myNode.seenBlocks[string(block.Hash)] = true // only set to seen if we validate it, otherwise it will come around again
                         myNode.forwardBlockWrapperToNetwork(BlockWrapper{Block: block, Sender: myNode.address}, myNode.connections)                        
@@ -194,13 +196,6 @@ func (n Node) printSeenBlockWrapper(){
     }
 }
 
-func (n Node) printBlockchain(){
-    for i := range n.blockchain.Blocks {
-        block := n.blockchain.Blocks[i]
-        fmt.Printf("  Block %d is: \n   PrevHash: %v \n   Info:     %v \n   Hash:     %v \n", i, block.PrevHash, block.Info, block.Hash)
-    }
-}
-
 func (n Node) printConnections(){
     for conn, id := range n.connections {
         localAddr := conn.LocalAddr().String()
@@ -216,7 +211,7 @@ func (n Node) printNode(){
     fmt.Println(" Seen Blocks:")
     n.printSeenBlockWrapper()
     fmt.Println(" Blockchain:")
-    n.printBlockchain()
+    n.blockchain.printBlockchain()
     fmt.Println("*------------------*")
 }
 

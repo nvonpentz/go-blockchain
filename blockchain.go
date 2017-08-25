@@ -1,21 +1,25 @@
 package main 
 
-// import "fmt"
+import "fmt"
 
 type Blockchain struct {
 	Blocks []Block
 }
 
+func (b Blockchain) printBlockchain(){
+    for i := range b.Blocks {
+        block := b.Blocks[i]
+        fmt.Printf("  Block %d is: \n   PrevHash: %v \n   Info:     %v \n   Hash:     %v \n", i, block.PrevHash, block.Info, block.Hash)
+    }
+}
+
 func (blockchain *Blockchain) addBlock(block Block) {
-	if blockchain.isValidBlock(block) == true {
+	lastBlock := blockchain.getLastBlock()
+
+	if lastBlock.isValidNextBlock(&block) == true {
 		blockchain.Blocks = append(blockchain.Blocks, block)
 	} else {
 	}
-}
-
-func (blockchain *Blockchain) isValidBlock(block Block) bool{
-	lastBlockInChain := blockchain.getLastBlock()
-	return lastBlockInChain.isValidNextBlock(&block)
 }
 
 func (blockchain *Blockchain) isValidChain() bool {
