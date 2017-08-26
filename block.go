@@ -4,6 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
+
+	"github.com/nvonpentz/go-hashable-keys"
 )
 
 type Block struct {
@@ -14,15 +16,34 @@ type Block struct {
 	Hash     []byte
 }
 
-/* When sending a block to the main channel,
-   we keep track of the sender in order to make requests
-   for the entire blockchain if necessary */
 type BlockWrapper struct {
     Block Block
-    Sender string
+    Sender string  // keep track of sender in case we need to ask for entire blockchain
 }
 
-var genesisBlock = Block{Index: 0, PrevHash: []byte{0}, Data: []Packet{}, Hash: []byte{0}}
+func createGenesisBlock() Block {
+	genesisKeys := hashkeys.Keypair{Public:  []byte("L2WaHqXWXpnJ1RKmopxJjd6UpnoYqDfBsdpSRhp6S9QV9qkarZ7e6Mdk5bQpnntMNbjxAtknAfi7"),
+						            Private: []byte("31uUweXiDWyyUwf2RNzChxQBzGpqy9n4h4XBPWg")}
+
+	genesisDocument     := []byte("Blockchain by Nick von Pentz")
+	genesisDocumentHash := hashDocument(genesisDocument)
+	genesisSignature    := signHash(genesisDocumentHash, genesisKeys)
+
+	genesisPacket    := Packet{Hash:      genesisDocumentHash,
+							Signature: genesisSignature,
+							Owner:     genesisKeys.Public}
+
+	genesisBlock     := Block{Index: 0,
+						  Nonce: 0,
+					      PrevHash: []byte{0},
+					      Data: []Packet{genesisPacket},
+					      Hash: []byte{0}}
+	genesisBlock.Hash = genesisBlock.calcHashForBlock(0)
+
+	return genesisBlock
+}
+
+var genesisBlock = createGenesisBlock()
 
 func (block *Block) calcHashForBlock(nonce uint32) []byte {
 	h := sha256.New()
@@ -89,15 +110,10 @@ func (oldBlock *Block) isValidNextBlock(newBlock *Block) (bool){
 	return isValidBlock
 }
 
-
-
-
-
-
-
-
-
-
-
-
+func printSeenBlockWrapper(seenBlocks map[string]bool){
+    for blockHashString, _  := range seenBlocks{
+        blockHashBytes := []byte(blockHashString)
+        fmt.Printf("  %v\n", blockHashBytes)
+    }
+}
 

@@ -219,13 +219,6 @@ func (n Node) hasConnectionOfAddress(address string) (bool) {
     return false
 }
 
-func (n Node) printSeenBlockWrapper(){
-    for blockHashString, _  := range n.seenBlocks{
-        blockHashBytes := []byte(blockHashString)
-        fmt.Printf("  %v\n", blockHashBytes)
-    }
-}
-
 func (n Node) printConnections(){
     for conn, id := range n.connections {
         localAddr := conn.LocalAddr().String()
@@ -239,7 +232,7 @@ func (n Node) printNode(){
     fmt.Printf(" Your Address:\n  %v \n Seed Address:\n  %v\n", n.address, n.seed)
     n.printConnections()
     fmt.Println(" Seen Blocks:")
-    n.printSeenBlockWrapper()
+    printSeenBlockWrapper(n.seenBlocks)
     fmt.Println(" Blockchain:")
     n.blockchain.printBlockchain()
     fmt.Println("*------------------*")
@@ -291,7 +284,7 @@ func dialNode(address string, newConnChannel chan net.Conn) {
     newConnChannel <- conn
 }
 
-func listenToConn(conn                          net.Conn, 
+func listenToConn(          conn                          net.Conn, 
                             blockWrapperChannel      chan *BlockWrapper,
                             packetChannel            chan Packet,
                             disconChannel            chan net.Conn,

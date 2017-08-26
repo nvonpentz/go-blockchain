@@ -19,7 +19,6 @@ func readDocument(filePath string) []byte{
 	if err != nil {
 		fmt.Println(err)
 	}
-
 	return document
 }
 
@@ -35,7 +34,6 @@ func signHash(hash []byte, keys hashkeys.Keypair) []byte{
 	if err !=nil {
 		fmt.Println(err)
 	}
-
 	return signature
 }
 
