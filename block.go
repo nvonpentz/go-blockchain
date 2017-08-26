@@ -49,15 +49,15 @@ func (block *Block) calcHashForBlock(nonce uint32) []byte {
 func (oldBlock *Block) isValidNextBlock(newBlock *Block) (bool){
 	// new block's index must be one greater
 	isValidIndex := newBlock.Index == oldBlock.Index + 1
-	fmt.Printf("isValidIndex %v \n", isValidIndex)
+	// fmt.Printf("isValidIndex %v \n", isValidIndex)
 
 	// new block's previous hash has to equal the hash of the old block
 	isValidPrevHash := string(newBlock.PrevHash) == string(oldBlock.Hash)
-	fmt.Printf("isValidPrevHash %v \n", isValidPrevHash)
+	// fmt.Printf("isValidPrevHash %v \n", isValidPrevHash)
 
 	// all packets in block data must be valid
 	areValidPacketSignatures := verifyPacketList(newBlock.Data)
-	fmt.Printf("areValidPacketSignatures %v \n", areValidPacketSignatures)
+	// fmt.Printf("areValidPacketSignatures %v \n", areValidPacketSignatures)
 
 	// hash value must be below difficulty
 	var newBlockHashAsInt uint32
@@ -70,13 +70,14 @@ func (oldBlock *Block) isValidNextBlock(newBlock *Block) (bool){
 	}
 
 	isHashBelowDifficulty := newBlockHashAsInt < difficulty
-	fmt.Printf("isHashBelowDifficulty %v \n", isHashBelowDifficulty)
+	// fmt.Printf("isHashBelowDifficulty %v \n", isHashBelowDifficulty)
 
 
 	// hash of entire block must equal the claimed block hash
 	calculatedBlockHash := newBlock.calcHashForBlock(newBlock.Nonce)
 	isCorrectBlockHash  := string(calculatedBlockHash) == string(newBlock.Hash)
-	fmt.Printf("isCorrectBlockHash %v \n", isCorrectBlockHash)
+	// fmt.Printf("isCorrectBlockHash %v \n", isCorrectBlockHash)
+	// fmt.Printf("correct hash: %v \n calculatedBlockHash: %v \n", newBlock.Hash, calculatedBlockHash)
 
 	isValidBlock := isValidIndex &&
 					isValidPrevHash &&
