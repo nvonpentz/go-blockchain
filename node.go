@@ -43,7 +43,7 @@ func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
     sentBlockchainChannel    := make(chan Blockchain)
 
     // listen to user input
-    go listenForUserInput(blockWrapperChannel, &myNode)
+    go listenForUserInput(blockWrapperChannel, packetChannel, &myNode)
 
     // listen on network
     listenForConnections(listenPort, newConnChannel)

@@ -140,4 +140,9 @@ This is a private blockchain, which means it cannot easily be run beyond a priva
 
 If you want to participate in a public blockchain network, pass the flag `-p` or `--public` and your node will be launched using your public IP address.
 
+## Improvements
+* change the packet list to a packet map, more efficient lookup
+* change myNode listen to connections to not be a function of my node or atleast get rid of the n.connections argument
+* make the hashes base 58 so they can be human readable when strings.
+
 
