@@ -77,7 +77,7 @@ func packetListHasPacket(packetList []Packet, packetInQuestion Packet) bool {
 			return true
 		}
 	}
-	fmt.Println("Did not find packet in the list of packets")
+	// fmt.Println("Did not find packet in the list of packets")
 	return false
 }
 
