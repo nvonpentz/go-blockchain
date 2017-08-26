@@ -60,13 +60,13 @@ Node2 connected to Node3
 From Node3, enter `getconns`.  It will ask Node2 for its connections, and Node2 will send back a list of addresses to connect to.  Node3 will then connect to those that it isn't connected with already (ie Node1).  Enter `node` to see the connections, and you will see that it is connected to both Node2 and Node1.
 
 ### Start Mining
-To start mining, after you have booted up the node, simpy enter `mine`, and your node will begin mining blocks and send them to the network when they are mined.  Nodes will automatically validate blocks/blockchains which are sent to them.
-
+To start mining, after you have booted up the node, enter `mine`, and your node will begin mining blocks and send them to the network when they are mined.  Nodes will automatically checks if a block/blockchain which are sent to them are valid.
 
 ## Summary / Walkthrough 
 A node on the network will:
 * Mine new blocks, add them to their blockchain, and send to connected nodes
-* Receive blocks mined by other nodes, validate them, and send them all their connections
+* Receive blocks mined by other nodes, check if they are valid, and send them all their connections if it is
+* 
 
 ### Mining
 Currently, block are mined every 5 to 10 seconds, and send to the `blockChannel` to be processed.
