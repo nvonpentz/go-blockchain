@@ -57,7 +57,6 @@ func verifyPacketList(packets []Packet) bool {
 			return false
 		}
 	}
-
 	return true
 }
 

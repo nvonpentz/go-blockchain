@@ -12,26 +12,9 @@ through sending this communication object.  The ID represents the type:
 */
 
 type Communication struct {
-    ID int
-    BlockWrapper BlockWrapper
+    ID            int
+    BlockWrapper  BlockWrapper
     SentAddresses []string
-    Blockchain Blockchain
-}
-
-// for testing
-func newComm(ID int) Communication{
-	switch ID {
-	case 0:
-		return Communication{0, BlockWrapper{genesisBlock, "127.0.0.1:1999"}, []string{}, Blockchain{[]Block{}}}
-	case 1:
-		return Communication{1, emptyBlockWrapper(), []string{}, Blockchain{[]Block{}}}
-	case 2:
-		return Communication{2, emptyBlockWrapper(), []string{}, Blockchain{[]Block{}}}
-	case 3:
-		return Communication{3, emptyBlockWrapper(), []string{}, Blockchain{[]Block{}}}
-	case 4:
-		return Communication{4, emptyBlockWrapper(), []string{}, Blockchain{[]Block{}}}
-	default:
-		return Communication{0, BlockWrapper{genesisBlock, "127.0.0.1:1999"}, []string{}, Blockchain{[]Block{}}}
-	}
+    Blockchain    Blockchain
+    Packet 		  Packet
 }

@@ -2,7 +2,6 @@ package main
 
 import(
 	"testing"
-
 	"github.com/nvonpentz/go-hashable-keys"
 )
 
@@ -16,7 +15,6 @@ func TestVerifyPacketSignature(t *testing.T){
 	if !verifyPacketSignature(packet01) {
 		t.Error("fails to approve valid packet")
 	}
-
 
 	// invalid packet; wrong public key for signature
 	doc       := readDocument("document.txt")

@@ -61,7 +61,7 @@ func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
             case conn         := <- newConnChannel: // listener picked up new conn
                 myNode.nextConnID = myNode.nextConnID + 1
                 myNode.connections[conn] = myNode.nextConnID // assign connection an ID
-                go listenToConn(conn, blockWrapperChannel, disconChannel, connRequestChannel, sentAddressesChannel, blockchainRequestChannel, sentBlockchainChannel)
+                go listenToConn(conn, blockWrapperChannel, packetChannel, disconChannel, connRequestChannel, sentAddressesChannel, blockchainRequestChannel, sentBlockchainChannel)
 
             case discon       := <- disconChannel: // established connection disconnected
                 connID := myNode.connections[discon]
@@ -71,8 +71,13 @@ func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
                 fmt.Println("received new packet!")
                 if verifyPacketSignature(packet){
                     // check to see if its in the nodes current packet list
-                        // if not add it and forward to network
-                        // if so, do nothing
+                    if packetListHasPacket(myNode.curPacketList, packet){
+                        fmt.Println("Packet is valid, but I already have it.")
+                    } else {
+                        // add to current list of packets to be mined into the block
+                        myNode.curPacketList = append(myNode.curPacketList, packet)
+                        myNode.forwardPacketToNetwork(packet, myNode.connections)
+                    }
                 } else {
                     fmt.Println("packet signature does not verify")
                 }
@@ -128,10 +133,19 @@ func (n *Node) updatePorts(listenPort string, seedData string, publicFlag bool) 
         n.address = getPrivateIP() + listenPort
     }
 }
+
 func (n *Node) forwardBlockWrapperToNetwork(blockWrapper BlockWrapper, connections map[net.Conn]int) {
     for conn, _ := range connections { // loop through all this nodes connections
         // destinationAddr := conn.RemoteAddr().String() // get the destination of the connection
-        communication := Communication{0, blockWrapper, []string{}, Blockchain{}}
+        communication := Communication{0, blockWrapper, []string{}, Blockchain{}, Packet{}}
+        encoder       := gob.NewEncoder(conn)
+        encoder.Encode(communication)        
+    }
+}
+
+func (n *Node) forwardPacketToNetwork(packet Packet, connections map[net.Conn]int) {
+    for conn, _ := range connections { // loop through all this nodes connections
+        communication := Communication{0, BlockWrapper{}, []string{}, Blockchain{}, packet}
         encoder       := gob.NewEncoder(conn)
         encoder.Encode(communication)        
     }
@@ -277,6 +291,7 @@ func dialNode(address string, newConnChannel chan net.Conn) {
 
 func listenToConn(conn                          net.Conn, 
                             blockWrapperChannel      chan *BlockWrapper,
+                            packetChannel            chan Packet,
                             disconChannel            chan net.Conn,
                             connRequestChannel       chan net.Conn,
                             sentAddressesChannel     chan []string,
@@ -304,6 +319,9 @@ func listenToConn(conn                          net.Conn,
         case 4:
             fmt.Println("You have been requested to send your blockchain address to a peer at " + conn.RemoteAddr().String() + " ...")
             blockchainRequestChannel <- conn
+        case 5:
+            fmt.Println("You have been sent a packet!")
+            packetChannel <- communication.Packet
         default:
             fmt.Println("There was a problem decoding the message")
             break
@@ -313,26 +331,26 @@ func listenToConn(conn                          net.Conn,
 }
 
 func requestConnections(conn net.Conn){
-    communication := Communication{2, BlockWrapper{}, []string{}, Blockchain{}}
+    communication := Communication{2, BlockWrapper{}, []string{}, Blockchain{}, Packet{}}
     encoder       := gob.NewEncoder(conn)
     encoder.Encode(communication)
 }
 
 func sendConnectionsToNode(conn net.Conn, addresses []string){
-    communication := Communication{1, BlockWrapper{}, addresses, Blockchain{}}
+    communication := Communication{1, BlockWrapper{}, addresses, Blockchain{}, Packet{}}
     encoder       := gob.NewEncoder(conn)
     encoder.Encode(communication)
 }
 
 func sendBlockchainToNode(conn net.Conn, blockchain Blockchain){
-    communication := Communication{3, BlockWrapper{}, []string{}, blockchain}
+    communication := Communication{3, BlockWrapper{}, []string{}, blockchain, Packet{}}
     encoder   := gob.NewEncoder(conn)
     encoder.Encode(communication)
     fmt.Printf("Sent my copy of blockchain to %v", conn.RemoteAddr().String())
 }
 
 func requestBlockchain(conn net.Conn){
-    communication := Communication{4, BlockWrapper{}, []string{}, Blockchain{}}
+    communication := Communication{4, BlockWrapper{}, []string{}, Blockchain{}, Packet{}}
     encoder   := gob.NewEncoder(conn)
     encoder.Encode(communication)
 }
