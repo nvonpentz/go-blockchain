@@ -33,8 +33,7 @@ func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
     myNode.updatePorts(listenPort, seedData, publicFlag)
 
     // create channel
-
-    packetChannel             := make(chan Packet)
+    packetChannel            := make(chan Packet)
     blockWrapperChannel      := make(chan *BlockWrapper)
     newConnChannel           := make(chan net.Conn) // new connections added
     disconChannel            := make(chan net.Conn) // new disconnection

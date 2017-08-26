@@ -47,6 +47,20 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, n *No
         }
     case "node":
         n.printNode()
+    case "send":
+        // ask for file name
+
+        // ask for public key
+
+        // create packet and send to packet channel
+
+        // return packet hash
+    case "lookup":
+        // ask for packet hash
+
+        // ask for public key
+
+        // return whether or not the public key validates this packet hash
     case "help":
         showNodeHelp()
     default:
