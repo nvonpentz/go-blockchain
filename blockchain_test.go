@@ -1,8 +1,12 @@
 package main 
 
-// import(
-// 	"testing"
-// )
+import(
+	"testing"
+)
+
+func TestFindPacketByHash(t *testing.T){
+	// TO DO
+}
 
 // func TestGetLastBlock(t *testing.T){
 // 	b1    := Block{0, []byte{}, "", []byte{byte('3'), byte('4')}}

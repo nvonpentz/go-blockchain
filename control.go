@@ -16,7 +16,6 @@ done by entering text via commandline
 */
 
 func listenForUserInput(blockWrapperChannel chan *BlockWrapper, packetChannel chan Packet, n *Node) {
-    fmt.Println("listening to user input..")
     reader := bufio.NewReader(os.Stdin) //constantly be reading in from std in
     input, err := reader.ReadString('\n')
     if (err != nil || input == "\n") {

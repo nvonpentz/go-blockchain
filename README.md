@@ -143,6 +143,8 @@ If you want to participate in a public blockchain network, pass the flag `-p` or
 ## Improvements
 * change the packet list to a packet map, more efficient lookup
 * change myNode listen to connections to not be a function of my node or atleast get rid of the n.connections argument
-* make the hashes base 58 so they can be human readable when strings.
+* make the hashes base 58 so they can be human readable when strings. CHECK
+* be able to check for a specific transaction hash
+* add channels to miner so it can be updated with new blocks/new packets as they come
 
 

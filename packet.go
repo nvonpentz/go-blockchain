@@ -81,6 +81,26 @@ func packetListHasPacket(packetList []Packet, packetInQuestion Packet) bool {
 	return false
 }
 
+func packetListHasPacketHash(packetList []Packet, packetHash []byte) bool {
+	for _ , packet := range packetList {
+		if string(packet.Hash) == string(packetHash){
+			return true
+		}
+	}
+	fmt.Println("Did not find a packet in the list of packets that had the designated hash")
+	return false
+}
+
+func getPacketFromListByHash(packetList []Packet, packetHash []byte) Packet {
+	for _ , packet := range packetList {
+		if string(packet.Hash) == string(packetHash){
+			return packet
+		}
+	}
+	fmt.Println("Did not find a packet in the list of packets that had the designated hash")
+	return Packet{}
+}
+
 func equalPackets(packet1, packet2 Packet) bool {
 	ownerEqual := string(packet1.Owner)     == string(packet2.Owner)
 	hashEqual  := string(packet1.Hash)      == string(packet2.Hash)

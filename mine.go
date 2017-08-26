@@ -5,9 +5,11 @@ import (
 	"encoding/binary"
 )
 
-const difficulty = 2000
+// const difficulty = 200 // can't use constant because its impossible to generate low enough block hashes for tests
+var difficulty uint32
 
 func mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
+	difficulty = 200
 	fmt.Println("-> begin mining...")
 
 	var blockHashAsInt uint32

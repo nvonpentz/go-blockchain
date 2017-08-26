@@ -41,3 +41,34 @@ func (blockchain Blockchain) getLastBlock() Block{
 	lastBlock := blockchain.Blocks[len(blockchain.Blocks) - 1]
 	return lastBlock
 }
+
+// recursively searches through the blocks for a packet with a given hash
+func (blockchain Blockchain) findPacketByHash(packetHash []byte) Packet {
+	
+	lastBlock := blockchain.getLastBlock()
+	
+	if packetListHasPacketHash(lastBlock.Data, packetHash){
+		packet := getPacketFromListByHash(lastBlock.Data, packetHash)
+		return packet
+	} else {
+		// packet was not found in the block's packet list
+		if len(blockchain.Blocks) > 1 {
+			subsetBlocks := blockchain.Blocks[:len(blockchain.Blocks)-1] // chop off last block
+			subsetChain  := Blockchain{Blocks: subsetBlocks}
+
+			return subsetChain.findPacketByHash(packetHash)
+		} else {
+			fmt.Println("The hash you seek does not exist on this blockchain.")
+		}
+	}
+
+	return Packet{}
+}
+
+
+
+
+
+
+
+

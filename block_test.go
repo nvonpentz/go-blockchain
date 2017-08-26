@@ -1,8 +1,9 @@
 package main
 
-// import(
-// 	"testing"
-// )
+import(
+	"testing"
+	// "fmt"
+)
 
 func areEqualBlocks(b1 Block, b2 Block) bool {
 	indexEq    := b1.Index == b2.Index
@@ -12,6 +13,37 @@ func areEqualBlocks(b1 Block, b2 Block) bool {
 
 	return indexEq && prevHashEq && DataEq && hashEq
 }
+
+func TestIsValidNextBlock(t *testing.T){
+	difficulty = 4294967295 // all hashses pass
+
+	// test two equal blocks
+	g  := &genesisBlock
+	// b0 := &Block{}
+	b1 := &Block{Index: g.Index + 1,
+				 Nonce: 5000,
+				 PrevHash: g.Hash,
+				 Data: []Packet{},
+				 Hash: []byte{}}
+
+	b1.Hash = b1.calcHashForBlock(5000)
+
+	// test valid block
+	if !g.isValidNextBlock(b1){
+		t.Error("Fails to validate valid next block")
+	}
+
+	// //test
+	// if b0.isValidNextBlock(b0){
+	// 	t.Error("Validates illegal (equal) blocks")
+	// }
+
+	// if g.isValidNextBlock(b0){
+	// 	t.Error("Validates illegal blocks")
+	// }
+
+}
+
 
 // func TestIsValidNextBlock(t *testing.T){
 // 	// test two equal block

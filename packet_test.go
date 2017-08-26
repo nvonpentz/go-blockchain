@@ -106,10 +106,12 @@ func TestPacketListHasPacket(t *testing.T){
 	}
 }
 
+func TestPacketListHasPacketHash(t *testing.T){
+	// TO DO
+}
 
-
-
-
-
+func TestGetPackFromListByHash(t *testing.T){
+	// TO DO
+}
 
 

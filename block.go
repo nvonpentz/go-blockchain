@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/binary"
+	"fmt"
 )
 
 type Block struct {
@@ -19,14 +20,6 @@ type Block struct {
 type BlockWrapper struct {
     Block Block
     Sender string
-}
-
-func emptyBlock() Block{
-	return Block{Index: 0, PrevHash: []byte{}, Data: []Packet{}, Hash: []byte{}}
-}
-
-func emptyBlockWrapper() BlockWrapper{
-	return BlockWrapper{Block: emptyBlock(), Sender: "127.0.0.1:1999"}
 }
 
 var genesisBlock = Block{Index: 0, PrevHash: []byte{0}, Data: []Packet{}, Hash: []byte{0}}
@@ -56,20 +49,34 @@ func (block *Block) calcHashForBlock(nonce uint32) []byte {
 func (oldBlock *Block) isValidNextBlock(newBlock *Block) (bool){
 	// new block's index must be one greater
 	isValidIndex := newBlock.Index == oldBlock.Index + 1
+	fmt.Printf("isValidIndex %v \n", isValidIndex)
 
 	// new block's previous hash has to equal the hash of the old block
 	isValidPrevHash := string(newBlock.PrevHash) == string(oldBlock.Hash)
+	fmt.Printf("isValidPrevHash %v \n", isValidPrevHash)
 
 	// all packets in block data must be valid
 	areValidPacketSignatures := verifyPacketList(newBlock.Data)
-	
+	fmt.Printf("areValidPacketSignatures %v \n", areValidPacketSignatures)
+
 	// hash value must be below difficulty
-	newBlockHashAsInt     := binary.LittleEndian.Uint32(newBlock.Hash)
+	var newBlockHashAsInt uint32
+	if len(newBlock.Hash) == 0 {
+		fmt.Println(len(newBlock.Hash))
+		fmt.Println("No hash, block invalid")
+		return false
+	} else {
+		newBlockHashAsInt = binary.LittleEndian.Uint32(newBlock.Hash)		
+	}
+
 	isHashBelowDifficulty := newBlockHashAsInt < difficulty
+	fmt.Printf("isHashBelowDifficulty %v \n", isHashBelowDifficulty)
+
 
 	// hash of entire block must equal the claimed block hash
 	calculatedBlockHash := newBlock.calcHashForBlock(newBlock.Nonce)
 	isCorrectBlockHash  := string(calculatedBlockHash) == string(newBlock.Hash)
+	fmt.Printf("isCorrectBlockHash %v \n", isCorrectBlockHash)
 
 	isValidBlock := isValidIndex &&
 					isValidPrevHash &&
