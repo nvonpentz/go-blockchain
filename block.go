@@ -70,6 +70,7 @@ func (oldBlock *Block) isValidNextBlock(newBlock *Block) (bool){
 	}
 
 	isHashBelowDifficulty := newBlockHashAsInt < difficulty
+	// fmt.Printf("newBlockHashAsInt %v, difficulty %v", newBlockHashAsInt, difficulty)
 	// fmt.Printf("isHashBelowDifficulty %v \n", isHashBelowDifficulty)
 
 
@@ -77,7 +78,6 @@ func (oldBlock *Block) isValidNextBlock(newBlock *Block) (bool){
 	calculatedBlockHash := newBlock.calcHashForBlock(newBlock.Nonce)
 	isCorrectBlockHash  := string(calculatedBlockHash) == string(newBlock.Hash)
 	// fmt.Printf("isCorrectBlockHash %v \n", isCorrectBlockHash)
-	// fmt.Printf("correct hash: %v \n calculatedBlockHash: %v \n", newBlock.Hash, calculatedBlockHash)
 
 	isValidBlock := isValidIndex &&
 					isValidPrevHash &&

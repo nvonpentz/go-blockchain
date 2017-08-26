@@ -39,7 +39,9 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, packe
             seedConn := n.getConnForAddress(n.seed)
             requestBlockchain(seedConn)                        
         }
+        fmt.Println()
         listenForUserInput(blockWrapperChannel, packetChannel, n)
+
     case "getconns":
         if n.hasConnectionOfAddress(n.seed){
             seedConn := n.getConnForAddress(n.seed)
@@ -48,19 +50,22 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, packe
         } else {
             fmt.Println("You are not connected to your seed node to make a request..")
         }
+        fmt.Println()
         listenForUserInput(blockWrapperChannel, packetChannel, n)
     case "node":
         n.printNode()
+        fmt.Println()
         listenForUserInput(blockWrapperChannel, packetChannel, n)
     case "genkeys":
         keys := hashkeys.GenerateNewKeypair()
         fmt.Printf("Public: %v\nPrivate: %v\n", string(keys.Public), string(keys.Private))
+        fmt.Println()
         listenForUserInput(blockWrapperChannel, packetChannel, n)
     case "upload":
         reader := bufio.NewReader(os.Stdin) //constantly be reading in from std in
         
         // ask for file name
-        fmt.Println("Enter the file you wish to save on the blockchain")  
+        fmt.Println("Enter the name of file you wish to save on the blockchain")  
         filePath, err := reader.ReadString('\n')
         if (err != nil || filePath == "\n") {
             fmt.Println(err)
@@ -92,7 +97,7 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, packe
         // create packet and print packet hash to user
         packet := createPacket(filePath, keyPair)
         packetHashHex := hex.EncodeToString(packet.Hash)
-        fmt.Printf("This the hash of your packet: %v \n", packetHashHex)
+        fmt.Printf("This the hash of your packet: %v\n", packetHashHex)
 
         // check validity of package
         if verifyPacketSignature(packet){
@@ -151,6 +156,7 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, packe
         listenForUserInput(blockWrapperChannel, packetChannel, n)
     case "help":
         showNodeHelp()
+        fmt.Println()
         listenForUserInput(blockWrapperChannel, packetChannel, n)
     default:
         fmt.Println("Enter 'help' for options.")

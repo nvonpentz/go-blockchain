@@ -9,7 +9,6 @@ import (
 var difficulty uint32
 
 func mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
-	difficulty = 200
 	fmt.Println("-> begin mining...")
 
 	var blockHashAsInt uint32
@@ -39,6 +38,7 @@ func mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
 	blockWrapper := &BlockWrapper{Block: block, Sender: n.address}
 
 	blockWrapperChannel <- blockWrapper
+	fmt.Println()
     mineBlock(blockWrapperChannel, n)
 }
 
