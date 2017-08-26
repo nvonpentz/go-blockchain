@@ -1,11 +1,13 @@
 # go-blockchain
+Prove you have an idea before anyone else by creating a hash of the document of your thoery, digitally signing it, and uploading it to the blockchain.
 
-A simple implementation of a private peer-to-peer blockchain.  There is no cryptocoin associated with this blockchain, it just the data structure and network.
+Suppose I have an interesting new theory about the world, and I want to be able to prove I had this idea, but don't want to publish it yet because the theory is unfinished.  I can acheive this by writing my theory down in a document, creating a hash of this document, and signing the hash with my private key.  I combine the document hash, signature, and my public key into a single `packet` of information, and upload it to the blockchain.
 
+Then, if someone else comes along and claims they had this idea first, I can demonstrate that I was first by making my document public.  Now anyone can hash my document and check if to see if the hash its on the blockchain.  They can also verify that it is indeed my public key which created the signature, and thus I am the only one able to create.
 ## Usage
 ```
 NAME:
-   go-blockchain - blockchain network
+   go-blockchain
 
 USAGE:
    go-blockchain [global options]
@@ -17,13 +19,16 @@ GLOBAL OPTIONS:
     -l, --listen     assigns the listening port for the server        (default = 1999).
     -s, --seed       assigns the port of the seed                     (default = 2000).
     -p, --public     launch node using a your public IP               (default = false).
-    -h, --help       prints this help Data
+    -h, --help       prints help information
 
 NODE COMMANDS:
-    getconns   requests the list of nodes from your seed node and attempts to connect to each
+    getconns  requests the list of nodes from your seed node and attempts to connect to each
     getchain  requests seed node for their version of the blockchain
-    node      prints the Datarmation associated with your node
-    help      prints the node command help Data
+    genkeys   generates and prints a public and private keypair
+    node      prints the data associated with your node
+    upload    initates the process of uploading a signed document hash to the blockchain
+    lookup    initates the process of verifying a document hash and public keypair is on the blockchain
+    help      prints the node command help information
 ```
 ## Getting Started
 ### Setup
@@ -67,24 +72,7 @@ A node on the network will:
 Currently, block are mined every 5 to 10 seconds, and send to the `blockChannel` to be processed.
 ```go
 func (blockchain *Blockchain) mineBlock(blockChannel chan Block){
-  fmt.Println("-> begin mining..")
 
-  // sleep between 5 - 10 seconds before mining block to simulate a blockchain
-  sleepTime := time.Duration((rand.Int() % 10) + 5)
-  time.Sleep(time.Second * sleepTime)
-
-  //create new block
-  prevBlock     := blockchain.getLastBlock()
-  newBlockIndex := prevBlock.Index + 1
-  newBlockData  := "new block!"
-  newBlock := Block{newBlockIndex, prevBlock.Hash, newBlockData, []byte{}}
-
-  // must calculate the hash of this block
-  newBlockHash := calcHashForBlock(newBlock)
-  newBlock      = Block{newBlockIndex, prevBlock.Hash, newBlockData, newBlockHash}
-
-  // send to control center to 
-  blockChannel <- newBlock 
 }
 ```
 Once in the `blockChannel`, the block is validated by the `isValidBlock()` blockchain method.  A pending block is valid if it's property `PrevHash` is equal to the `Hash` of the current latest block, and if it's `Index` is 1 greater than the latest block's `Index`:
@@ -120,10 +108,11 @@ This behavior is defined within the `handleBlockWrapper()` in `node.go`.
 Nodes communicate via TCP.  Every communication passed between nodes in the network is actually just a instance of `Communication` struct:
 ```
 type Communication struct {
-    ID int
-    BlockWrapper BlockWrapper // wrapper for sent block
+    ID            int
+    BlockWrapper  BlockWrapper // wrapper for sent block
     SentAddresses []string
-    Blockchain Blockchain
+    Blockchain    Blockchain
+    Packet        Packet
 }
 ```
 Depending on the value of the `Communication.ID`, the communication instance is either:
@@ -132,13 +121,9 @@ Depending on the value of the `Communication.ID`, the communication instance is 
 * A request for connection addresses (ID = 2)
 * A response of a blockchain (ID = 3)
 * A request to send a blockchain (ID = 4)
+* A packet (ID = 5)
 
 When a communication is sent over the network, it is parsed by the `listenToConnection()` go routine, and redirects the Datarmation to the appropriate channel.
-
-## Why Private?
-This is a private blockchain, which means it cannot easily be run beyond a private network because of the challenges of getting past routers and NAT.  Theoretically this blockchain would work as public blockchain if users setup port forwarding on their router, or if universal plug and play (UPNP) was implemented.
-
-If you want to participate in a public blockchain network, pass the flag `-p` or `--public` and your node will be launched using your public IP address.
 
 ## Improvements
 * change myNode listen to connections to not be a function of my node or atleast get rid of the n.connections argument CHECK

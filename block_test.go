@@ -2,7 +2,6 @@ package main
 
 import(
 	"testing"
-	"github.com/nvonpentz/go-hashable-keys"
 	// "fmt"
 )
 
@@ -19,9 +18,9 @@ func TestIsValidNextBlock(t *testing.T){
 	difficulty = 4294967295 // all hashses pass
 
 	// create 3 different valid packets
-	keys01 := hashkeys.GenerateNewKeypair()
-	keys02 := hashkeys.GenerateNewKeypair()
-	keys03 := hashkeys.GenerateNewKeypair()
+	keys01 := GenerateNewKeypair()
+	keys02 := GenerateNewKeypair()
+	keys03 := GenerateNewKeypair()
 
 
 	packet01 := createPacket("document.txt", *keys01)

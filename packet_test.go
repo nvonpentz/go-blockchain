@@ -2,12 +2,11 @@ package main
 
 import(
 	"testing"
-	"github.com/nvonpentz/go-hashable-keys"
 )
 
 func TestVerifyPacketSignature(t *testing.T){
-	keys01 := hashkeys.GenerateNewKeypair()
-	keys02 := hashkeys.GenerateNewKeypair()
+	keys01 := GenerateNewKeypair()
+	keys02 := GenerateNewKeypair()
 
 	packet01 := createPacket("document.txt", *keys01)
 
@@ -36,9 +35,9 @@ func TestVerifyPacketList(t *testing.T){
 	}
 
 	// create 3 valid packets
-	keys01 := hashkeys.GenerateNewKeypair()
-	keys02 := hashkeys.GenerateNewKeypair()
-	keys03 := hashkeys.GenerateNewKeypair()
+	keys01 := GenerateNewKeypair()
+	keys02 := GenerateNewKeypair()
+	keys03 := GenerateNewKeypair()
 
 	packet01 := createPacket("document.txt", *keys01)
 	packet02 := createPacket("document.txt", *keys02)
@@ -65,8 +64,8 @@ func TestVerifyPacketList(t *testing.T){
 
 func TestEqualPackets(t *testing.T){
 	// create 3 valid packets
-	keys01 := hashkeys.GenerateNewKeypair()
-	keys02 := hashkeys.GenerateNewKeypair()
+	keys01 := GenerateNewKeypair()
+	keys02 := GenerateNewKeypair()
 
 	packet01 := createPacket("document.txt", *keys01)
 	packet02 := createPacket("document.txt", *keys02)
@@ -82,10 +81,10 @@ func TestEqualPackets(t *testing.T){
 
 func TestPacketListHasPacket(t *testing.T){
 	// create 4 different packets
-	keys01 := hashkeys.GenerateNewKeypair()
-	keys02 := hashkeys.GenerateNewKeypair()
-	keys03 := hashkeys.GenerateNewKeypair()
-	keys04 := hashkeys.GenerateNewKeypair()
+	keys01 := GenerateNewKeypair()
+	keys02 := GenerateNewKeypair()
+	keys03 := GenerateNewKeypair()
+	keys04 := GenerateNewKeypair()
 
 
 	packet01 := createPacket("document.txt", *keys01)

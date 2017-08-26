@@ -3,7 +3,6 @@ package main
 import(
 	// "fmt"
 	"testing"
-	"github.com/nvonpentz/go-hashable-keys"
 )
 
 func generateMockChain() Blockchain {
@@ -11,10 +10,10 @@ func generateMockChain() Blockchain {
 	difficulty = 4294967295 // all hashses pass
 
 	// create 4 different valid packets
-	keys01 := hashkeys.GenerateNewKeypair()
-	keys02 := hashkeys.GenerateNewKeypair()
-	keys03 := hashkeys.GenerateNewKeypair()
-	keys04 := hashkeys.GenerateNewKeypair()
+	keys01 := GenerateNewKeypair()
+	keys02 := GenerateNewKeypair()
+	keys03 := GenerateNewKeypair()
+	keys04 := GenerateNewKeypair()
 
 	packet01 := createPacket("document.txt", *keys01)
 	packet02 := createPacket("document.txt", *keys02)
@@ -76,7 +75,7 @@ func TestFindPacketByHash(t *testing.T){
 	p1       := chain.findPacketByHashAndPublicKey(packet01.Hash, packet01.Owner)
 
 	// generate new packet not in blockcahin
-	keys     := hashkeys.GenerateNewKeypair()
+	keys     := GenerateNewKeypair()
 	packet05 := createPacket("document.txt", *keys)
 	if !equalPackets(p1, packet01){
 		t.Error("Fails to find first packet in blockchain via hash")

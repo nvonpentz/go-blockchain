@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/nvonpentz/go-hashable-keys"
+	// "github.com/nvonpentz/go-hashable-keys"
 )
 
 type Block struct {
@@ -22,7 +22,7 @@ type BlockWrapper struct {
 }
 
 func createGenesisBlock() Block {
-	genesisKeys := hashkeys.Keypair{Public:  []byte("L2WaHqXWXpnJ1RKmopxJjd6UpnoYqDfBsdpSRhp6S9QV9qkarZ7e6Mdk5bQpnntMNbjxAtknAfi7"),
+	genesisKeys := Keypair{Public:  []byte("L2WaHqXWXpnJ1RKmopxJjd6UpnoYqDfBsdpSRhp6S9QV9qkarZ7e6Mdk5bQpnntMNbjxAtknAfi7"),
 						            Private: []byte("31uUweXiDWyyUwf2RNzChxQBzGpqy9n4h4XBPWg")}
 
 	genesisDocument     := []byte("Blockchain by Nick von Pentz")

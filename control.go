@@ -7,7 +7,7 @@ import (
 	"strings"
     "encoding/hex"
 
-    "github.com/nvonpentz/go-hashable-keys"
+    // "github.com/nvonpentz/go-hashable-keys"
 )
 
 /*
@@ -57,7 +57,7 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, packe
         fmt.Println()
         listenForUserInput(blockWrapperChannel, packetChannel, n)
     case "genkeys":
-        keys := hashkeys.GenerateNewKeypair()
+        keys := GenerateNewKeypair()
         fmt.Printf("Public: %v\nPrivate: %v\n", string(keys.Public), string(keys.Private))
         fmt.Println()
         listenForUserInput(blockWrapperChannel, packetChannel, n)
@@ -92,7 +92,7 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, packe
 
         // reconstruct keypair
         privateKey = strings.Trim(privateKey, "\n")
-        keyPair := hashkeys.Keypair{Public: []byte(publicKey), Private: []byte(privateKey)}
+        keyPair := Keypair{Public: []byte(publicKey), Private: []byte(privateKey)}
 
         // create packet and print packet hash to user
         packet := createPacket(filePath, keyPair)

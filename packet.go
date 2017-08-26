@@ -5,7 +5,7 @@ import(
 	"io/ioutil"
 	"fmt"
 
-	"github.com/nvonpentz/go-hashable-keys"
+	// "github.com/nvonpentz/go-hashable-keys"
 )
 
 type Packet struct {
@@ -29,7 +29,7 @@ func hashDocument(document []byte) []byte{
 }
 
 
-func signHash(hash []byte, keys hashkeys.Keypair) []byte{
+func signHash(hash []byte, keys Keypair) []byte{
 	signature, err := keys.Sign(hash) //sign the hash of the transaction
 	if err !=nil {
 		fmt.Println(err)
@@ -37,7 +37,7 @@ func signHash(hash []byte, keys hashkeys.Keypair) []byte{
 	return signature
 }
 
-func createPacket(filepath string, keys hashkeys.Keypair) Packet {
+func createPacket(filepath string, keys Keypair) Packet {
 	document := readDocument(filepath)
 	documentHash := hashDocument(document)
 	signature := signHash(documentHash, keys)
@@ -46,7 +46,7 @@ func createPacket(filepath string, keys hashkeys.Keypair) Packet {
 }
 
 func verifyPacketSignature(packet Packet) bool {
-	return hashkeys.SignatureVerify(packet.Owner, packet.Signature, packet.Hash)
+	return SignatureVerify(packet.Owner, packet.Signature, packet.Hash)
 }
 
 func verifyPacketList(packets []Packet) bool {
