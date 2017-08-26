@@ -89,15 +89,58 @@ func TestFindPacketByHash(t *testing.T){
 }
 
 func TestGetLastBlock(t *testing.T){
-	// TO DO
+	chain := generateMockChain()
+	lastBlock := chain.Blocks[4]
+
+	if string(chain.getLastBlock().Hash) != string(lastBlock.Hash){
+		t.Error("Fails to return last block in chain")
+	}
 }
 
 func TestAddBlock(t *testing.T){
-	// TO DO
+	chain := generateMockChain()
+	lastBlock := chain.getLastBlock()
+
+	b5 := &Block{Index: lastBlock.Index + 1,
+				 Nonce: 5000,
+				 PrevHash: lastBlock.Hash,
+				 Data: []Packet{},
+				 Hash: []byte{}}
+	b5.Hash = b5.calcHashForBlock(5000)
+
+	chain.addBlock(*b5)
+
+	newLastBlock := chain.getLastBlock()
+
+	if string(newLastBlock.Hash) != string(b5.Hash){
+		t.Error("Fail to add new block")
+	}
 }
 
 func TestIsValidChain(t *testing.T){
-	// TO DO
+	chain := generateMockChain()
+
+	// test valid chain
+	if !chain.isValidChain(){
+		t.Error("fails to validate valid chain")
+	}
+
+	g := chain.Blocks[0]
+
+	// add in block to make invalid
+	b5 := &Block{Index: g.Index + 1,
+				 Nonce: 5000,
+				 PrevHash: g.Hash,
+				 Data: []Packet{},
+				 Hash: []byte{}}
+	b5.Hash = b5.calcHashForBlock(5000)
+
+	invalidChain := chain
+	invalidChain.Blocks = append(invalidChain.Blocks, *b5)
+
+	if invalidChain.isValidChain(){
+		t.Error("validates invalid chain")
+	}
 }
 
 // func TestAddBlock(t *testing.T){
