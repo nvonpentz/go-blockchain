@@ -32,18 +32,19 @@ func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
     // specify ports to seed and listen to
     myNode.updatePorts(listenPort, seedData, publicFlag)
 
-    // create channels
+    // create channel
+
+    packetChannel             := make(chan Packet)
     blockWrapperChannel      := make(chan *BlockWrapper)
     newConnChannel           := make(chan net.Conn) // new connections added
     disconChannel            := make(chan net.Conn) // new disconnection
     connRequestChannel       := make(chan net.Conn) // received a request to send connections 
     sentAddressesChannel     := make(chan []string) // received addresses to make connections
-    minedBlockChannel        := make(chan Block)    // new block was mined
     blockchainRequestChannel := make(chan net.Conn)
     sentBlockchainChannel    := make(chan Blockchain)
 
     // listen to user input
-    go listenForUserInput(minedBlockChannel, blockWrapperChannel, &myNode)
+    go listenForUserInput(blockWrapperChannel, &myNode)
 
     // listen on network
     listenForConnections(listenPort, newConnChannel)
@@ -66,6 +67,15 @@ func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
                 connID := myNode.connections[discon]
                 delete(myNode.connections, discon) // remove the connection from the nodes list of connections
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
+            case packet       := <- packetChannel:
+                fmt.Println("received new packet!")
+                if verifyPacketSignature(packet){
+                    // check to see if its in the nodes current packet list
+                        // if not add it and forward to network
+                        // if so, do nothing
+                } else {
+                    fmt.Println("packet signature does not verify")
+                }
 
             case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
                 block  := blockWrapper.Block

@@ -65,6 +65,49 @@ func TestVerifyPacketList(t *testing.T){
 	}
 }
 
+func TestEqualPackets(t *testing.T){
+	// create 3 valid packets
+	keys01 := hashkeys.GenerateNewKeypair()
+	keys02 := hashkeys.GenerateNewKeypair()
+
+	packet01 := createPacket("document.txt", *keys01)
+	packet02 := createPacket("document.txt", *keys02)
+
+	if !equalPackets(packet01, packet01){
+		t.Error("fails to validate equal packets")
+	}
+
+	if equalPackets(packet01, packet02){
+		t.Error("validates to different packets")
+	}
+}
+
+func TestPacketListHasPacket(t *testing.T){
+	// create 4 different packets
+	keys01 := hashkeys.GenerateNewKeypair()
+	keys02 := hashkeys.GenerateNewKeypair()
+	keys03 := hashkeys.GenerateNewKeypair()
+	keys04 := hashkeys.GenerateNewKeypair()
+
+
+	packet01 := createPacket("document.txt", *keys01)
+	packet02 := createPacket("document.txt", *keys02)
+	packet03 := createPacket("document.txt", *keys03)
+	packet04 := createPacket("document.txt", *keys04)
+
+	packets := []Packet{packet01, packet02, packet03}
+
+	if !packetListHasPacket(packets, packet01){
+		t.Error("fails to find packet in list")
+	}
+	if !packetListHasPacket(packets, packet03){
+		t.Error("fails to find packet in list")
+	}
+	if packetListHasPacket(packets, packet04){
+		t.Error("claims to find packet not in list")
+	}
+}
+
 
 
 

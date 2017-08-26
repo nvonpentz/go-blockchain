@@ -72,6 +72,24 @@ func hashPacketList(list []Packet) []byte {
 	return h.Sum(nil)
 }
 
+func packetListHasPacket(packetList []Packet, packetInQuestion Packet) bool {
+	for _ , packet := range packetList {
+		if equalPackets(packet, packetInQuestion){
+			return true
+		}
+	}
+	fmt.Println("Did not find packet in the list of packets")
+	return false
+}
+
+func equalPackets(packet1, packet2 Packet) bool {
+	ownerEqual := string(packet1.Owner)     == string(packet2.Owner)
+	hashEqual  := string(packet1.Hash)      == string(packet2.Hash)
+	sigEqual   := string(packet1.Signature) == string(packet1.Signature)
+
+	return ownerEqual && hashEqual && sigEqual
+}
+
 
 
 
