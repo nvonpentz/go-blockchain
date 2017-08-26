@@ -28,11 +28,10 @@ func TestIsValidNextBlock(t *testing.T){
 	packet02 := createPacket("document.txt", *keys02)
 	packet03 := createPacket("document.txt", *keys03)
 
-	packets := []Packet{packet01, packet02, packet03}
+	packets  := []Packet{packet01, packet02, packet03}
 
 	// test two equal blocks
 	g  := &genesisBlock
-	// b0 := &Block{}
 	b1 := &Block{Index: g.Index + 1,
 				 Nonce: 5000,
 				 PrevHash: g.Hash,
@@ -55,9 +54,9 @@ func TestIsValidNextBlock(t *testing.T){
 	}
 
 	// test block with wrong prevHash
-	b3 := *b1
+	b3         := *b1
 	b3.PrevHash = b2.Hash // wrong hash
-	b3.Hash = b3.calcHashForBlock(5000)
+	b3.Hash     = b3.calcHashForBlock(5000)
 	if g.isValidNextBlock(&b3){
 		t.Error("Validates block with incorrect prevHash")
 	}
@@ -74,11 +73,11 @@ func TestIsValidNextBlock(t *testing.T){
 	doc       := readDocument("document.txt")
 	hashedDoc := hashDocument(doc)
 	signature := signHash(hashedDoc, *keys01) // sign with keys01
-	packet04 := Packet{Hash: hashedDoc, Signature: signature, Owner: keys02.Public}
+	packet04  := Packet{Hash: hashedDoc, Signature: signature, Owner: keys02.Public}
 
 	packets = []Packet{packet01, packet04, packet02, packet03}
 	
-	b5 := *b1
+	b5     := *b1
 	b5.Data = packets
 	b5.Hash = b5.calcHashForBlock(5000)
 	if g.isValidNextBlock(&b5){

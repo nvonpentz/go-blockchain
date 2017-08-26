@@ -81,19 +81,19 @@ func packetListHasPacket(packetList []Packet, packetInQuestion Packet) bool {
 	return false
 }
 
-func packetListHasPacketHash(packetList []Packet, packetHash []byte) bool {
+func packetListHasPacketHashAndPublicKey(packetList []Packet, packetHash, publicKey []byte) bool {
 	for _ , packet := range packetList {
-		if string(packet.Hash) == string(packetHash){
+		if string(packet.Hash) == string(packetHash) && string(packet.Owner) == string(publicKey) {
 			return true
 		}
 	}
-	fmt.Println("Did not find a packet in the list of packets that had the designated hash")
+	// fmt.Println("Did not find a packet in the list of packets that had the designated hash")
 	return false
 }
 
-func getPacketFromListByHash(packetList []Packet, packetHash []byte) Packet {
+func getPacketFromListByHashAndPublicKey(packetList []Packet, packetHash, publicKey []byte) Packet {
 	for _ , packet := range packetList {
-		if string(packet.Hash) == string(packetHash){
+		if string(packet.Hash) == string(packetHash) && string(packet.Owner) == string(publicKey){
 			return packet
 		}
 	}
