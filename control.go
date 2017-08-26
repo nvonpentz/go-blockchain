@@ -107,11 +107,47 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, packe
         // go back user input as normal
         listenForUserInput(blockWrapperChannel, packetChannel, n)
     case "lookup":
-        // ask for packet hash
+        reader := bufio.NewReader(os.Stdin) //constantly be reading in from std in
+        
+        // ask for packet hash        
+        fmt.Println("Enter the hash (in hex) you wish to lookup on the blockchain")  
+        packetHash, err := reader.ReadString('\n')
+        if (err != nil || packetHash == "\n") {
+            fmt.Println(err)
+            fmt.Println("Please enter a valid filepath. Enter 'upload' to begin again.")
+            listenForUserInput(blockWrapperChannel, packetChannel, n)
+            break
+        }
+        packetHash      = strings.Trim(packetHash, "\n")
+        packetHashBytes, err := hex.DecodeString(packetHash)
+        if err != nil {
+            fmt.Println(err)
+            fmt.Println("Please enter valid packetHash. Enter 'upload' to begin again.")
+            listenForUserInput(blockWrapperChannel, packetChannel, n)
+            break
+        }
 
         // ask for public key
+        fmt.Println("Enter the public key associated with that hash")  
+        publicKey, err := reader.ReadString('\n')
+        if (err != nil || publicKey == "\n") {
+            fmt.Println(err)
+            fmt.Println("Please enter a valid publicKey. Enter 'upload' to begin again.")
+            listenForUserInput(blockWrapperChannel, packetChannel, n)
+            break
+        }
+        publicKey       = strings.Trim(publicKey, "\n")
+        publicKeyBytes := []byte(publicKey)
 
         // return whether or not the public key validates this packet hash
+        packet := n.blockchain.findPacketByHashAndPublicKey(packetHashBytes, publicKeyBytes)
+        emptyPacket := Packet{}
+        if equalPackets(packet, emptyPacket) {
+            fmt.Println("The document you requested does not exist with that combination hash and public key")
+        } else {
+            fmt.Println("Found the packet you were looking for:")
+            fmt.Println(packet)
+        }
         listenForUserInput(blockWrapperChannel, packetChannel, n)
     case "help":
         showNodeHelp()
