@@ -51,6 +51,16 @@ func verifyPacketSignature(packet Packet) bool {
 	return hashkeys.SignatureVerify(packet.Owner, packet.Signature, packet.Hash)
 }
 
+func verifyPacketList(packets []Packet) bool {
+	for _ , packet := range packets{
+		if verifyPacketSignature(packet) == false {
+			return false
+		}
+	}
+
+	return true
+}
+
 func hashPacketList(list []Packet) []byte {
 	h := sha256.New()
 	for _ , packet :=range list {
