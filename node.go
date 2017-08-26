@@ -69,7 +69,11 @@ func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
 
             case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
                 block  := blockWrapper.Block
-                if blockWrapper.Sender != myNode.address{ fmt.Printf("Received block #%vfrom network\n", block.Index) }
+                if blockWrapper.Sender != myNode.address{
+                    fmt.Printf("Received block #%v from network\n", block.Index)
+                } else {
+                    fmt.Printf("Mined block #%v \n", block.Index)
+                }
                 seenBlock := myNode.seenBlocks[string(block.Hash)] == true
                 if !seenBlock {
                     lastBlock := myNode.blockchain.getLastBlock()

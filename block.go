@@ -61,12 +61,21 @@ func (oldBlock *Block) isValidNextBlock(newBlock *Block) (bool){
 	isValidPrevHash := string(newBlock.PrevHash) == string(oldBlock.Hash)
 
 	// all packets in block data must be valid
-
+	areValidPacketSignatures := verifyPacketList(newBlock.Data)
+	
 	// hash value must be below difficulty
+	newBlockHashAsInt     := binary.LittleEndian.Uint32(newBlock.Hash)
+	isHashBelowDifficulty := newBlockHashAsInt < difficulty
 
 	// hash of entire block must equal the claimed block hash
+	calculatedBlockHash := newBlock.calcHashForBlock(newBlock.Nonce)
+	isCorrectBlockHash  := string(calculatedBlockHash) == string(newBlock.Hash)
 
-	isValidBlock := isValidIndex && isValidPrevHash
+	isValidBlock := isValidIndex &&
+					isValidPrevHash &&
+					areValidPacketSignatures &&
+					isHashBelowDifficulty &&
+					isCorrectBlockHash
 
 	//this is where proof of work comes to validate the calculated hash
 	return isValidBlock

@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 )
 
-const difficulty = 20000
+const difficulty = 2000
 
 func mineBlock(blockWrapperChannel chan *BlockWrapper, n *Node){
 	fmt.Println("-> begin mining...")
