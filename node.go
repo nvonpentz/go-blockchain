@@ -21,10 +21,6 @@ type Node struct {
     seenBlocks    map[string]bool
 }
 
-/*-----------*
- *  METHODS  * 
- *-----------*/
-
 func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
     joinFlag := false
     if seedData != "" { joinFlag = true } // join if user specifies a seed node 
@@ -248,10 +244,6 @@ func (n Node) printNode(){
     n.blockchain.printBlockchain()
     fmt.Println("*------------------*")
 }
-
-/*-------------*
- *  FUNCTIONS  * 
- *-------------*/
 
 func newNode() Node {
     myNode := Node{connections:   make(map[net.Conn]int),
