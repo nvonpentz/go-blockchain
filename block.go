@@ -17,7 +17,7 @@ type Block struct {
 }
 
 type BlockWrapper struct {
-    Block Block
+    Block  Block
     Sender string  // keep track of sender in case we need to ask for entire blockchain
 }
 

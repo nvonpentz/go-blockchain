@@ -97,17 +97,18 @@ func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
                     blockValid := lastBlock.isValidNextBlock(&block)
                     if blockValid {
                         myNode.seenBlocks[string(block.Hash)] = true // only set to seen if we validate it, otherwise it will come around again
-                        myNode.forwardBlockWrapperToNetwork(BlockWrapper{Block: block, Sender: myNode.address}, myNode.connections)                        
+                        myNode.forwardBlockWrapperToNetwork(BlockWrapper{Block: block, Sender: myNode.address}, myNode.connections)
                         myNode.blockchain.addBlock(block)
                         fmt.Printf("Block #%v is valid, adding to blockchain and forwarding to network\n", block.Index)
                     } else {
-                        fmt.Printf("Received invalid block %v, requesting full blockchain...\n", block.Index)                        
-                        requestBlockchain(myNode.getConnForAddress(blockWrapper.Sender)) //request blockchain ending in block, ba                            
+                        if block.Index > lastBlock.Index { 
+                            fmt.Printf("Received invalid block %v, requesting full blockchain...\n", block.Index)                        
+                            requestBlockchain(myNode.getConnForAddress(blockWrapper.Sender)) //request blockchain ending in block, ba                                                        
+                        }
                     }
                 } else {
                     fmt.Printf("Already seen block #%v before, ignoring..\n", block.Index)
                 }
-                // myNode.handleBlockWrapper(blockWrapper)
             case conn         := <-  connRequestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
                 sendConnectionsToNode(conn, addressesToSendTo)
