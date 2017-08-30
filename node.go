@@ -57,7 +57,7 @@ func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
 
     myNode.printNode()
 
-    // handle network go routines
+    // go routines
     for {
         select {
             case conn         := <- newConnChannel: // listener picked up new conn
@@ -69,46 +69,13 @@ func (myNode Node) run(listenPort string, seedData string, publicFlag bool) {
                 connID := myNode.connections[discon]
                 delete(myNode.connections, discon) // remove the connection from the nodes list of connections
                 fmt.Printf("* Connection %v has been disconnected \n", connID)
+
             case packet       := <- packetChannel:
-                fmt.Println("received new packet!")
-                if verifyPacketSignature(packet){
-                    // check to see if its in the nodes current packet list
-                    if packetListHasPacket(myNode.curPacketList, packet){
-                        fmt.Println("Packet is valid, but I already have it.")
-                    } else {
-                        // add to current list of packets to be mined into the block
-                        myNode.curPacketList = append(myNode.curPacketList, packet)
-                        myNode.forwardPacketToNetwork(packet, myNode.connections)
-                    }
-                } else {
-                    fmt.Println("packet signature does not verify")
-                }
+                myNode.handlePacket(packet)
 
             case blockWrapper := <- blockWrapperChannel:  // new blockWrapper sent to node // handles adding, validating, and sending blocks to network
-                block  := blockWrapper.Block
-                if blockWrapper.Sender != myNode.address{
-                    fmt.Printf("Received block #%v from network\n", block.Index)
-                } else {
-                    fmt.Printf("Mined block #%v \n", block.Index)
-                }
-                seenBlock := myNode.seenBlocks[string(block.Hash)] == true
-                if !seenBlock {
-                    lastBlock := myNode.blockchain.getLastBlock()
-                    blockValid := lastBlock.isValidNextBlock(&block)
-                    if blockValid {
-                        myNode.seenBlocks[string(block.Hash)] = true // only set to seen if we validate it, otherwise it will come around again
-                        myNode.forwardBlockWrapperToNetwork(BlockWrapper{Block: block, Sender: myNode.address}, myNode.connections)
-                        myNode.blockchain.addBlock(block)
-                        fmt.Printf("Block #%v is valid, adding to blockchain and forwarding to network\n", block.Index)
-                    } else {
-                        if block.Index > lastBlock.Index { 
-                            fmt.Printf("Received invalid block %v, requesting full blockchain...\n", block.Index)                        
-                            requestBlockchain(myNode.getConnForAddress(blockWrapper.Sender)) //request blockchain ending in block, ba                                                        
-                        }
-                    }
-                } else {
-                    fmt.Printf("Already seen block #%v before, ignoring..\n", block.Index)
-                }
+                myNode.handleBlockWrapper(blockWrapper)
+
             case conn         := <-  connRequestChannel:  // was requested addresses to send
                 addressesToSendTo := myNode.getRemoteAddresses()
                 sendConnectionsToNode(conn, addressesToSendTo)
@@ -151,6 +118,49 @@ func (n *Node) forwardPacketToNetwork(packet Packet, connections map[net.Conn]in
         communication := Communication{0, BlockWrapper{}, []string{}, Blockchain{}, packet}
         encoder       := gob.NewEncoder(conn)
         encoder.Encode(communication)        
+    }
+}
+
+func (n *Node) handlePacket(packet Packet){
+    fmt.Println("received new packet!")
+    if verifyPacketSignature(packet){
+        // check to see if its in the nodes current packet list
+        if packetListHasPacket(n.curPacketList, packet){
+            fmt.Println("Packet is valid, but I already have it.")
+        } else {
+            // add to current list of packets to be mined into the block
+            n.curPacketList = append(n.curPacketList, packet)
+            n.forwardPacketToNetwork(packet, n.connections)
+        }
+    } else {
+        fmt.Println("packet signature does not verify")
+    }
+}
+
+func (n *Node) handleBlockWrapper(blockWrapper *BlockWrapper){
+    block  := blockWrapper.Block
+    if blockWrapper.Sender != n.address{
+        fmt.Printf("Received block #%v from network\n", block.Index)
+    } else {
+        fmt.Printf("Mined block #%v \n", block.Index)
+    }
+    seenBlock := n.seenBlocks[string(block.Hash)] == true
+    if !seenBlock {
+        lastBlock := n.blockchain.getLastBlock()
+        blockValid := lastBlock.isValidNextBlock(&block)
+        if blockValid {
+            n.seenBlocks[string(block.Hash)] = true // only set to seen if we validate it, otherwise it will come around again
+            n.forwardBlockWrapperToNetwork(BlockWrapper{Block: block, Sender: n.address}, n.connections)
+            n.blockchain.addBlock(block)
+            fmt.Printf("Block #%v is valid, adding to blockchain and forwarding to network\n", block.Index)
+        } else {
+            if block.Index > lastBlock.Index { 
+                fmt.Printf("Received invalid block %v, requesting full blockchain...\n", block.Index)                        
+                requestBlockchain(n.getConnForAddress(blockWrapper.Sender)) //request blockchain ending in block, ba                                                        
+            }
+        }
+    } else {
+        fmt.Printf("Already seen block #%v before, ignoring..\n", block.Index)
     }
 }
 
@@ -332,6 +342,12 @@ func requestConnections(conn net.Conn){
     encoder.Encode(communication)
 }
 
+func requestBlockchain(conn net.Conn){
+    communication := Communication{4, BlockWrapper{}, []string{}, Blockchain{}, Packet{}}
+    encoder   := gob.NewEncoder(conn)
+    encoder.Encode(communication)
+}
+
 func sendConnectionsToNode(conn net.Conn, addresses []string){
     communication := Communication{1, BlockWrapper{}, addresses, Blockchain{}, Packet{}}
     encoder       := gob.NewEncoder(conn)
@@ -343,12 +359,6 @@ func sendBlockchainToNode(conn net.Conn, blockchain Blockchain){
     encoder   := gob.NewEncoder(conn)
     encoder.Encode(communication)
     fmt.Printf("Sent my copy of blockchain to %v", conn.RemoteAddr().String())
-}
-
-func requestBlockchain(conn net.Conn){
-    communication := Communication{4, BlockWrapper{}, []string{}, Blockchain{}, Packet{}}
-    encoder   := gob.NewEncoder(conn)
-    encoder.Encode(communication)
 }
 
 func sendBlockWrapperFromMinedBlock(block Block, blockWrapperChannel chan *BlockWrapper){

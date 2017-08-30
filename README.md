@@ -76,6 +76,9 @@ Every node is considered a **full node** and can:
 * Accept valid packets and add them to their current block for which they are trying to solve the mining puzzle
 * Verify that a valid packet is exists already on the network
 
+### Validating packets
+Packets are the atomic element of this blockchain.
+
 ### Mining
 Blocks are mined finding a nonce value such that:
 
@@ -109,9 +112,6 @@ There is a special circumstance in which a valid block is sent to your node, but
 
 The solution used in this blockchain is to send a request for the entire blockchain to the node who sent a block whose index is more than one greater than your nodes highest block.  In this case, your node will validate the entire chain, and if it is all valid, replace its current chain with the one received from its peers.  This is why the `Sender` field is included in the `blockWrapper`, in order to request entire blockchains from nodes who send a block which appears to be invalid, but might be valid in the context of the sending node's blockchain.
 
-### Validating packets
-Packets are the atomic element of this blockchain.
-
 ### Network
 Nodes communicate via TCP.  Every communication passed between nodes in the network is actually just a instance of `Communication` struct:
 ```
@@ -124,12 +124,12 @@ type Communication struct {
 }
 ```
 Depending on the value of the `Communication.ID`, the communication instance is either:
-* A block (ID = 0)
+* A block                            (ID = 0)
 * A response of connection addresses (ID = 1)
 * A request for connection addresses (ID = 2)
-* A response of a blockchain (ID = 3)
-* A request to send a blockchain (ID = 4)
-* A packet (ID = 5)
+* A response of a blockchain         (ID = 3)
+* A request to send a blockchain     (ID = 4)
+* A packet                           (ID = 5)
 
 When a communication is sent over the network, it is parsed by the `listenToConnection()` go routine, and redirects the Datarmation to the appropriate channel.
 
