@@ -4,6 +4,8 @@ Prove you have an idea before anyone else by creating a hash of the document of 
 Suppose I have an interesting new theory about the world, and I want to be able to prove I had this idea, but don't want to publish it yet because the theory is unfinished.  I can acheive this by writing my theory down in a document, creating a hash of this document, and signing the hash with my private key.  I combine the document hash, signature, and my public key into a single `packet` of information, and upload it to the blockchain.
 
 Then, if someone else comes along and claims they had this idea first, I can demonstrate that I was first by making my document public.  Now anyone can hash my document and check if to see if the hash its on the blockchain.  They can also verify that it is indeed my public key which created the signature, and thus I am the only one able to create.
+
+Now timestamping on a blockchain is actually more difficulty than you'd might expect, since there is no notion of global time.  The solution is to include a sample from a current news article at the end of the document you wish to upload to the chain.
 ## Usage
 ```
 NAME:
