@@ -77,7 +77,19 @@ Every node is considered a **full node** and can:
 * Verify that a valid packet is exists already on the network
 
 ### Validating packets
-Packets are the atomic element of this blockchain.
+Each block is filled with packets. Packets are the atomic elements of this blockchain.
+
+A packet represents a hashed document, a public key (the owner of the document) and a signature over the hash that is verified by the supplied public key:
+
+```go
+type Packet struct {
+  Hash      []byte
+  Signature []byte
+  Owner     []byte
+}
+```
+
+Validating packets is simple; check whether the signature is valid over the hash with the associated public key.
 
 ### Mining
 Blocks are mined finding a nonce value such that:
