@@ -119,7 +119,7 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, packe
         packetHash, err := reader.ReadString('\n')
         if (err != nil || packetHash == "\n") {
             fmt.Println(err)
-            fmt.Println("Please enter a valid filepath. Enter 'upload' to begin again.")
+            fmt.Println("Please enter a valid filepath. Enter 'lookup' to begin again.")
             listenForUserInput(blockWrapperChannel, packetChannel, n)
             break
         }
@@ -127,7 +127,7 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, packe
         packetHashBytes, err := hex.DecodeString(packetHash)
         if err != nil {
             fmt.Println(err)
-            fmt.Println("Please enter valid packetHash. Enter 'upload' to begin again.")
+            fmt.Println("Please enter valid packetHash. Enter 'lookup' to begin again.")
             listenForUserInput(blockWrapperChannel, packetChannel, n)
             break
         }
@@ -137,7 +137,7 @@ func handleUserInput(input string, blockWrapperChannel chan *BlockWrapper, packe
         publicKey, err := reader.ReadString('\n')
         if (err != nil || publicKey == "\n") {
             fmt.Println(err)
-            fmt.Println("Please enter a valid publicKey. Enter 'upload' to begin again.")
+            fmt.Println("Please enter a valid publicKey. Enter 'lookup' to begin again.")
             listenForUserInput(blockWrapperChannel, packetChannel, n)
             break
         }

@@ -1,11 +1,11 @@
 # go-blockchain
-Prove you have an idea before anyone else by creating a hash of the document of your thoery, digitally signing it, and uploading it to the blockchain.
+Prove you have an idea before anyone else by hashing the document explaining your idea, digitally signing it, and uploading it to the blockchain.
 
-Suppose you have an interesting new theory about the world, and you want to be able to prove you had this idea, but don't want to publish it yet because the theory is unfinished.  You can acheive this by typing the theory in a document, creating a hash of this document, and signing the hash with my private key.  You combine the document hash, signature, and my public key into a single `packet` of information, and upload it to the blockchain.
+Suppose you have an interesting new theory about the world, and you want to be able to prove you had this idea, but don't want to publish it yet because the theory is unfinished.  You can acheive this by producing a document which explains your idea, creating a hash of this document, and signing the hash with your private key.  Combine the document hash, signature, and your public key into a single `packet` of information, and upload it to the blockchain.
 
-Then, if someone else comes along and claims they had this idea first, you can demonstrate that you was first by making my document public.  Now anyone can hash my document and check if to see if the hash its on the blockchain.  They can also verify that it is indeed my public key which created the signature, and thus you am the only one able to create.
+Then, if someone else comes along and claims they had the idea first, you can demonstrate that you was first by making your document public.  Now anyone can hash your document and check if to see if the hash its on the blockchain.  They can also verify that it is indeed your public key which created the signature, and thus you am the only one able to create.
 
-Now timestamping on a blockchain is actually more difficult than you'd hope since there is no notion of global time.  The solution is to include a sample from a current news article (or some document that proves you wrote it at the same time) at the end of the document you wish to upload to the chain.
+Timestamping on a blockchain is actually more difficult than you'd hope since there is no notion of global time.  The solution is to include a sample from a current news article (or some document that proves you wrote it at the same time) at the end of the document you wish to upload to the chain.
 
 ## Usage
 ```
@@ -38,6 +38,7 @@ NODE COMMANDS:
 To install, in Terminal, `cd` into your directory containing Go projects and enter:
 ```
 git clone https://github.com/nvonpentz/go-blockchain.git
+go get
 go build
 go install
 ```
@@ -63,6 +64,14 @@ Node2 connected to Node3
 From Node3, enter `getconns`.  It will ask Node2 for its connections, and Node2 will send back a list of addresses to connect to.  Node3 will then connect to those that it isn't connected with already (ie Node1).  Enter `node` to see the connections, and you will see that it is connected to both Node2 and Node1.
 
 ### Upload a document
+To upload a document to the blockchain, simply move the file into the go-blockchain directory.  You will need a public/private key pair, so if you don't have any already, enter `genkeys` and new keys will be printed to the terminal.
+
+Once you have your keys, initiate the upload process by entering `upload`.  You will be prompted for the filename, public and private keys.  If the public and private keys match, and the file exists, a `packet` will be created sent forwarded to all your connections
+
+### Verify a document
+To verify a document exists on the blockchain, first the hash of the document.
+
+Next, boot up the node and get the most recent version of the blockchain from your seed node, by entering `getchain`.  Now that you have the most up to date blockchain, enter `lookup` to initate the verification process.  Supply the document hash and the public key that claims to own the document, and your node will search through its copy of the blockchain for a valid packet that matches the hash and public key, and return true if a valid packet is found.
 
 ### Start mining
 After you have booted up the node, enter `mine`, and your node will 
