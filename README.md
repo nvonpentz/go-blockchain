@@ -1,5 +1,5 @@
 # go-blockchain
-*Prove you had an idea at a certain date without revealing the idea, by hashing the document explaining your idea, digitally signing it, and uploading it to the blockchain.*
+**Prove you had an idea at a certain date without revealing the idea, by hashing the document explaining your idea, digitally signing it, and uploading it to the blockchain.**
 
 Suppose you have an interesting new theory and you want to be able to prove you had this idea, but don't want to publish it yet because the theory isn't finished.  You can acheive this by producing a document which explains your idea, creating a hash of it, and signing the hash with your private key.  Combine the document hash, signature, and your public key into a single `packet` of information, and upload it to the blockchain.
 
