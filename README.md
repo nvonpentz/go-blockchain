@@ -1,11 +1,12 @@
 # go-blockchain
-Prove you have an idea before anyone else by hashing the document explaining your idea, digitally signing it, and uploading it to the blockchain.
+Prove you had an idea at a certain date without revealing the idea, by hashing the document explaining your idea, digitally signing it, and uploading it to the blockchain.
+---
 
-Suppose you have an interesting new theory about the world, and you want to be able to prove you had this idea, but don't want to publish it yet because the theory is unfinished.  You can acheive this by producing a document which explains your idea, creating a hash of this document, and signing the hash with your private key.  Combine the document hash, signature, and your public key into a single `packet` of information, and upload it to the blockchain.
+Suppose you have an interesting new theory and you want to be able to prove you had this idea, but don't want to publish it yet because the theory isn't finished.  You can acheive this by producing a document which explains your idea, creating a hash of it, and signing the hash with your private key.  Combine the document hash, signature, and your public key into a single `packet` of information, and upload it to the blockchain.
 
-Then, if someone else comes along and claims they had the idea first, you can demonstrate that you was first by making your document public.  Now anyone can hash your document and check if to see if the hash its on the blockchain.  They can also verify that it is indeed your public key which created the signature, and thus you am the only one able to create.
+Then, if someone claims they had the idea first, you can demonstrate you were first by publishing the document and your public key.  Now anyone can hash your document and verify that it is indeed on the blockchain, and signed by your private key.
 
-Timestamping on a blockchain is actually more difficult than you'd hope since there is no notion of global time.  The solution is to include a sample from a current news article (or some document that proves you wrote it at the same time) at the end of the document you wish to upload to the chain.
+Because there is no notion of global time, timestamping on a blockchain is tricky.  The solution is to include a sample from a current news article (or some document that proves you wrote it at the same time) at the end of the document you wish to upload to the chain.
 
 ## Usage
 ```
@@ -155,9 +156,4 @@ Depending on the value of the `Communication.ID`, the communication instance is 
 When a communication is sent over the network, it is parsed by the `listenToConnection()` go routine, and redirects the Datarmation to the appropriate channel.
 
 ## Improvements
-* change myNode listen to connections to not be a function of my node or atleast get rid of the n.connections argument CHECK
-* make the hashes base 58 so they can be human readable when strings. CHECK
-* be able to check for a specific transaction hash CHECK
-* add channels to miner so it can be updated with new blocks/new packets as they come
-
-
+* add channels to miner so it can be updated with new blocks/new packets as they come instead of recreating a new block for each hash attempt
