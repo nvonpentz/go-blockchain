@@ -1,11 +1,15 @@
 # go-blockchain
-**Prove you had an idea at a certain date without revealing the idea, by hashing the document explaining your idea, digitally signing it, and uploading it to the blockchain.**
+**A blockchain to notarize ownership of any digital creation.**
 
-Suppose you have an interesting new theory and you want to be able to prove you had this idea, but don't want to publish it yet because the theory isn't finished.  You can acheive this by producing a document which explains your idea, creating a hash of it, and signing the hash with your private key.  Combine the document hash, signature, and your public key into a single `packet` of information, and upload it to the blockchain.
+This blockchain allows users to prove ownership of a creation at a certain date without revealing it by hashing creation, digitally signing it, and uploading it to the blockchain.
+
+Suppose you have an interesting new theory and you want to be able to prove you had this idea, but don't want to publish it yet because the theory isn't finished.  You can achieve this by producing a document which explains your idea, creating a hash of it, and signing the hash with your private key.  Combine the document hash, signature, and your public key into a single `packet` of information, and upload it to the blockchain.
 
 Then, if someone claims they had the idea first, you can demonstrate you were first by publishing the document and your public key.  Now anyone can hash your document and verify that it is indeed on the blockchain, and signed by your private key.
 
 Because there is no notion of global time, timestamping on a blockchain is tricky.  The solution is to include a sample from a current news article (or some document that proves you wrote it at the same time) at the end of the document you wish to upload to the chain.
+
+While this blockchain is application specific, nearly all the code is for the underlying (application-agnostic) blockchain.  Please message me if you would like direction in how to convert this blockchain for a different purpose.  While the cryptographic primitives (SHA-256 for hashing and ECDSA for digital signatures) and sourced from trusted Go libraries, *I make no gaurentees about the security of this blockchain.*
 
 ## Usage
 ```
@@ -129,7 +133,7 @@ When a block is sent to your node's blockchannel (either from successfully findi
 
 If the block is valid, it is added to the of seen blocks, and forwards it to all of its connections.  Blocks are validated in the `isValidNextBlock` function in `block.go`.
 
-There is a special circumstance in which a valid block is sent to your node, but your node does not recognize it as valid, because this blocks index is more than one ahead than the block at the tip of your node's blockchain.  This creates a bad scenario in which your node will mark the block as invalid, and add it to it's list of seen blocks.  So even if you were to eventually receive intermediate blocks between your node's tip and this block, your node would could never assimilate it, as it has discarded the block.
+There is a special circumstance in which a valid block is sent to your node, but your node does not recognize it as valid, because this blocks index is more than one ahead than the block at the tip of your node's blockchain.  This creates a bad scenario in which your node will mark the block as invalid, and add it to it's list of seen blocks.  So even if you were to eventually receive intermediate blocks between your node's tip and this block, your node could never assimilate it, as it has discarded the block.
 
 The solution used in this blockchain is to send a request for the entire blockchain to the node who sent a block whose index is more than one greater than your nodes highest block.  In this case, your node will validate the entire chain, and if it is all valid, replace its current chain with the one received from its peers.  This is why the `Sender` field is included in the `blockWrapper`, in order to request entire blockchains from nodes who send a block which appears to be invalid, but might be valid in the context of the sending node's blockchain.
 
@@ -152,7 +156,8 @@ Depending on the value of the `Communication.ID`, the communication instance is 
 * A request to send a blockchain     (ID = 4)
 * A packet                           (ID = 5)
 
-When a communication is sent over the network, it is parsed by the `listenToConnection()` go routine, and redirects the Datarmation to the appropriate channel.
+When a communication is sent over the network, it is parsed by the `listenToConnection()` go routine, and redirects the data to the appropriate channel. 
 
 ## Improvements
-* add channels to miner so it can be updated with new blocks/new packets as they come instead of recreating a new block for each hash attempt
+* Add channels to miner.go so it can be updated with new blocks/new packets as they come instead of recreating a new block for each hash attempt
+

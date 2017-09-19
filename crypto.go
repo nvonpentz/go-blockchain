@@ -1,6 +1,12 @@
 package main
 
-// NEED TO CITE CODE OWNER
+/*
+The majority of this code was written by Jorge Izquierdo for his implementation of a blockchain written in Go
+https://github.com/izqui/blockchain
+
+His code offered an elegant abstraction big number types used for ECDSA from the Go crypto library. 
+*/
+
 import (
 	"fmt"
 	"crypto/ecdsa"
