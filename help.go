@@ -1,12 +1,12 @@
 package main
 
-import(
-    "fmt"
+import (
+	"fmt"
 )
 
 func showGlobalHelp() {
-fmt.Println(
-`NAME:
+	fmt.Println(
+		`NAME:
    go-blockchain
 
 USAGE:
@@ -31,9 +31,9 @@ NODE COMMANDS:
     help      prints the node command help information`)
 }
 
-func showNodeHelp(){
-fmt.Println(
-`
+func showNodeHelp() {
+	fmt.Println(
+		`
 NODE COMMANDS:
     getconns  requests the list of nodes from your seed node and attempts to connect to each
     getchain  requests seed node for their version of the blockchain

@@ -1,42 +1,41 @@
-package main 
+package main
 
 import (
-	"testing"
-	"net"
 	"fmt"
+	"net"
+	"testing"
 	"time"
 	// "encoding/gob"
 )
 
 func createTestListener(port string) *net.Listener {
 	listener, err := net.Listen("tcp", port)
-    if err != nil {
-        fmt.Println("There was an error setting up the listener:")
-        fmt.Println(err)
-    }
-    return &listener
+	if err != nil {
+		fmt.Println("There was an error setting up the listener:")
+		fmt.Println(err)
+	}
+	return &listener
 }
 
-
-func TestAcceptConn(t *testing.T){
-	listenPort       := ":1999"
-	newConnChannel   := make(chan net.Conn)
+func TestAcceptConn(t *testing.T) {
+	listenPort := ":1999"
+	newConnChannel := make(chan net.Conn)
 	// userInputChannel := make(chan string)
 
 	listener, err := net.Listen("tcp", listenPort)
-    if err != nil {
-        fmt.Println("There was an error setting up the listener:")
-        fmt.Println(err)
-    }
-    go acceptConn(listener, newConnChannel)
+	if err != nil {
+		fmt.Println("There was an error setting up the listener:")
+		fmt.Println(err)
+	}
+	go acceptConn(listener, newConnChannel)
 
-	conn1, err := net.Dial("tcp", "127.0.0.1" + listenPort)
+	conn1, err := net.Dial("tcp", "127.0.0.1"+listenPort)
 	if err != nil {
 		t.Error("Unable to make a connection using acceptConn()")
 		fmt.Println(conn1)
 	}
 
-	conn2, err := net.Dial("tcp", "127.0.0.1" + listenPort)
+	conn2, err := net.Dial("tcp", "127.0.0.1"+listenPort)
 	if err != nil {
 		t.Error("Unable to make a connection using acceptConn()")
 		fmt.Println(conn2)
@@ -47,35 +46,35 @@ func TestAcceptConn(t *testing.T){
 	listener.Close()
 }
 
-func TestDialNode(t *testing.T){
-	listenPort       := ":1999"
-	newConnChannel   := make(chan net.Conn)
+func TestDialNode(t *testing.T) {
+	listenPort := ":1999"
+	newConnChannel := make(chan net.Conn)
 
 	listener, err := net.Listen("tcp", listenPort)
-    if err != nil {
-        fmt.Println("There was an error setting up the listener:")
-        fmt.Println(err)
-    }
+	if err != nil {
+		fmt.Println("There was an error setting up the listener:")
+		fmt.Println(err)
+	}
 	go dialNode("127.0.0.1:1999", newConnChannel)
 	acceptedConn, err := listener.Accept()
 	if err != nil {
 		t.Error("Unable to make a connection using n.dialNode()")
 	}
-	deliveredConn := <- newConnChannel
+	deliveredConn := <-newConnChannel
 	if deliveredConn.LocalAddr().String() != acceptedConn.RemoteAddr().String() {
 		t.Error("Unable to make a connection using n.DialNode")
-    }
-    listener.Close()
-    deliveredConn.Close()
-    acceptedConn.Close()
+	}
+	listener.Close()
+	deliveredConn.Close()
+	acceptedConn.Close()
 }
 
-func TestListenForConnections(t *testing.T){
-	listenPort       := ":2000" //specific 
-	newConnChannel   := make(chan net.Conn)
+func TestListenForConnections(t *testing.T) {
+	listenPort := ":2000" //specific
+	newConnChannel := make(chan net.Conn)
 
 	listenForConnections(listenPort, newConnChannel)
-	conn, err := net.Dial("tcp", "127.0.0.1" + listenPort)
+	conn, err := net.Dial("tcp", "127.0.0.1"+listenPort)
 	if err != nil {
 		t.Error("Unable to make a connection using listenForUserInput()")
 		fmt.Println(conn)
@@ -89,7 +88,7 @@ func TestListenForConnections(t *testing.T){
 // 	// create channels
 //     blockWrapperChannel      := make(chan *BlockWrapper)
 //     disconChannel            := make(chan net.Conn) // new disconnestion
-//     connRequestChannel       := make(chan net.Conn) // received a request to send connections 
+//     connRequestChannel       := make(chan net.Conn) // received a request to send connections
 //     sentAddressesChannel     := make(chan []string) // received addresses to make connections
 //     blockchainRequestChannel := make(chan net.Conn)
 //     sentBlockchainChannel    := make(chan Blockchain)
@@ -179,7 +178,7 @@ func TestListenForConnections(t *testing.T){
 //         fmt.Println("There was an error setting up the listener:")
 //         fmt.Println(err)
 //     }
-	
+
 // 	go dialNode("127.0.0.1:1999", newConnChannel)
 // 	conn1, err := listener.Accept()
 // 	go dialNode("127.0.0.1:1999", newConnChannel)
@@ -194,20 +193,9 @@ func TestListenForConnections(t *testing.T){
 // 	// if err != nil {
 // 	// 	fmt.Println(err)
 // 	// }
-	
+
 // 	// fmt.Print(comm.BlockWrapper.Sender)
 // 	conn1.Close()
 // 	conn2.Close()
 // 	listener.Close()
 // }
-
-
-
-
-
-
-
-
-
-
-

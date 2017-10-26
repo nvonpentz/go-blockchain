@@ -1,8 +1,8 @@
 package main
 
 import (
-	"testing"
 	"crypto/sha256"
+	"testing"
 )
 
 func TestKeyGeneration(t *testing.T) {

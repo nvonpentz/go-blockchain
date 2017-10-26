@@ -1,10 +1,10 @@
-package main 
+package main
 
-import(
+import (
 	"testing"
 )
 
-func TestVerifyPacketSignature(t *testing.T){
+func TestVerifyPacketSignature(t *testing.T) {
 	keys01 := GenerateNewKeypair()
 	keys02 := GenerateNewKeypair()
 
@@ -16,7 +16,7 @@ func TestVerifyPacketSignature(t *testing.T){
 	}
 
 	// invalid packet; wrong public key for signature
-	doc       := readDocument("document.txt")
+	doc := readDocument("document.txt")
 	hashedDoc := hashDocument(doc)
 	signature := signHash(hashedDoc, *keys01) // sign with keys01
 
@@ -28,9 +28,9 @@ func TestVerifyPacketSignature(t *testing.T){
 
 }
 
-func TestVerifyPacketList(t *testing.T){
+func TestVerifyPacketList(t *testing.T) {
 	// base case
-	if !verifyPacketList([]Packet{}){
+	if !verifyPacketList([]Packet{}) {
 		t.Error("fails to validate empty packet list")
 	}
 
@@ -44,12 +44,12 @@ func TestVerifyPacketList(t *testing.T){
 	packet03 := createPacket("document.txt", *keys03)
 
 	packets := []Packet{packet01, packet02, packet03}
-	if !verifyPacketList(packets){
+	if !verifyPacketList(packets) {
 		t.Error("fail to validate valid packet list of length 3")
 	}
 
 	// create an invalid packet
-	doc       := readDocument("document.txt")
+	doc := readDocument("document.txt")
 	hashedDoc := hashDocument(doc)
 	signature := signHash(hashedDoc, *keys01) // sign with keys01
 
@@ -57,12 +57,12 @@ func TestVerifyPacketList(t *testing.T){
 
 	packets = []Packet{packet01, packet04, packet03}
 
-	if verifyPacketList(packets){
+	if verifyPacketList(packets) {
 		t.Error("validates invalid packet list")
 	}
 }
 
-func TestEqualPackets(t *testing.T){
+func TestEqualPackets(t *testing.T) {
 	// create 3 valid packets
 	keys01 := GenerateNewKeypair()
 	keys02 := GenerateNewKeypair()
@@ -70,22 +70,21 @@ func TestEqualPackets(t *testing.T){
 	packet01 := createPacket("document.txt", *keys01)
 	packet02 := createPacket("document.txt", *keys02)
 
-	if !equalPackets(packet01, packet01){
+	if !equalPackets(packet01, packet01) {
 		t.Error("fails to validate equal packets")
 	}
 
-	if equalPackets(packet01, packet02){
+	if equalPackets(packet01, packet02) {
 		t.Error("validates to different packets")
 	}
 }
 
-func TestPacketListHasPacket(t *testing.T){
+func TestPacketListHasPacket(t *testing.T) {
 	// create 4 different packets
 	keys01 := GenerateNewKeypair()
 	keys02 := GenerateNewKeypair()
 	keys03 := GenerateNewKeypair()
 	keys04 := GenerateNewKeypair()
-
 
 	packet01 := createPacket("document.txt", *keys01)
 	packet02 := createPacket("document.txt", *keys02)
@@ -94,23 +93,21 @@ func TestPacketListHasPacket(t *testing.T){
 
 	packets := []Packet{packet01, packet02, packet03}
 
-	if !packetListHasPacket(packets, packet01){
+	if !packetListHasPacket(packets, packet01) {
 		t.Error("fails to find packet in list")
 	}
-	if !packetListHasPacket(packets, packet03){
+	if !packetListHasPacket(packets, packet03) {
 		t.Error("fails to find packet in list")
 	}
-	if packetListHasPacket(packets, packet04){
+	if packetListHasPacket(packets, packet04) {
 		t.Error("claims to find packet not in list")
 	}
 }
 
-func TestPacketListHasPacketHash(t *testing.T){
+func TestPacketListHasPacketHash(t *testing.T) {
 	// TO DO
 }
 
-func TestGetPackFromListByHash(t *testing.T){
+func TestGetPackFromListByHash(t *testing.T) {
 	// TO DO
 }
-
-

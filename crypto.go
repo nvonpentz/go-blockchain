@@ -4,16 +4,16 @@ package main
 The majority of this code was written by Jorge Izquierdo for his implementation of a blockchain written in Go
 https://github.com/izqui/blockchain
 
-His code offered an elegant abstraction big number types used for ECDSA from the Go crypto library. 
+His code offered an elegant abstraction big number types used for ECDSA from the Go crypto library.
 */
 
 import (
-	"fmt"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
-	"math/big"
+	"fmt"
 	"github.com/tv42/base58"
+	"math/big"
 )
 
 // Key generation with proof of work
@@ -70,7 +70,7 @@ func SignatureVerify(publicKey, sig, hash []byte) bool {
 	return ecdsa.Verify(&pub, hash, r, s)
 }
 
-func PrintKeys(keys Keypair){
+func PrintKeys(keys Keypair) {
 	fmt.Printf("Public: %v\n", string(keys.Public))
 	fmt.Printf("Private: %v\n", string(keys.Private))
 }
